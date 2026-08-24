@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getUserFromRequest } from '@/lib/auth';
+import { bankTransferInstructions } from '@/lib/payment-config';
 
 export async function GET(
   request: Request,
@@ -19,7 +20,8 @@ export async function GET(
         items: {
           include: { product: true },
         },
-        payments: true,
+        payment: true,
+        events: { orderBy: { createdAt: 'asc' } },
       },
     });
 
@@ -30,6 +32,8 @@ export async function GET(
     const formatted = {
       ...order,
       shippingAddress: JSON.parse(order.shippingAddress),
+      payments: order.payment,
+      bankTransferInstructions,
       items: order.items.map((item) => ({
         ...item,
         product: {

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getUserFromRequest } from '@/lib/auth';
+import { createOrder } from '@/lib/orders';
+import { bankTransferInstructions } from '@/lib/payment-config';
 
 export async function GET(request: Request) {
   try {
@@ -14,12 +16,16 @@ export async function GET(request: Request) {
         items: {
           include: { product: true },
         },
+        payment: true,
+        events: { orderBy: { createdAt: 'asc' } },
       },
     });
 
     const formatted = orders.map((o) => ({
       ...o,
       shippingAddress: JSON.parse(o.shippingAddress),
+      payments: o.payment,
+      bankTransferInstructions,
       items: o.items.map((item) => ({
         ...item,
         product: {
@@ -49,69 +55,25 @@ export async function POST(request: Request) {
     const requestedItems = items.map((item: { productId?: unknown; quantity?: unknown }) => ({ productId: String(item.productId || ''), quantity: Number(item.quantity) }));
     if (requestedItems.some((item) => !item.productId || !Number.isInteger(item.quantity) || item.quantity <= 0 || item.quantity > 99)) return NextResponse.json({ error: 'Invalid cart items.' }, { status: 400 });
 
-    const orderNumber = `CELIZ-${Math.floor(100000 + Math.random() * 900000)}`;
-
-    const newOrder = await prisma.$transaction(async (transaction) => {
-      const products = await Promise.all(requestedItems.map((item) => transaction.product.findUnique({ where: { id: item.productId }, select: { id: true, price: true, discountPrice: true, stockQty: true, isActive: true } })));
-      if (products.some((product) => !product || !product.isActive)) throw new Error('PRODUCT_UNAVAILABLE');
-      const pricedItems = requestedItems.map((item, index) => ({ ...item, product: products[index]! }));
-      if (pricedItems.some((item) => item.quantity > item.product.stockQty)) throw new Error('INSUFFICIENT_STOCK');
-      const subtotal = pricedItems.reduce((sum, item) => sum + (item.product.discountPrice ?? item.product.price) * item.quantity, 0);
-      const shippingFee = subtotal > 15000 ? 0 : 350;
-      for (const item of pricedItems) {
-        const changed = await transaction.product.updateMany({ where: { id: item.product.id, stockQty: item.product.stockQty }, data: { stockQty: { decrement: item.quantity } } });
-        if (changed.count !== 1) throw new Error('STOCK_CONFLICT');
-        await transaction.inventoryLog.create({ data: { productId: item.product.id, change: -item.quantity, reason: `Order ${orderNumber}`, adminUserId: null } });
-      }
-      const selectedPaymentMethod = ['COD', 'BANK_TRANSFER', 'PAYHERE'].includes(paymentMethod) ? paymentMethod : 'COD';
-      const gatewayName = selectedPaymentMethod === 'PAYHERE' ? 'PayHere' : selectedPaymentMethod === 'BANK_TRANSFER' ? 'BankTransfer' : 'COD';
-      return transaction.order.create({
-        data: {
-          orderNumber,
-          userId: user.id,
-          customerName: user.fullName,
-          customerEmail: user.email,
-          customerPhone: customerPhone || user.phone || '',
-          shippingAddress: JSON.stringify(shippingAddress),
-          paymentMethod: selectedPaymentMethod,
-          subtotal,
-          shippingFee,
-          total: subtotal + shippingFee,
-          status: 'PENDING',
-          items: {
-            create: pricedItems.map((item) => ({ productId: item.product.id, quantity: item.quantity, unitPrice: item.product.discountPrice ?? item.product.price }))
-          },
-          payments: {
-            create: {
-              amount: subtotal + shippingFee,
-              method: selectedPaymentMethod,
-              gateway: gatewayName,
-              status: 'PENDING'
-            }
-          }
-        },
-        include: {
-          items: { include: { product: true } },
-          payments: true
-        }
-      });
-    }).catch((error) => {
-      if (error instanceof Error && error.message === 'PRODUCT_UNAVAILABLE') return null;
-      if (error instanceof Error && error.message === 'INSUFFICIENT_STOCK') return null;
-      if (error instanceof Error && error.message === 'STOCK_CONFLICT') return null;
-      throw error;
-    });
-    if (!newOrder) return NextResponse.json({ error: 'One or more products are unavailable or out of stock.' }, { status: 409 });
+    const newOrder = await createOrder({ userId: user.id, customerPhone, shippingAddress, paymentMethod, items: requestedItems, idempotencyKey: request.headers.get('idempotency-key') });
 
     return NextResponse.json(
       {
         ...newOrder,
         shippingAddress: JSON.parse(newOrder.shippingAddress),
+        payments: newOrder.payment,
+        bankTransferInstructions,
       },
       { status: 201 }
     );
   } catch (error) {
     console.error('Error creating order:', error);
+    if (error instanceof Error && error.message === 'INVALID_PAYMENT_METHOD') {
+      return NextResponse.json({ error: 'Invalid payment method.' }, { status: 400 });
+    }
+    if (error instanceof Error && ['PRODUCT_UNAVAILABLE', 'INSUFFICIENT_STOCK', 'STOCK_CONFLICT'].includes(error.message)) {
+      return NextResponse.json({ error: 'One or more products are unavailable or out of stock.' }, { status: 409 });
+    }
     return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
   }
 }

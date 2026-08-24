@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { AlertTriangle, BarChart3, ClipboardList, Package, RefreshCw, Users } from 'lucide-react';
 import AdminAuthGate from '@/components/AdminAuthGate';
 
-interface DashboardData { metrics: { todayRevenue: number; todayOrders: number; totalProducts: number; totalCustomers: number; lowStock: number }; statusCounts: Record<string, number>; recentOrders: { id: string; orderNumber: string; customerName: string; total: number; status: string; createdAt: string }[]; lowStock: { id: string; name: string; stockQty: number; price: number }[]; }
+interface DashboardData { metrics: { todayRevenue: number; todayOrders: number; totalProducts: number; totalCustomers: number; lowStock: number; bankTransferReviews: number }; statusCounts: Record<string, number>; recentOrders: { id: string; orderNumber: string; customerName: string; total: number; status: string; createdAt: string }[]; lowStock: { id: string; name: string; stockQty: number; price: number }[]; }
 
 export default function AdminDashboardPage() { return <AdminAuthGate active="dashboard">{(_, token) => <Dashboard token={token} />}</AdminAuthGate>; }
 

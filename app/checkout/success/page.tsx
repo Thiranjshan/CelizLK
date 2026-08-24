@@ -34,6 +34,7 @@ interface OrderDetails {
   orderNumber: string;
   createdAt: string;
   status: string;
+  paymentStatus?: string;
   paymentMethod: string;
   customerName: string;
   customerEmail: string;
@@ -43,6 +44,7 @@ interface OrderDetails {
   shippingFee: number;
   total: number;
   items: OrderItem[];
+  bankTransferInstructions?: { bankName: string; accountName: string; accountNumber: string; branch: string; currency: string };
 }
 
 export default function OrderSuccessPage() {
@@ -57,24 +59,13 @@ function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get('orderNumber');
   const token = useStore((state) => state.accessToken);
-  const user = useStore((state) => state.user);
 
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!orderNumber) {
-      setError('No order specified.');
-      setLoading(false);
-      return;
-    }
-
-    if (!token) {
-      setError('Please sign in to view your order details.');
-      setLoading(false);
-      return;
-    }
+    if (!orderNumber || !token) return;
 
     fetch(`/api/orders/${orderNumber}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -95,6 +86,20 @@ function OrderSuccessContent() {
       });
   }, [orderNumber, token]);
 
+  const requestError = !orderNumber ? 'No order specified.' : !token ? 'Please sign in to view your order details.' : error;
+
+  if (requestError && !error) {
+    return (
+      <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center', maxWidth: 600 }}>
+        <div style={{ background: 'var(--bg-white)', padding: '2.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--accent-purple)' }}>Order Confirmation Notice</h2>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{requestError}</p>
+          <Link href="/account/orders" className="btn-primary">View Order History</Link>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}>
@@ -103,12 +108,12 @@ function OrderSuccessContent() {
     );
   }
 
-  if (error || !order) {
+  if (requestError || !order) {
     return (
       <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center', maxWidth: 600 }}>
         <div style={{ background: 'var(--bg-white)', padding: '2.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--accent-purple)' }}>Order Confirmation Notice</h2>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{error || 'Unable to display order details.'}</p>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{requestError || 'Unable to display order details.'}</p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
             <Link href="/account/orders" className="btn-primary">
               View Order History
@@ -151,7 +156,7 @@ function OrderSuccessContent() {
           <div style={{ fontSize: '0.95rem', color: 'var(--text-main)', lineHeight: 1.6 }}>
             <p>Your order is confirmed and will be dispatched shortly.</p>
             <p style={{ marginTop: '0.5rem', fontWeight: 700, color: 'var(--primary-indigo)' }}>
-              Please prepare exactly LKR {order.total.toLocaleString()} in cash to pay the courier driver upon delivery.
+              {order.paymentStatus === 'PAID' ? 'COD payment received.' : `Payment due on delivery: LKR ${order.total.toLocaleString()}.`}
             </p>
           </div>
         )}
@@ -160,14 +165,15 @@ function OrderSuccessContent() {
           <div style={{ fontSize: '0.95rem', color: 'var(--text-main)', lineHeight: 1.6 }}>
             <p style={{ marginBottom: '0.75rem' }}>Please complete a bank deposit or online transfer to verify your order:</p>
             <div style={{ background: 'var(--bg-main)', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.9rem' }}>
-              <div><strong>Bank Name:</strong> Commercial Bank</div>
-              <div><strong>Account Name:</strong> Celiz LK (Pvt) Ltd</div>
-              <div><strong>Account No:</strong> 1000-2345-6789</div>
-              <div><strong>Branch:</strong> Colombo Main</div>
+              <div><strong>Bank Name:</strong> {order.bankTransferInstructions?.bankName}</div>
+              <div><strong>Account Name:</strong> {order.bankTransferInstructions?.accountName}</div>
+              <div><strong>Account No:</strong> {order.bankTransferInstructions?.accountNumber}</div>
+              <div><strong>Branch:</strong> {order.bankTransferInstructions?.branch}</div>
               <div style={{ gridColumn: '1 / -1', borderTop: '1px dashed var(--border-color)', paddingTop: '0.5rem', marginTop: '0.25rem', color: 'var(--primary-indigo)', fontWeight: 700 }}>
                 Transfer Reference: Include Order #{order.orderNumber} in your bank transaction description.
               </div>
             </div>
+            <p style={{ marginTop: '0.75rem' }}>Payment Status: {order.paymentStatus === 'PAID' ? 'Paid' : 'Awaiting payment verification'}</p>
           </div>
         )}
 
@@ -255,8 +261,8 @@ function OrderSuccessContent() {
 
       {/* Navigation Buttons */}
       <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-        <Link href="/account/orders" className="btn-primary" style={{ padding: '0.85rem 1.75rem' }}>
-          View Order History
+        <Link href={`/account/orders/${order.id}`} className="btn-primary" style={{ padding: '0.85rem 1.75rem' }}>
+          View Order
         </Link>
         <Link href="/products" className="btn-primary" style={{ background: 'var(--border-color)', color: 'var(--text-main)', padding: '0.85rem 1.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span>Continue Shopping</span>

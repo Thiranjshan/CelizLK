@@ -162,6 +162,9 @@ model InventoryLog {
   reason      String
   adminUserId String?
   adminUser   AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+  orderId     String?
+  order       Order? @relation(fields: [orderId], references: [id])
+  eventType   String    @default("ADJUSTMENT")
   createdAt   DateTime @default(now())
 }
 
@@ -170,10 +173,24 @@ model Payment {
   orderId     String
   order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   amount      Float
+  currency    String   @default("LKR")
   method      String
   gateway     String?
   referenceId String?
   status      String   @default("PENDING")
+  failureReason String?
+  metadata String?
+  proofUrl String?
+  transferReference String?
+  transferAmount Float?
+  transferDate DateTime?
+  transferSubmittedAt DateTime?
+  transferNote String?
+  bankName String?
+  rejectedAt DateTime?
+  verifiedAt DateTime?
+  verifiedByAdminId String?
+  webhookEventId String? @unique
   createdAt   DateTime @default(now())
 }
 
@@ -228,15 +245,30 @@ model Order {
   shippingFee       Float       @default(350)
   total             Float
   paymentMethod     String      @default("COD") // COD | BANK_TRANSFER | PAYHERE
+  paymentStatus     String      @default("PENDING")
   paymentGatewayRef String?
   shippingAddress   String      // JSON string of address details
   customerName      String
   customerEmail     String
   customerPhone     String
+  confirmedAt       DateTime?
+  cancelledAt       DateTime?
+  cancelReason      String?
+  courier           String?
+  trackingNumber    String?
+  notes             String?
+  trackingToken     String?     @unique
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
+  idempotencyKey    String?     @unique
   items             OrderItem[]
-  payments          Payment[]
+  payment           Payment[]
+  events            OrderEvent[]
+  inventoryLogs     InventoryLog[]
+
+  @@index([trackingToken])
+  @@index([idempotencyKey])
+  @@index([userId])
 }
 
 model OrderItem {
@@ -247,6 +279,29 @@ model OrderItem {
   product   Product  @relation(fields: [productId], references: [id])
   quantity  Int
   unitPrice Float
+  productName String?
+  productSku String?
+  unitDiscount Float @default(0)
+  lineSubtotal Float @default(0)
+}
+
+model OrderEvent {
+  id              String   @id @default(uuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  eventType       String
+  previousOrderStatus  String?
+  newOrderStatus       String?
+  previousPaymentStatus String?
+  newPaymentStatus String?
+  actorType       String
+  actorId         String?
+  description     String
+  metadata        String?
+  createdAt       DateTime @default(now())
+
+  @@index([orderId, createdAt])
+  @@index([eventType, createdAt])
 }
 
 model CartItem {
