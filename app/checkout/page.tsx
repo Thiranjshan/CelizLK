@@ -49,7 +49,7 @@ function CheckoutContent() {
   const updateBuyNowQuantity = useStore((state) => state.updateBuyNowQuantity);
   const setBuyNowItem = useStore((state) => state.setBuyNowItem);
 
-  const getSelectedCartItems = useStore((state) => state.getSelectedCartItems);
+  const cart = useStore((state) => state.cart);
   const updateQuantity = useStore((state) => state.updateQuantity);
   const removeFromCart = useStore((state) => state.removeFromCart);
   const clearCart = useStore((state) => state.clearCart);
@@ -62,7 +62,7 @@ function CheckoutContent() {
     }
   }, [authInitialized, user, router, isBuyNow]);
 
-  const checkoutItems = isBuyNow ? (buyNowItem ? [buyNowItem] : []) : getSelectedCartItems();
+  const checkoutItems = isBuyNow ? (buyNowItem ? [buyNowItem] : []) : cart.filter((item) => item.selected !== false);
 
   const subtotal = checkoutItems.reduce((acc, item) => {
     const price = item.product.discountPrice ?? item.product.price;

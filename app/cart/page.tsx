@@ -11,10 +11,13 @@ export default function CartPage() {
   const updateQuantity = useStore((state) => state.updateQuantity);
   const toggleCartItemSelection = useStore((state) => state.toggleCartItemSelection);
   const toggleAllCartItems = useStore((state) => state.toggleAllCartItems);
-  const setBuyNowItem = useStore((state) => state.setBuyNowItem);
   const clearCart = useStore((state) => state.clearCart);
-  const getCartSubtotal = useStore((state) => state.getCartSubtotal());
-  const selectedItems = useStore((state) => state.getSelectedCartItems());
+  const setBuyNowItem = useStore((state) => state.setBuyNowItem);
+  const selectedItems = cart.filter((item) => item.selected !== false);
+  const getCartSubtotal = selectedItems.reduce((acc, item) => {
+    const price = item.product.discountPrice ?? item.product.price;
+    return acc + price * item.quantity;
+  }, 0);
 
   const allSelected = cart.length > 0 && cart.every((item) => item.selected !== false);
   const shippingFee = getCartSubtotal > 15000 ? 0 : 350;

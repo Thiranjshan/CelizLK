@@ -13,7 +13,8 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const hasHydrated = useSyncExternalStore(() => () => undefined, () => true, () => false);
-  const cartCount = useStore((state) => hasHydrated ? state.getCartCount() : 0);
+  const cart = useStore((state) => state.cart);
+  const cartCount = hasHydrated ? cart.filter((item) => item.selected !== false).reduce((sum, item) => sum + item.quantity, 0) : 0;
   const user = useStore((state) => hasHydrated ? state.user : null);
 
   if (pathname.startsWith('/admin') || pathname.startsWith('/checkout')) return null;
