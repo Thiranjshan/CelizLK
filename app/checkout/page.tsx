@@ -12,9 +12,14 @@ export default function CheckoutPage() {
   const user = useStore((state) => state.user);
   const addToast = useStore((state) => state.addToast);
   const accessToken = useStore((state) => state.accessToken);
+  const setUser = useStore((state) => state.setUser);
+  const setAccessToken = useStore((state) => state.setAccessToken);
   const getCartSubtotal = useStore((state) => state.getCartSubtotal());
 
   const [loading, setLoading] = useState(false);
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
+  const [savedAddresses, setSavedAddresses] = useState<{ id: string; label: string; recipientName: string; phone: string; addressLine1: string; addressLine2?: string | null; city: string; district: string; postalCode?: string | null }[]>([]);
+  const [resolvedDeliveryFee, setResolvedDeliveryFee] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -22,18 +27,23 @@ export default function CheckoutPage() {
     addressLine1: '',
     addressLine2: '',
     city: '',
-    district: '',
+    district: 'Colombo',
     postalCode: '',
+    password: '',
     paymentMethod: 'COD', // COD | BANK_TRANSFER | PAYHERE
   });
 
   useEffect(() => {
-    if (user) {
-      setFormData((current) => ({ ...current, fullName: user.fullName, email: user.email, phone: user.phone || '' }));
-    }
-  }, [user]);
+    if (!accessToken) return;
+    fetch('/api/addresses', { headers: { Authorization: `Bearer ${accessToken}` } }).then((response) => response.ok ? response.json() : []).then(setSavedAddresses).catch(() => setSavedAddresses([]));
+  }, [accessToken]);
 
-  const shippingFee = getCartSubtotal > 15000 ? 0 : 350;
+  useEffect(() => {
+    if (!formData.district) return;
+    fetch(`/api/delivery-zones?district=${encodeURIComponent(formData.district)}`).then((response) => response.ok ? response.json() : null).then((zone) => setResolvedDeliveryFee(zone?.fee ?? null)).catch(() => setResolvedDeliveryFee(null));
+  }, [formData.district]);
+
+  const shippingFee = getCartSubtotal > 15000 ? 0 : resolvedDeliveryFee ?? 350;
   const grandTotal = getCartSubtotal + shippingFee;
 
   if (cart.length === 0) {
@@ -47,25 +57,23 @@ export default function CheckoutPage() {
     );
   }
 
-  if (!user || !accessToken) {
-    return (
-      <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}>
-        <h2>Sign in to checkout</h2>
-        <p style={{ color: 'var(--text-secondary)', margin: '0.75rem 0 1.5rem' }}>Your cart is waiting for you.</p>
-        <button onClick={() => router.push('/login?returnTo=/checkout')} className="btn-primary">Sign in</button>
-      </div>
-    );
-  }
-
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      let currentToken = accessToken;
+      if (!user || !currentToken) {
+        if (formData.password.length < 8) throw new Error('Enter a password of at least 8 characters to continue.');
+        const customerResponse = await fetch('/api/checkout/customer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fullName: formData.fullName, email: formData.email, phone: formData.phone, password: formData.password }) });
+        const customerResult = await customerResponse.json();
+        if (!customerResponse.ok) throw new Error(customerResult.error || 'Unable to authenticate your account.');
+        setUser(customerResult.user); setAccessToken(customerResult.accessToken); currentToken = customerResult.accessToken;
+      }
       const orderPayload = {
-        customerName: formData.fullName,
-        customerEmail: formData.email,
-        customerPhone: formData.phone,
+        customerName: formData.fullName || user?.fullName || '',
+        customerEmail: formData.email || user?.email || '',
+        customerPhone: formData.phone || user?.phone || '',
         shippingAddress: {
           addressLine1: formData.addressLine1,
           addressLine2: formData.addressLine2,
@@ -74,9 +82,6 @@ export default function CheckoutPage() {
           postalCode: formData.postalCode,
         },
         paymentMethod: formData.paymentMethod,
-        subtotal: getCartSubtotal,
-        shippingFee,
-        total: grandTotal,
         items: cart.map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
@@ -86,19 +91,21 @@ export default function CheckoutPage() {
 
       const res = await fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${currentToken}`, 'Idempotency-Key': idempotencyKey },
         body: JSON.stringify(orderPayload),
       });
 
-      if (!res.ok) throw new Error('Order creation failed');
+      const orderResult = await res.json();
+      if (!res.ok) throw new Error(orderResult.error || 'Order creation failed');
 
-      const createdOrder = await res.json();
+      const createdOrder = orderResult;
+      if (!savedAddresses.some((address) => address.addressLine1 === formData.addressLine1 && address.city === formData.city && address.district === formData.district)) await fetch('/api/addresses', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${currentToken}` }, body: JSON.stringify({ label: 'Checkout address', recipientName: formData.fullName || user?.fullName || '', phone: formData.phone || user?.phone || '', addressLine1: formData.addressLine1, addressLine2: formData.addressLine2, city: formData.city, district: formData.district, postalCode: formData.postalCode, isDefault: true }) });
       clearCart();
       addToast('success', `Order #${createdOrder.orderNumber} placed successfully!`);
       router.push(`/checkout/success?orderNumber=${createdOrder.orderNumber}`);
     } catch (err) {
       console.error('Error placing order:', err);
-      addToast('error', 'Failed to place order. Please try again.');
+      addToast('error', err instanceof Error ? err.message : 'Failed to place order. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -123,7 +130,7 @@ export default function CheckoutPage() {
                 <input
                   type="text"
                   required
-                  value={formData.fullName}
+                  value={formData.fullName || user?.fullName || ''}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                   className="form-input"
                 />
@@ -134,7 +141,7 @@ export default function CheckoutPage() {
                 <input
                   type="text"
                   required
-                  value={formData.phone}
+                  value={formData.phone || user?.phone || ''}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   className="form-input"
                 />
@@ -146,11 +153,25 @@ export default function CheckoutPage() {
               <input
                 type="email"
                 required
-                value={formData.email}
+                value={formData.email || user?.email || ''}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="form-input"
               />
             </div>
+
+            {!user && <div className="form-group">
+              <label className="form-label">Create or access your account password *</label>
+              <input
+                type="password"
+                required
+                minLength={8}
+                autoComplete="new-password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="form-input"
+              />
+              <small style={{ color: 'var(--text-secondary)' }}>At least 8 characters. Existing customers should enter their account password.</small>
+            </div>}
           </div>
 
           {/* Section 2: Delivery Address */}
@@ -159,6 +180,8 @@ export default function CheckoutPage() {
               <Truck size={20} color="var(--accent-purple)" />
               <span>2. Delivery Address in Sri Lanka</span>
             </h3>
+
+            {savedAddresses.length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.5rem', marginBottom: '1rem' }}>{savedAddresses.map((address) => <button type="button" key={address.id} className="admin-outline-button" onClick={() => setFormData({ ...formData, fullName: address.recipientName, phone: address.phone, addressLine1: address.addressLine1, addressLine2: address.addressLine2 || '', city: address.city, district: address.district, postalCode: address.postalCode || '' })}>{address.label}</button>)}</div>}
 
             <div className="form-group">
               <label className="form-label">Street Address *</label>
@@ -197,6 +220,7 @@ export default function CheckoutPage() {
               <div className="form-group">
                 <label className="form-label">District *</label>
                 <select
+                  required
                   value={formData.district}
                   onChange={(e) => setFormData({ ...formData, district: e.target.value })}
                   className="form-select"

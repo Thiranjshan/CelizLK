@@ -17,12 +17,15 @@ model User {
   phone        String?
   role         String      @default("CUSTOMER") // CUSTOMER | ADMIN
   isEmailVerified Boolean   @default(false)
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
   lastLoginAt  DateTime?
   failedLoginAttempts Int  @default(0)
   lockUntil    DateTime?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   profile      Profile?
+  addresses    Address[]
   orders       Order[]
   cartItems    CartItem[]
   refreshTokens RefreshToken[]
@@ -90,6 +93,37 @@ model Profile {
   district     String?
   postalCode   String?
   country      String   @default("Sri Lanka")
+}
+
+model Address {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label         String   @default("Home")
+  recipientName String
+  phone         String
+  addressLine1  String
+  addressLine2  String?
+  city          String
+  district      String
+  postalCode    String?
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model DeliveryZone {
+  id        String   @id @default(uuid())
+  name      String
+  district  String   @unique
+  fee       Float
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([district])
 }
 
 model Category {
@@ -242,6 +276,7 @@ model Order {
   user              User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   status            String      @default("PENDING") // PENDING | PAID | SHIPPED | DELIVERED | CANCELLED
   subtotal          Float
+  deliveryFee       Float       @default(0)
   shippingFee       Float       @default(350)
   total             Float
   paymentMethod     String      @default("COD") // COD | BANK_TRANSFER | PAYHERE

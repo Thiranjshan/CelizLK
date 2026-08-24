@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { ShoppingBag, Search, User, ShieldCheck, Zap, Menu, X } from 'lucide-react';
 import { useStore } from '@/lib/store';
 
@@ -12,8 +12,9 @@ export default function Header() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const cartCount = useStore((state) => state.getCartCount());
-  const user = useStore((state) => state.user);
+  const hasHydrated = useSyncExternalStore(() => () => undefined, () => true, () => false);
+  const cartCount = useStore((state) => hasHydrated ? state.getCartCount() : 0);
+  const user = useStore((state) => hasHydrated ? state.user : null);
 
   if (pathname.startsWith('/admin')) return null;
 

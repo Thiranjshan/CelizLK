@@ -8,7 +8,7 @@ import { ArrowRight, KeyRound, LogOut, MapPin, Package, Settings, ShieldCheck, U
 
 const settingsLinks = [
   { href: '/account#profile', label: 'Profile details', description: 'Update your name and contact information', icon: UserRound },
-  { href: '/account#address', label: 'Delivery address', description: 'Manage the address used at checkout', icon: MapPin },
+  { href: '/account/addresses', label: 'Delivery addresses', description: 'Manage the addresses used at checkout', icon: MapPin },
   { href: '/account#security', label: 'Password & security', description: 'Keep your account access protected', icon: KeyRound },
 ];
 

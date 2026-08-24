@@ -70,7 +70,10 @@ async function createOrderInTransaction(transaction: OrderTransaction, input: Cr
   if (pricedItems.some((item) => item.quantity > item.product.stockQty)) throw new Error('INSUFFICIENT_STOCK');
 
   const subtotal = pricedItems.reduce((sum, item) => sum + (item.product.discountPrice ?? item.product.price) * item.quantity, 0);
-  const deliveryFee = subtotal > 15000 ? 0 : 350;
+  const district = typeof input.shippingAddress.district === 'string' ? input.shippingAddress.district.trim() : '';
+  const zone = district ? await transaction.deliveryZone.findFirst({ where: { district, isActive: true }, select: { fee: true } }) : null;
+  if (district && !zone) throw new Error('DELIVERY_AREA_UNAVAILABLE');
+  const deliveryFee = subtotal > 15000 ? 0 : zone?.fee ?? 350;
   const total = subtotal + deliveryFee;
   const orderStatus: OrderStatus = selectedPaymentMethod === 'COD' ? 'CONFIRMED' : 'AWAITING_PAYMENT';
   const paymentStatus: PaymentStatus = selectedPaymentMethod === 'COD' ? 'UNPAID' : 'PENDING';
@@ -94,6 +97,7 @@ async function createOrderInTransaction(transaction: OrderTransaction, input: Cr
       paymentMethod: selectedPaymentMethod,
       paymentStatus,
       subtotal,
+      deliveryFee,
       shippingFee: deliveryFee,
       total,
       status: orderStatus,

@@ -6,19 +6,13 @@ import { useSearchParams } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import { CheckCircle2, Truck, CreditCard, Banknote, Building2, Package, ArrowRight } from 'lucide-react';
 
-interface OrderItemProduct {
-  id: string;
-  name: string;
-  images: string[];
-  price: number;
-  discountPrice: number | null;
-}
-
 interface OrderItem {
   id: string;
+  productName: string;
+  image?: string | null;
   quantity: number;
   unitPrice: number;
-  product: OrderItemProduct;
+  lineTotal: number;
 }
 
 interface ShippingAddress {
@@ -41,7 +35,7 @@ interface OrderDetails {
   customerPhone: string;
   shippingAddress: ShippingAddress;
   subtotal: number;
-  shippingFee: number;
+  deliveryFee: number;
   total: number;
   items: OrderItem[];
   bankTransferInstructions?: { bankName: string; accountName: string; accountNumber: string; branch: string; currency: string };
@@ -221,7 +215,7 @@ function OrderSuccessContent() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>Shipping Fee</span>
-              <span>{order.shippingFee === 0 ? 'FREE' : `LKR ${order.shippingFee}`}</span>
+              <span>{order.deliveryFee === 0 ? 'FREE' : `LKR ${order.deliveryFee}`}</span>
             </div>
             <div style={{ borderTop: '2px dashed var(--border-color)', paddingTop: '0.75rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem', fontWeight: 900, color: 'var(--primary-indigo)' }}>
               <span>Total Payable</span>
@@ -241,18 +235,18 @@ function OrderSuccessContent() {
           {order.items.map((item) => (
             <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid var(--border-color)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                {item.product.images?.[0] && (
-                  <img src={item.product.images[0]} alt={item.product.name} style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 'var(--radius-md)' }} />
+                {item.image && (
+                  <img src={item.image} alt="" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 'var(--radius-md)' }} />
                 )}
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.98rem' }}>{item.product.name}</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.98rem' }}>{item.productName}</div>
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                     Qty: {item.quantity} × LKR {item.unitPrice.toLocaleString()}
                   </div>
                 </div>
               </div>
               <div style={{ fontWeight: 800, color: 'var(--primary-indigo)' }}>
-                LKR {(item.unitPrice * item.quantity).toLocaleString()}
+                LKR {item.lineTotal.toLocaleString()}
               </div>
             </div>
           ))}

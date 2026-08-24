@@ -6,6 +6,8 @@ import { confirmBankTransfer, confirmCodPayment, createOrder, rejectBankTransfer
 import { createAccessToken } from '@/lib/auth';
 import { GET as getCustomerOrder, PATCH as patchCustomerOrder } from '@/app/api/orders/[id]/route';
 import { POST as confirmCodRoute } from '@/app/api/admin/orders/[id]/payment/confirm-cod/route';
+import { POST as checkoutCustomer } from '@/app/api/checkout/customer/route';
+import { GET as getDeliveryZone } from '@/app/api/delivery-zones/route';
 
 async function fixtures() {
   const user = await prisma.user.findFirstOrThrow({ where: { role: 'CUSTOMER' } });
@@ -182,4 +184,26 @@ test('rejects mismatched bank amount, supports rejection, resubmission, and conf
 
 test.after(async () => {
   await prisma.$disconnect();
+});
+
+test('creates and authenticates a checkout customer without duplicate accounts', async () => {
+  const email = `checkout-${randomUUID()}@example.com`;
+  const createdResponse = await checkoutCustomer(new Request('http://localhost/api/checkout/customer', { method: 'POST', body: JSON.stringify({ fullName: 'Checkout Customer', email, phone: '+94770000000', password: 'checkout123' }) }));
+  const created = await createdResponse.json();
+  assert.equal(createdResponse.status, 201);
+  assert.ok(created.accessToken);
+  const user = await prisma.user.findUniqueOrThrow({ where: { email } });
+  assert.notEqual(user.passwordHash, 'checkout123');
+
+  const wrong = await checkoutCustomer(new Request('http://localhost/api/checkout/customer', { method: 'POST', body: JSON.stringify({ email, password: 'wrongpass' }) }));
+  assert.equal(wrong.status, 401);
+  assert.equal(await prisma.user.count({ where: { email } }), 1);
+});
+
+test('returns active delivery-zone fees and rejects unknown districts', async () => {
+  const colombo = await getDeliveryZone(new Request('http://localhost/api/delivery-zones?district=Colombo'));
+  assert.equal(colombo.status, 200);
+  assert.equal((await colombo.json()).fee, 350);
+  const unknown = await getDeliveryZone(new Request('http://localhost/api/delivery-zones?district=Unknown'));
+  assert.equal(unknown.status, 404);
 });
