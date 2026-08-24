@@ -1,0 +1,6 @@
+import { NextResponse } from 'next/server';
+import { getAdminFromRequest, writeAudit } from '@/lib/admin-auth';
+import { prisma } from '@/lib/prisma';
+
+export async function GET(request: Request) { const admin = await getAdminFromRequest(request); if (!admin) return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 }); if (admin.role !== 'SUPER_ADMIN') return NextResponse.json({ error: 'Forbidden.' }, { status: 403 }); const setting = await prisma.siteContent.findUnique({ where: { key: 'settings' } }); return NextResponse.json(setting ? JSON.parse(setting.value) : {}); }
+export async function PATCH(request: Request) { const admin = await getAdminFromRequest(request); if (!admin) return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 }); if (admin.role !== 'SUPER_ADMIN') return NextResponse.json({ error: 'Forbidden.' }, { status: 403 }); const value = await request.json(); const serialized = JSON.stringify(value); if (serialized.length > 20000) return NextResponse.json({ error: 'Settings are too large.' }, { status: 400 }); const setting = await prisma.siteContent.upsert({ where: { key: 'settings' }, update: { value: serialized }, create: { key: 'settings', value: serialized } }); await writeAudit(admin.id, 'UPDATE', 'SETTINGS', 'settings', value); return NextResponse.json(JSON.parse(setting.value)); }

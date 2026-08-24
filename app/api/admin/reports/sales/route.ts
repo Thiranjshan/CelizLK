@@ -1,0 +1,5 @@
+import { NextResponse } from 'next/server';
+import { getAdminFromRequest, hasAdminPermission } from '@/lib/admin-auth';
+import { prisma } from '@/lib/prisma';
+
+export async function GET(request: Request) { const admin = await getAdminFromRequest(request); if (!admin) return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 }); if (!hasAdminPermission(admin.role, ['SUPER_ADMIN'])) return NextResponse.json({ error: 'Forbidden.' }, { status: 403 }); const orders = await prisma.order.findMany({ orderBy: { createdAt: 'asc' }, select: { total: true, status: true, createdAt: true } }); const byDay = orders.reduce<Record<string, { orders: number; revenue: number }>>((result, order) => { const day = order.createdAt.toISOString().slice(0, 10); result[day] ||= { orders: 0, revenue: 0 }; result[day].orders += 1; result[day].revenue += order.total; return result; }, {}); return NextResponse.json({ byDay, totalRevenue: orders.reduce((sum, order) => sum + order.total, 0), totalOrders: orders.length }); }
