@@ -16,7 +16,7 @@ export default function Header() {
   const cartCount = useStore((state) => hasHydrated ? state.getCartCount() : 0);
   const user = useStore((state) => hasHydrated ? state.user : null);
 
-  if (pathname.startsWith('/admin')) return null;
+  if (pathname.startsWith('/admin') || pathname.startsWith('/checkout')) return null;
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();

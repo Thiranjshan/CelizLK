@@ -18,6 +18,8 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const addToCart = useStore((state) => state.addToCart);
+  const setBuyNowItem = useStore((state) => state.setBuyNowItem);
+  const user = useStore((state) => state.user);
 
   const images = Array.isArray(product.images) ? product.images : [];
   const currentImage = images[selectedImageIndex] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop';
@@ -27,8 +29,13 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
     : 0;
 
   const handleBuyNow = () => {
-    addToCart(product, quantity);
-    router.push('/checkout');
+    setBuyNowItem({ product, quantity });
+    const checkoutUrl = '/checkout?buyNow=1';
+    if (user) {
+      router.push(checkoutUrl);
+    } else {
+      router.push(`/login?returnTo=${encodeURIComponent(checkoutUrl)}`);
+    }
   };
 
   return (

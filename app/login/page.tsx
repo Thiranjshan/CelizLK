@@ -1,12 +1,23 @@
 'use client';
 
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useStore } from '@/lib/store';
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="container" style={{ maxWidth: 520, padding: '5rem 1.25rem', textAlign: 'center' }}>Loading sign in...</div>}>
+      <LoginContent />
+    </Suspense>
+  );
+}
+
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get('returnTo');
+
   const setUser = useStore((state) => state.setUser);
   const setAccessToken = useStore((state) => state.setAccessToken);
   const addToast = useStore((state) => state.addToast);
@@ -15,17 +26,45 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   async function submit(event: React.FormEvent) {
-    event.preventDefault(); setLoading(true);
+    event.preventDefault();
+    setLoading(true);
     try {
-      const response = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
-      const requestedPath = new URLSearchParams(window.location.search).get('returnTo');
-      setUser(data.user); setAccessToken(data.accessToken); router.push(requestedPath?.startsWith('/') ? requestedPath : '/'); addToast('success', 'Welcome back.');
-    } catch (error) { addToast('error', error instanceof Error ? error.message : 'Unable to sign in.'); } finally { setLoading(false); }
+
+      setUser(data.user);
+      setAccessToken(data.accessToken);
+      const targetPath = returnTo?.startsWith('/') ? returnTo : '/';
+      router.push(targetPath);
+      addToast('success', 'Welcome back.');
+    } catch (error) {
+      addToast('error', error instanceof Error ? error.message : 'Unable to sign in.');
+    } finally {
+      setLoading(false);
+    }
   }
 
-  return <AuthForm title="Welcome back" submitLabel="Sign in" loading={loading} onSubmit={submit} fields={{ email, setEmail, password, setPassword }} footer={<span>New to Celiz? <Link href="/signup">Create an account</Link></span>} />;
+  const signupHref = returnTo ? `/signup?returnTo=${encodeURIComponent(returnTo)}` : '/signup';
+
+  return (
+    <AuthForm
+      title="Welcome back"
+      submitLabel="Sign in"
+      loading={loading}
+      onSubmit={submit}
+      fields={{ email, setEmail, password, setPassword }}
+      footer={
+        <span>
+          New to Celiz? <Link href={signupHref}>Create an account</Link>
+        </span>
+      }
+    />
+  );
 }
 
 function AuthForm({ title, submitLabel, loading, onSubmit, fields, footer }: { title: string; submitLabel: string; loading: boolean; onSubmit: (event: React.FormEvent) => void; fields: { email: string; setEmail: (value: string) => void; password: string; setPassword: (value: string) => void }; footer: React.ReactNode }) {

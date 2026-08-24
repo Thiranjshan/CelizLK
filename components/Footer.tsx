@@ -6,7 +6,7 @@ import { ShieldCheck, Truck, Headphones, Award } from 'lucide-react';
 
 export default function Footer() {
   const pathname = usePathname();
-  if (pathname.startsWith('/admin')) return null;
+  if (pathname.startsWith('/admin') || pathname.startsWith('/checkout')) return null;
 
   return (
     <footer className="site-footer">

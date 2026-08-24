@@ -5,6 +5,7 @@ import { Product, UserSession } from './types';
 export interface LocalCartItem {
   product: Product;
   quantity: number;
+  selected?: boolean;
 }
 
 interface ToastMessage {
@@ -15,21 +16,31 @@ interface ToastMessage {
 
 interface StoreState {
   cart: LocalCartItem[];
+  buyNowItem: LocalCartItem | null;
   user: UserSession | null;
   accessToken: string | null;
+  authInitialized: boolean;
   toasts: ToastMessage[];
   
   // Cart Actions
   addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  toggleCartItemSelection: (productId: string) => void;
+  toggleAllCartItems: (selected: boolean) => void;
   clearCart: () => void;
   getCartCount: () => number;
   getCartSubtotal: () => number;
+  getSelectedCartItems: () => LocalCartItem[];
+
+  // Buy Now Actions
+  setBuyNowItem: (item: LocalCartItem | null) => void;
+  updateBuyNowQuantity: (quantity: number) => void;
   
   // Auth Actions
   setUser: (user: UserSession | null) => void;
   setAccessToken: (token: string | null) => void;
+  setAuthInitialized: (initialized: boolean) => void;
   logout: () => void;
 
   // Toast Actions
@@ -41,8 +52,10 @@ export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
       cart: [],
+      buyNowItem: null,
       user: null,
       accessToken: null,
+      authInitialized: false,
       toasts: [],
 
       addToCart: (product, quantity = 1) => {
@@ -52,9 +65,10 @@ export const useStore = create<StoreState>()(
         if (existingIndex > -1) {
           const updatedCart = [...cart];
           updatedCart[existingIndex].quantity += quantity;
+          updatedCart[existingIndex].selected = true;
           set({ cart: updatedCart });
         } else {
-          set({ cart: [...cart, { product, quantity }] });
+          set({ cart: [...cart, { product, quantity, selected: true }] });
         }
         addToast('success', `Added "${product.name}" to cart!`);
       },
@@ -81,22 +95,60 @@ export const useStore = create<StoreState>()(
         });
       },
 
+      toggleCartItemSelection: (productId) => {
+        const { cart } = get();
+        set({
+          cart: cart.map((item) =>
+            item.product.id === productId
+              ? { ...item, selected: item.selected === undefined ? false : !item.selected }
+              : item
+          ),
+        });
+      },
+
+      toggleAllCartItems: (selected) => {
+        const { cart } = get();
+        set({
+          cart: cart.map((item) => ({ ...item, selected })),
+        });
+      },
+
       clearCart: () => set({ cart: [] }),
 
       getCartCount: () => {
-        return get().cart.reduce((total, item) => total + item.quantity, 0);
+        return get().cart.filter((item) => item.selected !== false).reduce((total, item) => total + item.quantity, 0);
       },
 
       getCartSubtotal: () => {
-        return get().cart.reduce((total, item) => {
-          const price = item.product.discountPrice ?? item.product.price;
-          return total + price * item.quantity;
-        }, 0);
+        return get()
+          .cart.filter((item) => item.selected !== false)
+          .reduce((total, item) => {
+            const price = item.product.discountPrice ?? item.product.price;
+            return total + price * item.quantity;
+          }, 0);
+      },
+
+      getSelectedCartItems: () => {
+        return get().cart.filter((item) => item.selected !== false);
+      },
+
+      setBuyNowItem: (buyNowItem) => set({ buyNowItem }),
+
+      updateBuyNowQuantity: (quantity) => {
+        const { buyNowItem } = get();
+        if (!buyNowItem) return;
+        if (quantity <= 0) {
+          set({ buyNowItem: null });
+        } else {
+          set({ buyNowItem: { ...buyNowItem, quantity } });
+        }
       },
 
       setUser: (user) => set({ user }),
 
       setAccessToken: (accessToken) => set({ accessToken }),
+
+      setAuthInitialized: (authInitialized) => set({ authInitialized }),
 
       logout: () => {
         set({ user: null, accessToken: null });

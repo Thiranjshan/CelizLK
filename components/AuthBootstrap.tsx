@@ -6,6 +6,7 @@ import { useStore } from '@/lib/store';
 export default function AuthBootstrap() {
   const setUser = useStore((state) => state.setUser);
   const setAccessToken = useStore((state) => state.setAccessToken);
+  const setAuthInitialized = useStore((state) => state.setAuthInitialized);
 
   useEffect(() => {
     fetch('/api/auth/refresh', { method: 'POST' })
@@ -16,8 +17,11 @@ export default function AuthBootstrap() {
           setAccessToken(data.accessToken);
         }
       })
-      .catch(() => undefined);
-  }, [setAccessToken, setUser]);
+      .catch(() => undefined)
+      .finally(() => {
+        setAuthInitialized(true);
+      });
+  }, [setAccessToken, setUser, setAuthInitialized]);
 
   return null;
 }

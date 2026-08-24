@@ -6,13 +6,27 @@ import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ArrowLeft, ShieldCheck } 
 
 export default function CartPage() {
   const cart = useStore((state) => state.cart);
+  const user = useStore((state) => state.user);
   const removeFromCart = useStore((state) => state.removeFromCart);
   const updateQuantity = useStore((state) => state.updateQuantity);
+  const toggleCartItemSelection = useStore((state) => state.toggleCartItemSelection);
+  const toggleAllCartItems = useStore((state) => state.toggleAllCartItems);
+  const setBuyNowItem = useStore((state) => state.setBuyNowItem);
   const clearCart = useStore((state) => state.clearCart);
   const getCartSubtotal = useStore((state) => state.getCartSubtotal());
+  const selectedItems = useStore((state) => state.getSelectedCartItems());
 
+  const allSelected = cart.length > 0 && cart.every((item) => item.selected !== false);
   const shippingFee = getCartSubtotal > 15000 ? 0 : 350;
   const grandTotal = getCartSubtotal + shippingFee;
+
+  const handleCheckoutClick = (e: React.MouseEvent) => {
+    if (selectedItems.length === 0) {
+      e.preventDefault();
+      return;
+    }
+    setBuyNowItem(null);
+  };
 
   if (cart.length === 0) {
     return (
@@ -49,19 +63,35 @@ export default function CartPage() {
 
           <div style={{ background: 'var(--bg-white)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
             <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border-color)', fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>Items in Cart ({cart.length})</span>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={(e) => toggleAllCartItems(e.target.checked)}
+                  style={{ width: 18, height: 18, accentColor: 'var(--accent-purple)' }}
+                />
+                <span>Select All Items ({selectedItems.length}/{cart.length} selected)</span>
+              </label>
               <button onClick={clearCart} style={{ color: 'var(--error)', fontSize: '0.85rem', fontWeight: 600 }}>
                 Clear All
               </button>
             </div>
 
             {cart.map((item) => {
+              const isSelected = item.selected !== false;
               const unitPrice = item.product.discountPrice ?? item.product.price;
               const images = Array.isArray(item.product.images) ? item.product.images : [];
               const mainImg = images[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop';
 
               return (
-                <div key={item.product.id} style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', padding: '1.25rem', borderBottom: '1px solid var(--border-color)' }}>
+                <div key={item.product.id} style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', padding: '1.25rem', borderBottom: '1px solid var(--border-color)', opacity: isSelected ? 1 : 0.65 }}>
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => toggleCartItemSelection(item.product.id)}
+                    style={{ width: 18, height: 18, accentColor: 'var(--accent-purple)', cursor: 'pointer' }}
+                  />
+
                   <img src={mainImg} alt={item.product.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 'var(--radius-md)', background: '#F9FAFB', border: '1px solid var(--border-color)' }} />
 
                   <div style={{ flex: 1 }}>
@@ -113,7 +143,7 @@ export default function CartPage() {
           </h3>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.85rem', color: 'var(--text-secondary)' }}>
-            <span>Subtotal</span>
+            <span>Subtotal ({selectedItems.length} selected)</span>
             <span style={{ fontWeight: 700, color: 'var(--text-headline)' }}>LKR {getCartSubtotal.toLocaleString()}</span>
           </div>
 
@@ -129,8 +159,21 @@ export default function CartPage() {
             <span>LKR {grandTotal.toLocaleString()}</span>
           </div>
 
-          <Link href="/checkout" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '0.9rem', fontSize: '1.05rem', marginBottom: '1.25rem' }}>
-            <span>Proceed to Checkout</span>
+          <Link
+            href={user ? '/checkout' : '/login?returnTo=/checkout'}
+            onClick={handleCheckoutClick}
+            className="btn-primary"
+            style={{
+              width: '100%',
+              justifyContent: 'center',
+              padding: '0.9rem',
+              fontSize: '1.05rem',
+              marginBottom: '1.25rem',
+              opacity: selectedItems.length === 0 ? 0.5 : 1,
+              pointerEvents: selectedItems.length === 0 ? 'none' : 'auto',
+            }}
+          >
+            <span>Proceed to Checkout ({selectedItems.length})</span>
             <ArrowRight size={18} />
           </Link>
 
