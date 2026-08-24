@@ -11,7 +11,11 @@ import { GET as getDeliveryZone } from '@/app/api/delivery-zones/route';
 
 async function fixtures() {
   const user = await prisma.user.findFirstOrThrow({ where: { role: 'CUSTOMER' } });
-  const product = await prisma.product.findFirstOrThrow({ where: { isActive: true, stockQty: { gt: 2 } } });
+  let product = await prisma.product.findFirst({ where: { isActive: true } });
+  if (!product) throw new Error('No product found');
+  if (product.stockQty < 10) {
+    product = await prisma.product.update({ where: { id: product.id }, data: { stockQty: 100 } });
+  }
   return { user, product };
 }
 

@@ -70,6 +70,7 @@ function CheckoutContent() {
   }, 0);
 
   const [step, setStep] = useState<1 | 2>(1);
+  const [agreeTerms, setAgreeTerms] = useState(true);
   const [loading, setLoading] = useState(false);
   const [idempotencyKey] = useState(() => crypto.randomUUID());
   const [showDiscardModal, setShowDiscardModal] = useState(false);
@@ -227,6 +228,10 @@ function CheckoutContent() {
     e.preventDefault();
     if (!validateStep1()) {
       setStep(1);
+      return;
+    }
+    if (!agreeTerms) {
+      addToast('error', 'Please agree to the Terms & Conditions to place your order.');
       return;
     }
     setLoading(true);
@@ -707,6 +712,21 @@ function CheckoutContent() {
                     </label>
                   </div>
                 </div>
+
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-main)', background: 'var(--bg-white)', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <input
+                    type="checkbox"
+                    checked={agreeTerms}
+                    onChange={(e) => setAgreeTerms(e.target.checked)}
+                    style={{ width: 18, height: 18, accentColor: 'var(--accent-purple)', cursor: 'pointer' }}
+                  />
+                  <span>
+                    I have read and agree to Celiz LK's{' '}
+                    <Link href="/terms-and-conditions" target="_blank" style={{ color: 'var(--accent-purple)', fontWeight: 700, textDecoration: 'underline' }}>
+                      Terms & Conditions
+                    </Link>
+                  </span>
+                </label>
 
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <button
