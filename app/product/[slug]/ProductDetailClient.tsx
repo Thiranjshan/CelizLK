@@ -17,6 +17,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   const router = useRouter();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [stockError, setStockError] = useState('');
   const addToCart = useStore((state) => state.addToCart);
   const setBuyNowItem = useStore((state) => state.setBuyNowItem);
   const user = useStore((state) => state.user);
@@ -29,7 +30,14 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
     : 0;
 
   const handleBuyNow = () => {
+    if (quantity <= 0 || product.stockQty <= 0) {
+      setStockError('This product is out of stock.');
+      return;
+    }
+    setStockError('');
+
     setBuyNowItem({ product, quantity });
+
     const checkoutUrl = '/checkout?buyNow=1';
     if (user) {
       router.push(checkoutUrl);
@@ -136,9 +144,16 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
           </div>
 
           {/* Action CTAs */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: stockError ? '0.75rem' : '2.5rem' }}>
             <button
-              onClick={() => addToCart(product, quantity)}
+              onClick={() => {
+                if (quantity <= 0 || product.stockQty <= 0) {
+                  setStockError('This product is out of stock.');
+                  return;
+                }
+                setStockError('');
+                addToCart(product, quantity);
+              }}
               className="btn-add-cart"
               style={{ padding: '0.9rem', fontSize: '1rem' }}
             >
@@ -155,6 +170,12 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
               <span>Buy Now</span>
             </button>
           </div>
+
+          {stockError && (
+            <p role="alert" style={{ color: 'var(--error)', fontSize: '0.875rem', fontWeight: 600, marginBottom: '2.5rem' }}>
+              {stockError}
+            </p>
+          )}
 
           {/* Trust Guarantees */}
           <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
