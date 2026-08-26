@@ -299,7 +299,8 @@ function CheckoutContent() {
       if (isBuyNow) {
         setBuyNowItem(null);
       } else {
-        clearCart();
+        // Only remove items that were part of this order (selected items), not the whole cart
+        checkoutItems.forEach((item) => removeFromCart(item.product.id));
       }
 
       addToast('success', `Order #${createdOrder.orderNumber} placed successfully!`);
@@ -371,7 +372,7 @@ function CheckoutContent() {
               {step > 1 ? <CheckCircle2 size={18} /> : '1'}
             </div>
             <span style={{ fontWeight: 800, fontSize: '0.95rem', color: step === 1 ? 'var(--primary-indigo)' : 'var(--text-headline)' }}>
-              1. Order & Delivery Details
+              Order & Delivery Details
             </span>
           </div>
 
@@ -382,7 +383,7 @@ function CheckoutContent() {
               2
             </div>
             <span style={{ fontWeight: 800, fontSize: '0.95rem', color: step === 2 ? 'var(--primary-indigo)' : 'var(--text-secondary)' }}>
-              2. Payment Method
+              Payment Method
             </span>
           </div>
         </div>
@@ -397,7 +398,7 @@ function CheckoutContent() {
                 <div style={{ background: 'var(--bg-white)', padding: '2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-indigo)' }}>
                     <User size={20} color="var(--accent-purple)" />
-                    <span>Customer Information</span>
+                    <span>Contact Information</span>
                   </h3>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
@@ -712,6 +713,8 @@ function CheckoutContent() {
                     </label>
                   </div>
                 </div>
+
+
 
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-main)', background: 'var(--bg-white)', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                   <input

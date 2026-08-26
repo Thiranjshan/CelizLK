@@ -24,15 +24,6 @@ export const orderTransitions: Record<OrderStatus, OrderStatus[]> = {
 export const orderEventTypes = ['ORDER_CREATED', 'PAYMENT_PENDING', 'PAYMENT_DETAILS_SUBMITTED', 'PAYMENT_CONFIRMED', 'COD_PAYMENT_CONFIRMED', 'PAYMENT_REJECTED', 'ORDER_CONFIRMED', 'ORDER_PROCESSING', 'ORDER_PACKED', 'ORDER_SHIPPED', 'ORDER_DELIVERED', 'ORDER_CANCELLED'] as const;
 export type OrderEventType = typeof orderEventTypes[number];
 
-export type BankTransferDetails = {
-  transferReference: unknown;
-  transferAmount: unknown;
-  transferDate: unknown;
-  bankName?: unknown;
-  transferNote?: unknown;
-  proofUrl?: unknown;
-};
-
 export type CreateOrderInput = {
   userId: string;
   customerPhone?: unknown;
@@ -103,13 +94,15 @@ async function createOrderInTransaction(transaction: OrderTransaction, input: Cr
       status: orderStatus,
       items: { create: pricedItems.map((item) => ({ productId: item.product.id, productName: item.product.name, quantity: item.quantity, unitPrice: item.product.discountPrice ?? item.product.price, lineSubtotal: (item.product.discountPrice ?? item.product.price) * item.quantity })) },
       payment: { create: { amount: total, method: selectedPaymentMethod, gateway: selectedPaymentMethod === 'PAYHERE' ? 'PayHere' : selectedPaymentMethod === 'BANK_TRANSFER' ? 'BankTransfer' : 'COD', status: paymentStatus } },
-      events: { create: selectedPaymentMethod === 'COD' ? [
-        { eventType: 'ORDER_CREATED', newOrderStatus: orderStatus, actorType: 'CUSTOMER', actorId: input.userId, description: 'Order created' },
-        { eventType: 'ORDER_CONFIRMED', previousOrderStatus: null, newOrderStatus: 'CONFIRMED', actorType: 'SYSTEM', description: 'COD order confirmed' },
-      ] : [
-        { eventType: 'ORDER_CREATED', newOrderStatus: orderStatus, actorType: 'CUSTOMER', actorId: input.userId, description: 'Order created' },
-        { eventType: 'PAYMENT_PENDING', newOrderStatus: orderStatus, actorType: 'SYSTEM', description: 'Payment is pending' },
-      ] },
+      events: {
+        create: selectedPaymentMethod === 'COD' ? [
+          { eventType: 'ORDER_CREATED', newOrderStatus: orderStatus, actorType: 'CUSTOMER', actorId: input.userId, description: 'Order created' },
+          { eventType: 'ORDER_CONFIRMED', previousOrderStatus: null, newOrderStatus: 'CONFIRMED', actorType: 'SYSTEM', description: 'COD order confirmed' },
+        ] : [
+          { eventType: 'ORDER_CREATED', newOrderStatus: orderStatus, actorType: 'CUSTOMER', actorId: input.userId, description: 'Order created' },
+          { eventType: 'PAYMENT_PENDING', newOrderStatus: orderStatus, actorType: 'SYSTEM', description: 'Payment is pending' },
+        ]
+      },
     },
     include: { items: { include: { product: true } }, payment: true, events: true },
   });
@@ -174,45 +167,6 @@ export async function confirmCodPayment(orderId: string, adminId: string) {
   });
 }
 
-function parseTransferDetails(input: BankTransferDetails) {
-  const transferReference = typeof input.transferReference === 'string' ? input.transferReference.trim() : '';
-  const transferAmount = Number(input.transferAmount);
-  const transferDate = new Date(String(input.transferDate || ''));
-  if (!transferReference || transferReference.length > 120) throw new Error('INVALID_TRANSFER_REFERENCE');
-  if (!Number.isFinite(transferAmount) || transferAmount <= 0) throw new Error('INVALID_TRANSFER_AMOUNT');
-  if (!Number.isFinite(transferDate.getTime())) throw new Error('INVALID_TRANSFER_DATE');
-  return {
-    transferReference,
-    transferAmount,
-    transferDate,
-    bankName: typeof input.bankName === 'string' ? input.bankName.trim().slice(0, 100) || null : null,
-    transferNote: typeof input.transferNote === 'string' ? input.transferNote.trim().slice(0, 500) || null : null,
-    proofUrl: typeof input.proofUrl === 'string' ? input.proofUrl.trim().slice(0, 500) || null : null,
-  };
-}
-
-export async function submitBankTransferDetails(orderId: string, userId: string, input: BankTransferDetails) {
-  const details = parseTransferDetails(input);
-  return prisma.$transaction(async (transaction) => {
-    const order = await transaction.order.findUnique({ where: { id: orderId }, include: { payment: true } });
-    if (!order) throw new Error('ORDER_NOT_FOUND');
-    if (order.userId !== userId) throw new Error('ORDER_FORBIDDEN');
-    if (order.paymentMethod !== 'BANK_TRANSFER') throw new Error('INVALID_PAYMENT_METHOD');
-    const payment = order.payment[0];
-    if (!payment) throw new Error('PAYMENT_NOT_FOUND');
-    if (payment.status === 'PAID') throw new Error('PAYMENT_ALREADY_PAID');
-    if (!['PENDING', 'FAILED'].includes(payment.status)) throw new Error('INVALID_PAYMENT_STATE');
-    const sameSubmission = payment.status === 'PENDING' && payment.transferReference === details.transferReference && payment.transferAmount === details.transferAmount && payment.transferDate?.getTime() === details.transferDate.getTime();
-    if (sameSubmission) return payment;
-    if (payment.status === 'PENDING' && payment.transferSubmittedAt) throw new Error('PAYMENT_ALREADY_SUBMITTED');
-
-    const updated = await transaction.payment.update({ where: { id: payment.id }, data: { status: 'PENDING', transferReference: details.transferReference, transferAmount: details.transferAmount, transferDate: details.transferDate, transferSubmittedAt: new Date(), bankName: details.bankName, transferNote: details.transferNote, proofUrl: details.proofUrl, failureReason: null, rejectedAt: null } });
-    await transaction.order.update({ where: { id: order.id }, data: { paymentStatus: 'PENDING' } });
-    await transaction.orderEvent.create({ data: { orderId: order.id, eventType: 'PAYMENT_DETAILS_SUBMITTED', previousPaymentStatus: payment.status, newPaymentStatus: 'PENDING', actorType: 'CUSTOMER', actorId: userId, description: 'Bank transfer details submitted' } });
-    return updated;
-  });
-}
-
 export async function confirmBankTransfer(orderId: string, adminId: string) {
   return prisma.$transaction(async (transaction) => {
     const order = await transaction.order.findUnique({ where: { id: orderId }, include: { payment: true } });
@@ -223,17 +177,17 @@ export async function confirmBankTransfer(orderId: string, adminId: string) {
     if (payment.status === 'PAID') throw new Error('PAYMENT_ALREADY_PAID');
     if (payment.status === 'FAILED') throw new Error('PAYMENT_ALREADY_REJECTED');
     if (payment.status !== 'PENDING' || order.status !== 'AWAITING_PAYMENT') throw new Error('INVALID_PAYMENT_STATE');
-    if (payment.transferAmount === null || payment.transferAmount === undefined || Math.abs(payment.transferAmount - order.total) > 0.005) throw new Error('AMOUNT_MISMATCH');
-
     const verifiedAt = new Date();
     const changed = await transaction.payment.updateMany({ where: { id: payment.id, status: 'PENDING' }, data: { status: 'PAID', verifiedAt, verifiedByAdminId: adminId } });
     if (changed.count !== 1) throw new Error('PAYMENT_CONFLICT');
     const confirmed = await transaction.order.updateMany({ where: { id: order.id, status: 'AWAITING_PAYMENT' }, data: { status: 'CONFIRMED', paymentStatus: 'PAID', confirmedAt: verifiedAt } });
     if (confirmed.count !== 1) throw new Error('ORDER_CONFLICT');
-    await transaction.orderEvent.createMany({ data: [
-      { orderId: order.id, eventType: 'PAYMENT_CONFIRMED', previousPaymentStatus: 'PENDING', newPaymentStatus: 'PAID', actorType: 'ADMIN', actorId: adminId, description: 'Bank transfer payment confirmed' },
-      { orderId: order.id, eventType: 'ORDER_CONFIRMED', previousOrderStatus: 'AWAITING_PAYMENT', newOrderStatus: 'CONFIRMED', actorType: 'ADMIN', actorId: adminId, description: 'Order confirmed after bank transfer verification' },
-    ] });
+    await transaction.orderEvent.createMany({
+      data: [
+        { orderId: order.id, eventType: 'PAYMENT_CONFIRMED', previousPaymentStatus: 'PENDING', newPaymentStatus: 'PAID', actorType: 'ADMIN', actorId: adminId, description: 'Bank transfer payment confirmed' },
+        { orderId: order.id, eventType: 'ORDER_CONFIRMED', previousOrderStatus: 'AWAITING_PAYMENT', newOrderStatus: 'CONFIRMED', actorType: 'ADMIN', actorId: adminId, description: 'Order confirmed after bank transfer verification' },
+      ]
+    });
     return { payment: await transaction.payment.findUniqueOrThrow({ where: { id: payment.id } }), order: await transaction.order.findUniqueOrThrow({ where: { id: order.id } }) };
   });
 }

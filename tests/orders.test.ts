@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { test } from 'node:test';
 import { prisma } from '@/lib/prisma';
-import { confirmBankTransfer, confirmCodPayment, createOrder, rejectBankTransfer, submitBankTransferDetails, transitionOrder } from '@/lib/orders';
+import { confirmBankTransfer, confirmCodPayment, createOrder, transitionOrder } from '@/lib/orders';
 import { createAccessToken } from '@/lib/auth';
 import { GET as getCustomerOrder, PATCH as patchCustomerOrder } from '@/app/api/orders/[id]/route';
 import { POST as confirmCodRoute } from '@/app/api/admin/orders/[id]/payment/confirm-cod/route';
@@ -157,33 +157,22 @@ test('creates a bank-transfer order awaiting payment', async () => {
   await assert.rejects(() => transitionOrder(order.id, 'CONFIRMED', admin.id), /PAYMENT_REQUIRED/);
 });
 
-test('submits bank details once and keeps duplicate retries idempotent', async () => {
-  const { user, product } = await fixtures();
-  const order = await createOrder({ userId: user.id, shippingAddress: { addressLine1: 'Submission address', city: 'Colombo', district: 'Colombo' }, paymentMethod: 'BANK_TRANSFER', items: [{ productId: product.id, quantity: 1 }], idempotencyKey: randomUUID() });
-  const input = { transferReference: 'TXN-123456', transferAmount: order.total, transferDate: '2026-08-24', transferNote: 'Online transfer' };
-  const first = await submitBankTransferDetails(order.id, user.id, input);
-  const second = await submitBankTransferDetails(order.id, user.id, input);
-  assert.equal(first.id, second.id);
-  assert.equal(second.transferReference, input.transferReference);
-  assert.equal(await prisma.orderEvent.count({ where: { orderId: order.id, eventType: 'PAYMENT_DETAILS_SUBMITTED' } }), 1);
-});
-
-test('rejects mismatched bank amount, supports rejection, resubmission, and confirmation', async () => {
+test('confirms bank transfer unconditionally and transitions order', async () => {
   const { user, product } = await fixtures();
   const admin = await prisma.adminUser.findFirstOrThrow();
-  const order = await createOrder({ userId: user.id, shippingAddress: { addressLine1: 'Review address', city: 'Colombo', district: 'Colombo' }, paymentMethod: 'BANK_TRANSFER', items: [{ productId: product.id, quantity: 1 }], idempotencyKey: randomUUID() });
-  await submitBankTransferDetails(order.id, user.id, { transferReference: 'WRONG-AMOUNT', transferAmount: order.total - 1, transferDate: '2026-08-24' });
-  await assert.rejects(() => confirmBankTransfer(order.id, admin.id), /AMOUNT_MISMATCH/);
-  const rejected = await rejectBankTransfer(order.id, admin.id, 'Amount does not match order total.');
-  assert.equal(rejected.status, 'FAILED');
-  assert.equal(rejected.failureReason, 'Amount does not match order total.');
-  await submitBankTransferDetails(order.id, user.id, { transferReference: 'CORRECT-123', transferAmount: order.total, transferDate: '2026-08-24' });
+  const order = await createOrder({ userId: user.id, shippingAddress: { addressLine1: 'Bank confirm address', city: 'Colombo', district: 'Colombo' }, paymentMethod: 'BANK_TRANSFER', items: [{ productId: product.id, quantity: 1 }], idempotencyKey: randomUUID() });
+  assert.equal(order.status, 'AWAITING_PAYMENT');
+  assert.equal(order.paymentStatus, 'PENDING');
+
   const confirmed = await confirmBankTransfer(order.id, admin.id);
   assert.equal(confirmed.payment.status, 'PAID');
   assert.equal(confirmed.order.status, 'CONFIRMED');
   assert.equal(confirmed.order.paymentStatus, 'PAID');
-  assert.equal(await prisma.orderEvent.count({ where: { orderId: order.id, eventType: 'PAYMENT_REJECTED' } }), 1);
   assert.equal(await prisma.orderEvent.count({ where: { orderId: order.id, eventType: 'PAYMENT_CONFIRMED' } }), 1);
+  assert.equal(await prisma.orderEvent.count({ where: { orderId: order.id, eventType: 'ORDER_CONFIRMED' } }), 1);
+
+  // Cannot confirm again
+  await assert.rejects(() => confirmBankTransfer(order.id, admin.id), /PAYMENT_ALREADY_PAID/);
 });
 
 test.after(async () => {
