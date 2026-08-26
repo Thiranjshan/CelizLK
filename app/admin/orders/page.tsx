@@ -41,49 +41,39 @@ function OrdersManager({ token }: { token: string }) {
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
 
-  const load = useCallback((options?: { silent?: boolean }) => {
-    const silent = options?.silent ?? false;
-    if (!silent) setLoading(true);
-    return fetch('/api/admin/orders', { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
+  const load = useCallback(() => {
+    setLoading(true);
+    fetch('/api/admin/orders', { headers: { Authorization: `Bearer ${token}` } })
       .then(async (r) => { const d = await r.json(); if (!r.ok) throw new Error(d.error); return d; })
-      .then(setOrders)
-      .catch((e) => setError(e.message))
-      .finally(() => { if (!silent) setLoading(false); });
+      .then(setOrders).catch((e) => setError(e.message)).finally(() => setLoading(false));
   }, [token]);
 
   useEffect(() => { load(); }, [load]);
 
-  async function refreshAfterMutation() {
-    await load({ silent: true });
-  }
-
   async function updateStatus(order: Order, status: string) {
-    setError('');
     const r = await fetch('/api/admin/orders', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ id: order.id, status }) });
     const d = await r.json();
     if (!r.ok) { setError(d.error); return; }
-    await refreshAfterMutation();
+    setOrders((cur) => cur.map((o) => o.id === order.id ? { ...o, status } : o));
   }
 
   async function confirmBankPayment(orderId: string) {
     setConfirmBusy(true);
-    setError('');
     try {
       const r = await fetch(`/api/admin/orders/${orderId}/payment/verify`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
+      setOrders((cur) => cur.map((o) => o.id === orderId ? { ...o, paymentStatus: 'PAID' } : o));
       setConfirmingId(null);
-      await refreshAfterMutation();
     } catch (e) { setError(e instanceof Error ? e.message : 'Failed to confirm payment.'); }
     finally { setConfirmBusy(false); }
   }
 
   async function confirmCodPayment(orderId: string) {
-    setError('');
     const r = await fetch(`/api/admin/orders/${orderId}/payment/confirm-cod`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
     const d = await r.json();
     if (!r.ok) { setError(d.error); return; }
-    await refreshAfterMutation();
+    setOrders((cur) => cur.map((o) => o.id === orderId ? { ...o, paymentStatus: 'PAID' } : o));
   }
 
   const nextStatuses: Record<string, string[]> = { CONFIRMED: ['PROCESSING', 'CANCELLED'], PROCESSING: ['PACKED', 'CANCELLED'], PACKED: ['SHIPPED'], SHIPPED: ['DELIVERED'] };
