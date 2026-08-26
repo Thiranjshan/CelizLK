@@ -70,7 +70,7 @@ function CheckoutContent() {
   }, 0);
 
   const [step, setStep] = useState<1 | 2>(1);
-  const [agreeTerms, setAgreeTerms] = useState(true);
+  const [agreeTerms, setAgreeTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [idempotencyKey] = useState(() => crypto.randomUUID());
   const [showDiscardModal, setShowDiscardModal] = useState(false);
