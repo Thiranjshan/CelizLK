@@ -23,6 +23,11 @@ interface StoreState {
   accessToken: string | null;
   authInitialized: boolean;
   toasts: ToastMessage[];
+  wishlist: string[];
+
+  // Wishlist Actions
+  toggleWishlist: (productId: string) => void;
+  isInWishlist: (productId: string) => boolean;
   
   // Cart Actions
   addToCart: (product: Product, quantity?: number) => void;
@@ -61,6 +66,25 @@ export const useStore = create<StoreState>()(
       accessToken: null,
       authInitialized: false,
       toasts: [],
+      wishlist: [],
+
+      toggleWishlist: (productId) => {
+        const { wishlist, addToast } = get();
+        const exists = wishlist.includes(productId);
+        let updatedWishlist: string[];
+        if (exists) {
+          updatedWishlist = wishlist.filter((id) => id !== productId);
+          addToast('info', 'Removed product from wishlist.');
+        } else {
+          updatedWishlist = [...wishlist, productId];
+          addToast('success', 'Added product to wishlist!');
+        }
+        set({ wishlist: updatedWishlist });
+      },
+
+      isInWishlist: (productId) => {
+        return get().wishlist.includes(productId);
+      },
 
       addToCart: (product, quantity = 1) => {
         const { cart, user, userCarts, guestCart, addToast } = get();
@@ -265,7 +289,7 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: 'celiz-lk-store-v2',
-      partialize: (state) => ({ cart: state.cart, userCarts: state.userCarts, guestCart: state.guestCart }),
+      partialize: (state) => ({ cart: state.cart, userCarts: state.userCarts, guestCart: state.guestCart, wishlist: state.wishlist }),
     }
   )
 );

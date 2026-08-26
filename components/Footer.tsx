@@ -1,8 +1,8 @@
- 'use client';
+'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { ShieldCheck, Truck, Headphones, Award } from 'lucide-react';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -15,59 +15,76 @@ export default function Footer() {
         <div className="footer-grid">
           {/* Brand Info */}
           <div className="footer-brand">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.4rem', fontWeight: 900, fontFamily: 'var(--font-heading)' }}>
-              <div style={{ width: 36, height: 36, background: 'var(--brand-gradient)', color: 'white', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>C</div>
-              <span>Celiz <span style={{ color: '#C084FC' }}>LK</span></span>
-            </div>
+            <Link href="/" style={{ display: 'inline-block', marginBottom: '1rem' }}>
+              <Image
+                src="/logo.png"
+                alt="Celiz LK"
+                width={140}
+                height={42}
+                priority
+                unoptimized
+                style={{ objectFit: 'contain' }}
+              />
+            </Link>
             <p>
-              Your Trusted Gadget Partner in Sri Lanka. Premium wireless audio, ultra-fast charging, smart wearables, and mobile tech delivered fast with authentic local warranty.
+              Your trusted gadget partner in Sri Lanka. Providing genuine branded tech accessories, audio devices, chargers, and wearables with official local warranty.
             </p>
+            <div className="footer-social-links" style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem' }}>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="Facebook">FB</a>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="Instagram">IG</a>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="Twitter">TW</a>
+              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="YouTube">YT</a>
+            </div>
           </div>
 
-          {/* Shop Categories */}
+          {/* Shop */}
           <div>
-            <h4 className="footer-col-title">Categories</h4>
+            <h4 className="footer-col-title">Shop</h4>
             <ul className="footer-links">
-              <li><Link href="/category/earbuds">Wireless Earbuds</Link></li>
-              <li><Link href="/category/chargers">Fast Chargers & Cables</Link></li>
-              <li><Link href="/category/power-banks">Portable Power Banks</Link></li>
+              <li><Link href="/products">All Products</Link></li>
+              <li><Link href="/category/earbuds">Audio</Link></li>
+              <li><Link href="/category/chargers">Chargers &amp; Cables</Link></li>
+              <li><Link href="/category/power-banks">Power Banks</Link></li>
               <li><Link href="/category/smartwatches">Smartwatches</Link></li>
-              <li><Link href="/category/accessories">Tech Accessories</Link></li>
+              <li><Link href="/category/accessories">Accessories</Link></li>
+              <li><Link href="/products?filter=deals">Deals</Link></li>
             </ul>
           </div>
 
-          {/* Customer Service */}
+          {/* Help */}
           <div>
-            <h4 className="footer-col-title">Customer Care</h4>
+            <h4 className="footer-col-title">Help</h4>
             <ul className="footer-links">
-              <li><Link href="/account/orders">Track Your Order</Link></li>
-              <li><Link href="/contact">Contact Support</Link></li>
+              <li><Link href="/contact">Contact Us</Link></li>
+              <li><Link href="/faq">FAQ</Link></li>
+              <li><Link href="/delivery-information">Delivery Information</Link></li>
+              <li><Link href="/warranty">Warranty</Link></li>
+              <li><Link href="/refund-policy">Returns &amp; Refunds</Link></li>
+            </ul>
+          </div>
+
+          {/* Company */}
+          <div>
+            <h4 className="footer-col-title">Company</h4>
+            <ul className="footer-links">
               <li><Link href="/about">About Celiz LK</Link></li>
-              <li><Link href="/admin">Admin Portal</Link></li>
-            </ul>
-          </div>
-
-          {/* Legal Pages (Required for PayHere Approval) */}
-          <div>
-            <h4 className="footer-col-title">Legal & Policies</h4>
-            <ul className="footer-links">
+              <li><Link href="/about#story">Our Story</Link></li>
               <li><Link href="/privacy-policy">Privacy Policy</Link></li>
-              <li><Link href="/refund-policy">Refund & Returns Policy</Link></li>
-              <li><Link href="/terms-and-conditions">Terms & Conditions</Link></li>
-              <li><Link href="/contact">Business Details</Link></li>
+              <li><Link href="/terms-and-conditions">Terms &amp; Conditions</Link></li>
             </ul>
           </div>
         </div>
 
         {/* Footer Bottom Bar */}
         <div className="footer-bottom">
-          <div>
-            © {new Date().getFullYear()} Celiz LK (Private) Limited. All Rights Reserved.
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', color: '#9CA3AF' }}>
-            <span>🔒 Secure Checkout via PayHere</span>
-            <span>💵 Cash on Delivery</span>
-            <span>🏦 Bank Transfer</span>
+          <div>© {new Date().getFullYear()} Celiz LK. All rights reserved.</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>We accept:</span>
+            <span style={{ background: '#f4f4f5', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, color: '#18181b' }}>VISA</span>
+            <span style={{ background: '#f4f4f5', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, color: '#18181b' }}>Mastercard</span>
+            <span style={{ background: '#f4f4f5', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, color: '#18181b' }}>AMEX</span>
+            <span style={{ background: '#f4f4f5', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, color: '#18181b' }}>Koko</span>
+            <span style={{ background: '#f4f4f5', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, color: '#18181b' }}>COD</span>
           </div>
         </div>
       </div>
