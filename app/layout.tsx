@@ -4,6 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ToastContainer from '@/components/ToastContainer';
 import AuthBootstrap from '@/components/AuthBootstrap';
+import WhatsAppButton from '@/components/WhaatsAppBtton';
 
 export const metadata: Metadata = {
   title: 'Celiz LK — Online Tech Gadgets Store Sri Lanka',
@@ -29,6 +30,7 @@ export default function RootLayout({
         <main style={{ flex: 1 }}>
           {children}
         </main>
+        <WhatsAppButton />
         <Footer />
         <ToastContainer />
       </body>

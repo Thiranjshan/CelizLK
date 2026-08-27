@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { FaFacebookF, FaInstagram, FaTiktok } from 'react-icons/fa';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -30,11 +31,36 @@ export default function Footer() {
               Your trusted gadget partner in Sri Lanka. Providing genuine branded tech accessories, audio devices, chargers, and wearables with official local warranty.
             </p>
             <div className="footer-social-links" style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem' }}>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="Facebook">FB</a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="Instagram">IG</a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="Twitter">TW</a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="YouTube">YT</a>
-            </div>
+  <a
+    href="https://www.facebook.com/share/1LXMTdG8jr/?mibextid=wwXIfr"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="social-icon-btn"
+    aria-label="Facebook"
+  >
+    <FaFacebookF />
+  </a>
+
+  <a
+    href="https://instagram.com"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="social-icon-btn"
+    aria-label="Instagram"
+  >
+    <FaInstagram />
+  </a>
+
+  <a
+    href="https://tiktok.com"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="social-icon-btn"
+    aria-label="TikTok"
+  >
+    <FaTiktok />
+  </a>
+</div>
           </div>
 
           {/* Shop */}
