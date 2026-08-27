@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { FaFacebookF, FaInstagram, FaTiktok } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaTiktok,FaCcVisa, FaCcMastercard} from 'react-icons/fa';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -103,16 +103,30 @@ export default function Footer() {
 
         {/* Footer Bottom Bar */}
         <div className="footer-bottom">
-          <div>© {new Date().getFullYear()} Celiz LK. All rights reserved.</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>We accept:</span>
-            <span style={{ background: '#f4f4f5', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, color: '#18181b' }}>VISA</span>
-            <span style={{ background: '#f4f4f5', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, color: '#18181b' }}>Mastercard</span>
-            <span style={{ background: '#f4f4f5', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, color: '#18181b' }}>AMEX</span>
-            <span style={{ background: '#f4f4f5', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, color: '#18181b' }}>Koko</span>
-            <span style={{ background: '#f4f4f5', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, color: '#18181b' }}>COD</span>
-          </div>
-        </div>
+  <div>© {new Date().getFullYear()} Celiz LK. All rights reserved.</div>
+
+  <div className="footer-payment-methods">
+    <span className="footer-payment-label">We accept:</span>
+
+    <span className="payment-logo payment-logo-visa" aria-label="Visa">
+      <FaCcVisa />
+    </span>
+
+    <span className="payment-logo payment-logo-mastercard" aria-label="Mastercard">
+      <FaCcMastercard />
+    </span>
+
+    <span className="payment-logo payment-logo-koko" aria-label="Koko">
+      <Image
+        src="/koko-logo.png"
+        alt="Koko"
+        width={48}
+        height={24}
+        style={{ objectFit: 'contain' }}
+      />
+    </span>
+  </div>
+</div>
       </div>
     </footer>
   );

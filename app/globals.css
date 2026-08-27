@@ -2036,3 +2036,37 @@ h6 {
     font-size: 28px;
   }
 }
+
+.footer-payment-methods {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.footer-payment-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.payment-logo {
+  height: 30px;
+  min-width: 48px;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background: #f4f4f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-logo svg {
+  width: 40px;
+  height: 24px;
+}
+
+.payment-logo-koko img {
+  width: 42px;
+  height: 22px;
+}

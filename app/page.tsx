@@ -260,28 +260,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Customer Support CTA */}
-        <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '3.5rem 3rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2rem', marginBottom: '5rem' }} className="support-cta-layout">
-          <div>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-headline)', marginBottom: '0.5rem' }}>Need help choosing a gadget?</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Talk to us and we&apos;ll help you find the right product.</p>
-          </div>
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <a 
-              href="https://wa.me/94771234567" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="btn-primary" 
-              style={{ background: '#25D366', color: 'white', border: 'none', boxShadow: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
-            >
-              <MessageCircle size={18} />
-              <span>Chat on WhatsApp</span>
-            </a>
-            <Link href="/contact" className="btn-add-cart" style={{ width: 'auto', padding: '0.85rem 1.8rem', fontWeight: 700 }}>
-              Contact Us
-            </Link>
-          </div>
-        </section>
+        
       </div>
     </div>
   );
