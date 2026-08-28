@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import ProductCard from '@/components/ProductCard';
 import HeroCarousel from '@/components/home/HeroCarousel';
 import { Award, ShieldCheck, Truck, Headphones, MessageCircle, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 
 export const revalidate = 60; // ISR revalidate every 60 seconds
 
@@ -199,27 +200,87 @@ export default async function HomePage() {
           </section>
         </div>
 
-        {/* Genuine products. Trusted brands. Section */}
-        <section style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '2.5rem', marginBottom: '4rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 2.5fr', gap: '3rem', alignItems: 'center' }} className="brands-trust-layout">
-            <div>
-              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-headline)', lineHeight: 1.3 }}>Genuine products.<br />Trusted brands.</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.75rem', lineHeight: 1.5 }}>
-                We carefully source genuine products from trusted brands, giving you the confidence to shop with Celiz LK.
-              </p>
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem 2.5rem', alignItems: 'center', justifyContent: 'center' }}>
-              {trustedBrands.map((brand) => (
-                <span 
-                  key={brand} 
-                  style={{ fontSize: '1.15rem', fontWeight: 900, color: '#D4D4D8', letterSpacing: '0.05em', textTransform: 'uppercase', fontStyle: 'italic' }}
-                >
-                  {brand}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
+       {/* Genuine products. Trusted brands. Section */}
+<section
+  style={{
+    border: '1px solid var(--border-color)',
+    borderRadius: 'var(--radius-lg)',
+    padding: '2.5rem',
+    marginBottom: '4rem',
+  }}
+>
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns: '1.2fr 2.5fr',
+      gap: '3rem',
+      alignItems: 'center',
+    }}
+    className="brands-trust-layout"
+  >
+    {/* Left side - KEEP AS IT IS */}
+    <div>
+      <h3
+        style={{
+          fontSize: '1.35rem',
+          fontWeight: 800,
+          color: 'var(--text-headline)',
+          lineHeight: 1.3,
+        }}
+      >
+        Genuine products.
+        <br />
+        Trusted brands.
+      </h3>
+
+      <p
+        style={{
+          fontSize: '0.85rem',
+          color: 'var(--text-secondary)',
+          marginTop: '0.75rem',
+          lineHeight: 1.5,
+        }}
+      >
+        We carefully source genuine products from trusted brands, giving you
+        the confidence to shop with Celiz LK.
+      </p>
+    </div>
+
+    {/* Right side - Logo Reel */}
+    <div className="brands-logo-reel">
+      <div className="brands-logo-track">
+        {/* First set */}
+        <div className="brands-logo-group">
+          <Image src="/images/brands/jbl.png" alt="JBL" width={90} height={50} />
+          <Image src="/images/brands/anker.png" alt="Anker" width={90} height={50} />
+          <Image src="/images/brands/apple.png" alt="Apple" width={90} height={50} />
+          <Image src="/images/brands/samsung.png" alt="Samsung" width={90} height={50} />
+          <Image src="/images/brands/dji.png" alt="DJI" width={90} height={50} />
+          <Image src="/images/brands/mi.png" alt="MI" width={90} height={50} />
+          <Image src="/images/brands/baseus.png" alt="Baseus" width={90} height={50} />
+          <Image src="/images/brands/ugreen.png" alt="UGREEN" width={90} height={50} />
+          <Image src="/images/brands/huawei.png" alt="huawei" width={90} height={50} />
+          <Image src="/images/brands/insta.png" alt="insta" width={90} height={50} />
+
+        </div>
+
+        {/* Duplicate set for seamless loop */}
+        <div className="brands-logo-group" aria-hidden="true">
+          <Image src="/images/brands/jbl.png" alt="JBL" width={90} height={50} />
+          <Image src="/images/brands/anker.png" alt="Anker" width={90} height={50} />
+          <Image src="/images/brands/apple.png" alt="Apple" width={90} height={50} />
+          <Image src="/images/brands/samsung.png" alt="Samsung" width={90} height={50} />
+          <Image src="/images/brands/dji.png" alt="DJI" width={90} height={50} />
+          <Image src="/images/brands/mi.png" alt="MI" width={90} height={50} />
+          <Image src="/images/brands/baseus.png" alt="Baseus" width={90} height={50} />
+          <Image src="/images/brands/ugreen.png" alt="UGREEN" width={90} height={50} />
+          <Image src="/images/brands/huawei.png" alt="huawei" width={90} height={50} />
+          <Image src="/images/brands/insta.png" alt="insta" width={90} height={50} />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
         {/* Why Celiz LK Promos grid */}
         <section style={{ borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', padding: '3rem 0', marginBottom: '4rem' }}>

@@ -106,7 +106,7 @@ export default function Footer() {
   <div>© {new Date().getFullYear()} Celiz LK. All rights reserved.</div>
 
   <div className="footer-payment-methods">
-    <span className="footer-payment-label">We accept:</span>
+    <span >We accept:</span>
 
     <span className="payment-logo payment-logo-visa" aria-label="Visa">
       <FaCcVisa />
