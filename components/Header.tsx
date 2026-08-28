@@ -3,21 +3,30 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { ShoppingBag, Search, User, Heart, Menu, X, MessageCircle } from 'lucide-react';
 import { useStore } from '@/lib/store';
+import CategoryMegaMenu from '@/components/CategoryMegaMenu';
+import BrandMegaMenu from '@/components/BrandMegaMenu';
+
+interface Brand { id: string; name: string; slug: string; logoUrl: string | null; }
 
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [brandsOpen, setBrandsOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
   const hasHydrated = useSyncExternalStore(() => () => undefined, () => true, () => false);
   const cart = useStore((state) => state.cart);
   const cartCount = hasHydrated ? cart.filter((item) => item.selected !== false).reduce((sum, item) => sum + item.quantity, 0) : 0;
   const wishlist = useStore((state) => state.wishlist);
   const wishlistCount = hasHydrated ? wishlist.length : 0;
   const user = useStore((state) => hasHydrated ? state.user : null);
+
+  useEffect(() => { fetch('/api/brands').then((response) => response.ok ? response.json() : []).then(setBrands).catch(() => undefined); }, []);
 
   if (pathname.startsWith('/admin') || pathname.startsWith('/checkout')) return null;
 
@@ -30,7 +39,6 @@ export default function Header() {
   };
 
   const navCategories = [
-    { name: 'Shop All', href: '/products' },
     { name: 'Audio', href: '/category/earbuds' },
     { name: 'Chargers & Cables', href: '/category/chargers' },
     { name: 'Power Banks', href: '/category/power-banks' },
@@ -44,6 +52,16 @@ export default function Header() {
     { name: 'FAQ', href: '/faq' },
     { name: 'Support', href: '/contact' },
   ];
+
+  const closeMenus = () => {
+    setCategoriesOpen(false);
+    setBrandsOpen(false);
+  };
+
+  const closeMobileNavigation = () => {
+    closeMenus();
+    setMobileMenuOpen(false);
+  };
 
   return (
     <>
@@ -138,32 +156,29 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Category Navigation Bar (Desktop Only) */}
-        <nav className="cat-nav-bar desktop-only">
+        <nav className="cat-nav-bar desktop-only" onKeyDown={(event) => { if (event.key === 'Escape') closeMenus(); }}>
           <div className="container cat-nav-container">
             <ul className="cat-nav-list left-nav">
-              {navCategories.map((cat) => {
-                const isActive = pathname === cat.href;
-                return (
-                  <li key={cat.href} className="cat-nav-item">
-                    <Link href={cat.href} className={isActive ? 'active' : ''}>
-                      {cat.name}
-                    </Link>
-                  </li>
-                );
-              })}
+              <li className="cat-nav-item">
+                <Link href="/products" className={pathname === '/products' ? 'active' : ''}>
+                  Shop <span className="nav-accent">All</span>
+                </Link>
+              </li>
+              <li className={`cat-nav-item mega-nav-item ${categoriesOpen ? 'open' : ''}`} onMouseEnter={() => { setCategoriesOpen(true); setBrandsOpen(false); }} onMouseLeave={() => setCategoriesOpen(false)}>
+                <button type="button" aria-expanded={categoriesOpen} onClick={() => { setCategoriesOpen((open) => !open); setBrandsOpen(false); }} onFocus={() => { setCategoriesOpen(true); setBrandsOpen(false); }}>
+                  Shop by <span className="nav-accent">Category</span> <span className="nav-chevron" aria-hidden="true">▾</span>
+                </button>
+                {categoriesOpen && <CategoryMegaMenu categories={navCategories} onNavigate={closeMenus} />}
+              </li>
+              {brands.length > 0 && <li className={`cat-nav-item mega-nav-item ${brandsOpen ? 'open' : ''}`} onMouseEnter={() => { setBrandsOpen(true); setCategoriesOpen(false); }} onMouseLeave={() => setBrandsOpen(false)}>
+                <button type="button" aria-expanded={brandsOpen} onClick={() => { setBrandsOpen((open) => !open); setCategoriesOpen(false); }} onFocus={() => { setBrandsOpen(true); setCategoriesOpen(false); }}>
+                  Shop by <span className="nav-accent">Brand</span> <span className="nav-chevron" aria-hidden="true">▾</span>
+                </button>
+                {brandsOpen && <BrandMegaMenu brands={brands} onNavigate={closeMenus} />}
+              </li>}
             </ul>
             <ul className="cat-nav-list right-nav">
-              {infoLinks.map((link) => {
-                const isActive = pathname === link.href;
-                return (
-                  <li key={link.href} className="cat-nav-item">
-                    <Link href={link.href} className={isActive ? 'active' : ''}>
-                      {link.name}
-                    </Link>
-                  </li>
-                );
-              })}
+              {infoLinks.map((link) => <li key={link.href} className="cat-nav-item"><Link href={link.href} className={pathname === link.href ? 'active' : ''}>{link.name}</Link></li>)}
             </ul>
           </div>
         </nav>
@@ -186,23 +201,23 @@ export default function Header() {
 
               <ul className="mobile-nav-list">
                 <li className="mobile-nav-section-title">Shop Categories</li>
-                {navCategories.map((cat) => (
-                  <li key={cat.href} className="mobile-nav-item">
-                    <Link
-                      href={cat.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {cat.name}
-                    </Link>
-                  </li>
-                ))}
+                <li className="mobile-nav-item">
+                  <Link href="/products" onClick={closeMobileNavigation}>Shop <span className="nav-accent">All</span></Link>
+                </li>
+                <li className="mobile-nav-item mobile-menu-group">
+                  <button type="button" aria-expanded={categoriesOpen} onClick={() => { setCategoriesOpen((open) => !open); setBrandsOpen(false); }}>
+                    <span className="mobile-nav-label">Shop by <span className="nav-accent">Category</span></span> <span aria-hidden="true">{categoriesOpen ? '⌃' : '›'}</span>
+                  </button>
+                  {categoriesOpen && <ul className="mobile-subnav-list">{navCategories.map((category) => <li key={category.href}><Link href={category.href} onClick={closeMobileNavigation}>{category.name}</Link></li>)}</ul>}
+                </li>
+                {brands.length > 0 && <li className="mobile-nav-item mobile-menu-group"><button type="button" aria-expanded={brandsOpen} onClick={() => { setBrandsOpen((open) => !open); setCategoriesOpen(false); }}><span className="mobile-nav-label">Shop by <span className="nav-accent">Brand</span></span> <span aria-hidden="true">{brandsOpen ? '⌃' : '›'}</span></button>{brandsOpen && <ul className="mobile-subnav-list mobile-brand-list">{brands.map((brand) => <li key={brand.id}><Link href={`/products?brand=${brand.slug}`} onClick={closeMobileNavigation}>{brand.name}</Link></li>)}</ul>}</li>}
 
                 <li className="mobile-nav-section-title" style={{ marginTop: '1.5rem' }}>Information</li>
                 {infoLinks.map((link) => (
                   <li key={link.href} className="mobile-nav-item">
                     <Link
                       href={link.href}
-                      onClick={() => setMobileMenuOpen(false)}
+                      onClick={closeMobileNavigation}
                     >
                       {link.name}
                     </Link>

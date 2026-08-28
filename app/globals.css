@@ -1857,16 +1857,210 @@ h6 {
   justify-content: space-between;
   align-items: center;
   height: 44px;
+  position: relative;
 }
 
 .cat-nav-list.left-nav {
   display: flex;
-  gap: 1.5rem;
+  gap: 2.75rem;
 }
 
 .cat-nav-list.right-nav {
   display: flex;
   gap: 1.25rem;
+}
+
+.cat-nav-list.left-nav .cat-nav-item > a,
+.cat-nav-list.left-nav .cat-nav-item > button {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  min-height: 44px;
+  color: var(--text-secondary);
+  font-size: .86rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.cat-nav-list.left-nav .cat-nav-item > a:hover,
+.cat-nav-list.left-nav .cat-nav-item > a.active {
+  color: var(--text-secondary);
+}
+
+.nav-accent,
+.nav-chevron {
+  color: var(--accent-purple);
+}
+
+.nav-chevron {
+  font-size: .72rem;
+  transition: transform var(--transition-fast);
+}
+
+.mega-nav-item {
+  position: static;
+}
+
+.mega-nav-item > button {
+  position: relative;
+}
+
+.mega-nav-item.open > button,
+.mega-nav-item > button:hover,
+.mega-nav-item > button:focus-visible {
+  color: var(--text-headline);
+}
+
+.mega-nav-item.open > button::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--accent-purple);
+}
+
+.mega-nav-item.open .nav-chevron {
+  transform: rotate(180deg);
+}
+
+.mega-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  padding: 1.5rem 1.75rem 0;
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  animation: mega-menu-in .16s ease-out;
+  white-space: normal;
+}
+
+.mega-menu-heading {
+  display: flex;
+  align-items: baseline;
+  gap: .75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.mega-menu-eyebrow {
+  color: var(--accent-purple);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.mega-menu-heading p {
+  color: var(--text-secondary);
+  font-size: .8rem;
+}
+
+.category-mega-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem 3rem;
+  padding: 1.25rem 0;
+}
+
+.category-group-title {
+  margin-bottom: .65rem;
+  color: var(--accent-purple);
+  font-size: .7rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.category-group ul {
+  display: grid;
+  gap: .3rem;
+  list-style: none;
+}
+
+.category-group a {
+  display: inline-block;
+  padding: .24rem 0;
+  color: var(--text-primary);
+  font-size: .84rem;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.category-group a:hover,
+.category-group a:focus-visible {
+  color: var(--accent-purple);
+  transform: translateX(3px);
+}
+
+.brand-mega-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: .7rem;
+  padding: 1.25rem 0;
+}
+
+.brand-mega-item {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  min-width: 0;
+  padding: .65rem .7rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: .84rem;
+  font-weight: 650;
+  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.brand-mega-item:hover,
+.brand-mega-item:focus-visible {
+  color: var(--accent-purple);
+  background: var(--accent-glow);
+  border-color: var(--border-color);
+}
+
+.brand-mega-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 40px;
+  flex: 0 0 48px;
+  color: var(--accent-purple);
+  font-weight: 800;
+}
+
+.brand-mega-logo img {
+  width: 48px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.mega-menu-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: .85rem 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.mega-menu-view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  color: var(--accent-purple);
+  font-size: .78rem;
+  font-weight: 750;
+}
+
+@keyframes mega-menu-in {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .mobile-menu-toggle {
@@ -2105,6 +2299,15 @@ h6 {
   transform: scale(1.05);
 }
 
+.brands-logo-group a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
+  color: inherit;
+  text-decoration: none;
+}
+
 .brands-logo-reel:hover .brands-logo-track {
   animation-play-state: paused;
 }
@@ -2118,3 +2321,19 @@ h6 {
     transform: translateX(-50%);
   }
 }
+
+.brand-nav-item { position: relative; }
+.brand-nav-item > button { background: none; border: 0; color: inherit; font: inherit; padding: .85rem 0; cursor: pointer; }
+.brand-dropdown { position: absolute; top: 100%; left: 0; z-index: 20; min-width: 180px; padding: .45rem 0; background: white; border: 1px solid var(--border-color); border-radius: 6px; box-shadow: var(--shadow-md); animation: brand-menu-in .14s ease-out; }
+.brand-dropdown a { display: block; padding: .55rem .9rem; white-space: nowrap; }
+.brand-dropdown a:hover { background: var(--bg-light); }
+@keyframes brand-menu-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.mobile-nav-item > button { width: 100%; display: flex; justify-content: space-between; background: none; border: 0; color: inherit; font: inherit; padding: .7rem 0; text-align: left; }
+.mobile-brand-list { list-style: none; padding: 0 0 .25rem 1rem; }
+.mobile-brand-list a { font-size: .9rem; }
+.mobile-menu-group > button { font-size: 1.05rem; font-weight: 600; }
+.mobile-nav-label { display: inline-flex; align-items: center; gap: .3rem; }
+.mobile-subnav-list { list-style: none; margin: 0 0 .35rem 1rem; padding-left: .85rem; border-left: 1px solid var(--border-color); }
+.mobile-subnav-list li a { display: block; padding: .42rem 0; color: var(--text-secondary); font-size: .92rem; font-weight: 600; }
+.mobile-subnav-list li a:hover,
+.mobile-subnav-list li a:focus-visible { color: var(--accent-purple); }

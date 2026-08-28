@@ -84,7 +84,7 @@ export default async function HomePage() {
   let rawNewArrivals = await prisma.product.findMany({
     where: { isNewArrival: true, isActive: true },
     take: 3,
-    include: { category: true },
+    include: { category: true, brandRecord: true },
   });
 
   // Fallback to latest products if none are marked isNewArrival
@@ -93,12 +93,13 @@ export default async function HomePage() {
       where: { isActive: true },
       orderBy: { createdAt: 'desc' },
       take: 3,
-      include: { category: true },
+      include: { category: true, brandRecord: true },
     });
   }
 
   const newArrivals = rawNewArrivals.map((p) => ({
     ...p,
+    brand: p.brandRecord,
     images: JSON.parse(p.images),
     specs: JSON.parse(p.specs),
     createdAt: p.createdAt.toISOString(),
@@ -108,21 +109,22 @@ export default async function HomePage() {
   const rawFeaturedProducts = await prisma.product.findMany({
     where: { isFeatured: true, isActive: true },
     take: 3,
-    include: { category: true },
+    include: { category: true, brandRecord: true },
   });
 
   const featuredProducts = rawFeaturedProducts.map((p) => ({
     ...p,
+    brand: p.brandRecord,
     images: JSON.parse(p.images),
     specs: JSON.parse(p.specs),
     createdAt: p.createdAt.toISOString(),
   }));
 
-  // Trusted brands display values
-  const trustedBrands = [
-    'ANKER', 'soundcore', 'DJI', 'SAMSUNG', 'baseus', 'UGREEN',
-    'hoco.', 'JOYROOM', 'oraimo', 'REMAX', 'WIWU'
-  ];
+  const trustedBrands = await prisma.brand.findMany({
+    where: { isActive: true },
+    orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+    take: 12,
+  });
 
   return (
     <div style={{ background: '#FFFFFF' }}>
@@ -249,33 +251,11 @@ export default async function HomePage() {
     {/* Right side - Logo Reel */}
     <div className="brands-logo-reel">
       <div className="brands-logo-track">
-        {/* First set */}
         <div className="brands-logo-group">
-          <Image src="/images/brands/jbl.png" alt="JBL" width={90} height={50} />
-          <Image src="/images/brands/anker.png" alt="Anker" width={90} height={50} />
-          <Image src="/images/brands/apple.png" alt="Apple" width={90} height={50} />
-          <Image src="/images/brands/samsung.png" alt="Samsung" width={90} height={50} />
-          <Image src="/images/brands/dji.png" alt="DJI" width={90} height={50} />
-          <Image src="/images/brands/mi.png" alt="MI" width={90} height={50} />
-          <Image src="/images/brands/baseus.png" alt="Baseus" width={90} height={50} />
-          <Image src="/images/brands/ugreen.png" alt="UGREEN" width={90} height={50} />
-          <Image src="/images/brands/huawei.png" alt="huawei" width={90} height={50} />
-          <Image src="/images/brands/insta.png" alt="insta" width={90} height={50} />
-
+          {trustedBrands.map((brand) => <Link key={brand.id} href={`/products?brand=${brand.slug}`} aria-label={`Shop ${brand.name}`}>{brand.logoUrl ? <Image src={brand.logoUrl} alt={brand.name} width={90} height={50} /> : <span style={{ width: 90, textAlign: 'center', fontWeight: 700 }}>{brand.name}</span>}</Link>)}
         </div>
-
-        {/* Duplicate set for seamless loop */}
         <div className="brands-logo-group" aria-hidden="true">
-          <Image src="/images/brands/jbl.png" alt="JBL" width={90} height={50} />
-          <Image src="/images/brands/anker.png" alt="Anker" width={90} height={50} />
-          <Image src="/images/brands/apple.png" alt="Apple" width={90} height={50} />
-          <Image src="/images/brands/samsung.png" alt="Samsung" width={90} height={50} />
-          <Image src="/images/brands/dji.png" alt="DJI" width={90} height={50} />
-          <Image src="/images/brands/mi.png" alt="MI" width={90} height={50} />
-          <Image src="/images/brands/baseus.png" alt="Baseus" width={90} height={50} />
-          <Image src="/images/brands/ugreen.png" alt="UGREEN" width={90} height={50} />
-          <Image src="/images/brands/huawei.png" alt="huawei" width={90} height={50} />
-          <Image src="/images/brands/insta.png" alt="insta" width={90} height={50} />
+          {trustedBrands.map((brand) => <Link key={brand.id} href={`/products?brand=${brand.slug}`} tabIndex={-1} aria-hidden="true">{brand.logoUrl ? <Image src={brand.logoUrl} alt="" width={90} height={50} /> : <span style={{ width: 90, textAlign: 'center', fontWeight: 700 }}>{brand.name}</span>}</Link>)}
         </div>
       </div>
     </div>

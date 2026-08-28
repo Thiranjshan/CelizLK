@@ -5,7 +5,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const categorySlug = searchParams.get('category');
-    const brand = searchParams.get('brand');
+    const brandSlug = searchParams.get('brand');
     const search = searchParams.get('search');
     const featured = searchParams.get('featured');
     const sort = searchParams.get('sort'); // price-asc, price-desc, newest
@@ -21,8 +21,9 @@ export async function GET(request: Request) {
       }
     }
 
-    if (brand) {
-      where.brand = brand;
+    if (brandSlug) {
+      const brand = await prisma.brand.findUnique({ where: { slug: brandSlug } });
+      if (brand) where.brandId = brand.id;
     }
 
     if (featured === 'true') {
@@ -33,7 +34,7 @@ export async function GET(request: Request) {
       where.OR = [
         { name: { contains: search } },
         { description: { contains: search } },
-        { brand: { contains: search } },
+        { brandRecord: { name: { contains: search } } },
       ];
     }
 
@@ -44,11 +45,12 @@ export async function GET(request: Request) {
     const products = await prisma.product.findMany({
       where,
       orderBy,
-      include: { category: true },
+      include: { category: true, brandRecord: true },
     });
 
     const formatted = products.map((p) => ({
       ...p,
+      brand: p.brandRecord,
       images: JSON.parse(p.images),
       specs: JSON.parse(p.specs),
     }));
@@ -63,7 +65,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, slug, description, price, discountPrice, stockQty, categoryId, brand, images, specs, isFeatured } = body;
+    const { name, slug, description, price, discountPrice, stockQty, categoryId, brandId, images, specs, isFeatured } = body;
 
     const newProduct = await prisma.product.create({
       data: {
@@ -74,7 +76,7 @@ export async function POST(request: Request) {
         discountPrice: discountPrice ? parseFloat(discountPrice) : null,
         stockQty: parseInt(stockQty) || 10,
         categoryId,
-        brand,
+        brandId,
         images: typeof images === 'string' ? images : JSON.stringify(images),
         specs: typeof specs === 'string' ? specs : JSON.stringify(specs || {}),
         isFeatured: Boolean(isFeatured),

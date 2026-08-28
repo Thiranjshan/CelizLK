@@ -85,7 +85,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
         {/* Right Column: Details & Purchasing */}
         <div>
           <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-purple)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
-            {product.brand} • {product.category?.name || 'Gadgets'}
+            {product.brand?.name || 'Gadget'} • {product.category?.name || 'Gadgets'}
           </div>
 
           <h1 style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1.25, marginBottom: '1rem', color: 'var(--primary-indigo)' }}>

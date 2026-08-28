@@ -16,7 +16,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const { category, brand, sort } = await searchParams;
 
   // Fetch categories for sidebar filter
-  const categories = await prisma.category.findMany();
+  const [categories, brands] = await Promise.all([
+    prisma.category.findMany({ orderBy: { name: 'asc' } }),
+    prisma.brand.findMany({ where: { isActive: true }, orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }] }),
+  ]);
 
   // Build filter query
   const where: any = { isActive: true };
@@ -25,7 +28,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     if (selectedCat) where.categoryId = selectedCat.id;
   }
   if (brand) {
-    where.brand = brand;
+    const selectedBrand = brands.find((item) => item.slug === brand);
+    if (selectedBrand) where.brandId = selectedBrand.id;
   }
 
   let orderBy: any = { createdAt: 'desc' };
@@ -35,17 +39,16 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const rawProducts = await prisma.product.findMany({
     where,
     orderBy,
-    include: { category: true },
+    include: { category: true, brandRecord: true },
   });
 
   const products = rawProducts.map((p) => ({
     ...p,
+    brand: p.brandRecord,
     images: JSON.parse(p.images),
     specs: JSON.parse(p.specs),
     createdAt: p.createdAt.toISOString(),
   }));
-
-  const brands = ['Celiz LK', 'Anker', 'Baseus'];
 
   return (
     <div className="container" style={{ padding: '3rem 1.25rem 5rem 1.25rem' }}>
@@ -108,17 +111,17 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 All Brands
               </Link>
             </li>
-            {brands.map((b) => (
-              <li key={b}>
+            {brands.map((item) => (
+              <li key={item.id}>
                 <Link
-                  href={`/products?brand=${encodeURIComponent(b)}${category ? `&category=${category}` : ''}`}
+                  href={`/products?brand=${item.slug}${category ? `&category=${category}` : ''}`}
                   style={{
-                    fontWeight: brand === b ? 700 : 500,
-                    color: brand === b ? 'var(--accent-purple)' : 'var(--text-secondary)',
+                    fontWeight: brand === item.slug ? 700 : 500,
+                    color: brand === item.slug ? 'var(--accent-purple)' : 'var(--text-secondary)',
                     fontSize: '0.925rem',
                   }}
                 >
-                  {b}
+                  {item.name}
                 </Link>
               </li>
             ))}

@@ -86,7 +86,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* Product Info */}
       <div className="product-info">
-        <span className="product-brand">{product.brand}</span>
+        <span className="product-brand">{product.brand?.name || 'Gadget'}</span>
         <Link href={`/product/${product.slug}`} className="product-title" title={product.name}>
           {product.name}
         </Link>

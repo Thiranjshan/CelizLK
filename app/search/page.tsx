@@ -34,15 +34,16 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         OR: [
           { name: { contains: query } },
           { description: { contains: query } },
-          { brand: { contains: query } },
+          { brandRecord: { name: { contains: query } } },
         ],
       },
       orderBy: { createdAt: 'desc' },
-      include: { category: true },
+      include: { category: true, brandRecord: true },
     });
 
     products = rawProducts.map((product) => ({
       ...product,
+      brand: product.brandRecord,
       images: JSON.parse(product.images),
       specs: JSON.parse(product.specs),
       createdAt: product.createdAt.toISOString(),

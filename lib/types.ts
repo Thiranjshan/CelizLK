@@ -11,6 +11,15 @@ export interface Category {
   };
 }
 
+export interface Brand {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl?: string | null;
+  isActive: boolean;
+  sortOrder: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -21,7 +30,8 @@ export interface Product {
   stockQty: number;
   categoryId: string;
   category?: Category;
-  brand: string;
+  brandId: string;
+  brand?: Brand | null;
   images: string[]; // parsed from JSON
   specs: Record<string, string | number | boolean>; // parsed from JSON
   seoTitle?: string | null;

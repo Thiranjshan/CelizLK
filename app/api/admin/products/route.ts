@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   const admin = await getAdminFromRequest(request);
   if (!admin) return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 });
   if (!hasAdminPermission(admin.role, ['PRODUCT_MANAGER'])) return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
-  const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' }, include: { category: true } });
+  const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' }, include: { category: true, brandRecord: true } });
   return NextResponse.json(products.map((product) => ({ ...product, images: JSON.parse(product.images), specs: JSON.parse(product.specs) })));
 }
 
@@ -20,7 +20,7 @@ export async function PATCH(request: Request) {
     name?: string;
     slug?: string;
     description?: string;
-    brand?: string;
+    brandId?: string;
     categoryId?: string;
     price?: number;
     discountPrice?: number | null;
@@ -44,8 +44,8 @@ export async function PATCH(request: Request) {
   if (typeof body.description === 'string' && body.description.trim().length >= 1) {
     data.description = body.description.trim().slice(0, 5000);
   }
-  if (typeof body.brand === 'string' && body.brand.trim().length >= 1) {
-    data.brand = body.brand.trim().slice(0, 80);
+  if (typeof body.brandId === 'string' && body.brandId.trim().length >= 1) {
+    data.brandId = body.brandId.trim();
   }
   if (typeof body.categoryId === 'string' && body.categoryId.trim().length > 0) {
     data.categoryId = body.categoryId.trim();
@@ -88,7 +88,7 @@ export async function PATCH(request: Request) {
 
   const current = await prisma.product.findUnique({
     where: { id: productId },
-    select: { id: true, price: true, discountPrice: true, stockQty: true, slug: true }
+    select: { id: true, price: true, discountPrice: true, stockQty: true, slug: true, brandId: true }
   });
   if (!current) return NextResponse.json({ error: 'Product not found.' }, { status: 404 });
 
@@ -106,6 +106,12 @@ export async function PATCH(request: Request) {
     if (!categoryExists) {
       return NextResponse.json({ error: 'Category not found.' }, { status: 400 });
     }
+  }
+
+  if (data.brandId) {
+    const brand = await prisma.brand.findUnique({ where: { id: data.brandId } });
+    if (!brand) return NextResponse.json({ error: 'Brand not found.' }, { status: 400 });
+    if (!brand.isActive && brand.id !== current.brandId) return NextResponse.json({ error: 'Inactive brands cannot be assigned to products.' }, { status: 400 });
   }
 
   const finalPrice = data.price ?? current.price;
@@ -140,7 +146,8 @@ export async function PATCH(request: Request) {
   return NextResponse.json({
     ...product,
     images: JSON.parse(product.images),
-    specs: JSON.parse(product.specs)
+    specs: JSON.parse(product.specs),
+    brand: await prisma.brand.findUnique({ where: { id: product.brandId || '' } })
   });
 }
 
@@ -154,9 +161,12 @@ export async function POST(request: Request) {
   const price = Number(body.price);
   const stockQty = Number(body.stockQty ?? 0);
   const discountPrice = body.discountPrice === null || body.discountPrice === undefined ? null : Number(body.discountPrice);
-  if (name.length < 2 || name.length > 160 || !slug || !Number.isFinite(price) || price < 0 || !Number.isInteger(stockQty) || stockQty < 0 || (discountPrice !== null && (!Number.isFinite(discountPrice) || discountPrice < 0 || discountPrice > price)) || typeof body.categoryId !== 'string' || typeof body.brand !== 'string' || !body.description) return NextResponse.json({ error: 'Invalid product details.' }, { status: 400 });
+  if (name.length < 2 || name.length > 160 || !slug || !Number.isFinite(price) || price < 0 || !Number.isInteger(stockQty) || stockQty < 0 || (discountPrice !== null && (!Number.isFinite(discountPrice) || discountPrice < 0 || discountPrice > price)) || typeof body.categoryId !== 'string' || typeof body.brandId !== 'string' || !body.description) return NextResponse.json({ error: 'Invalid product details.' }, { status: 400 });
+  const brand = await prisma.brand.findUnique({ where: { id: body.brandId } });
+  if (!brand) return NextResponse.json({ error: 'Selected brand does not exist.' }, { status: 400 });
+  if (!brand.isActive) return NextResponse.json({ error: 'Inactive brands cannot be assigned to new products.' }, { status: 400 });
   try {
-    const product = await prisma.product.create({ data: { name, slug, description: String(body.description).slice(0, 5000), price, discountPrice, stockQty, categoryId: body.categoryId, brand: String(body.brand).slice(0, 80), images: JSON.stringify(Array.isArray(body.images) ? body.images.slice(0, 12) : []), specs: JSON.stringify(body.specs && typeof body.specs === 'object' ? body.specs : {}), isFeatured: body.isFeatured === true, isNewArrival: body.isNewArrival === true, status: body.status === 'DRAFT' ? 'DRAFT' : 'ACTIVE' } });
+    const product = await prisma.product.create({ data: { name, slug, description: String(body.description).slice(0, 5000), price, discountPrice, stockQty, categoryId: body.categoryId, brandId: body.brandId, images: JSON.stringify(Array.isArray(body.images) ? body.images.slice(0, 12) : []), specs: JSON.stringify(body.specs && typeof body.specs === 'object' ? body.specs : {}), isFeatured: body.isFeatured === true, isNewArrival: body.isNewArrival === true, status: body.status === 'DRAFT' ? 'DRAFT' : 'ACTIVE' }, include: { brandRecord: true } });
     if (stockQty) await prisma.inventoryLog.create({ data: { productId: product.id, change: stockQty, reason: 'Initial stock', adminUserId: admin.id } });
     await writeAudit(admin.id, 'CREATE', 'PRODUCT', product.id, { name, slug, price, stockQty }); return NextResponse.json(product, { status: 201 });
   } catch { return NextResponse.json({ error: 'Product slug already exists or category is invalid.' }, { status: 409 }); }

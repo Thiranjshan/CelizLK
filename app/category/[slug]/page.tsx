@@ -24,11 +24,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const rawProducts = await prisma.product.findMany({
     where: { categoryId: category.id, isActive: true },
     orderBy: { createdAt: 'desc' },
-    include: { category: true },
+    include: { category: true, brandRecord: true },
   });
 
   const products = rawProducts.map((p) => ({
     ...p,
+    brand: p.brandRecord,
     images: JSON.parse(p.images),
     specs: JSON.parse(p.specs),
     createdAt: p.createdAt.toISOString(),

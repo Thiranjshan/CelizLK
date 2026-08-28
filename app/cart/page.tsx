@@ -99,7 +99,7 @@ export default function CartPage() {
 
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-purple)', textTransform: 'uppercase' }}>
-                      {item.product.brand}
+                      {item.product.brand?.name || 'Gadget'}
                     </div>
                     <Link href={`/product/${item.product.slug}`} style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-headline)' }}>
                       {item.product.name}

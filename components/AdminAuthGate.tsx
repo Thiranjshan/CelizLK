@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { FormEvent, ReactNode, useEffect, useState } from 'react';
-import { BarChart3, Boxes, ClipboardList, LayoutGrid, LogOut, Package, ShieldCheck, Users } from 'lucide-react';
+import { BarChart3, Boxes, ClipboardList, LayoutGrid, LogOut, Package, ShieldCheck, Tag, Users } from 'lucide-react';
 
 export interface AdminSession { id: string; email: string; name: string; role: string; }
 
@@ -38,6 +38,7 @@ export default function AdminAuthGate({ children, active }: { children: (session
     { href: '/admin/orders', label: 'Orders', icon: ClipboardList },
     { href: '/admin/products', label: 'Products', icon: Package },
     { href: '/admin/categories', label: 'Categories', icon: LayoutGrid },
+    { href: '/admin/brands', label: 'Brands', icon: Tag },
     { href: '/admin/inventory', label: 'Inventory', icon: Boxes },
     { href: '/admin/customers', label: 'Customers', icon: Users },
   ];

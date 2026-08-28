@@ -20,6 +20,7 @@ async function main() {
   await prisma.cartItem.deleteMany();
   await prisma.contactMessage.deleteMany();
   await prisma.product.deleteMany();
+  await prisma.brand.deleteMany();
   await prisma.categoryAttribute.deleteMany();
   await prisma.category.deleteMany();
   await prisma.profile.deleteMany();
@@ -280,9 +281,37 @@ async function main() {
     },
   ];
 
+  const brandIds = new Map<string, string>();
+  const reelBrands = [
+    ['JBL', 'jbl', '/images/brands/jbl.png', 1],
+    ['Anker', 'anker', '/images/brands/anker.png', 2],
+    ['Apple', 'apple', '/images/brands/apple.png', 3],
+    ['Samsung', 'samsung', '/images/brands/samsung.png', 4],
+    ['DJI', 'dji', '/images/brands/dji.png', 5],
+    ['MI', 'mi', '/images/brands/mi.png', 6],
+    ['Baseus', 'baseus', '/images/brands/baseus.png', 7],
+    ['UGREEN', 'ugreen', '/images/brands/ugreen.png', 8],
+    ['huawei', 'huawei', '/images/brands/huawei.png', 9],
+    ['insta', 'insta', '/images/brands/insta.png', 10],
+  ] as const;
+  for (const [name, slug, logoUrl, sortOrder] of reelBrands) {
+    const brand = await prisma.brand.create({ data: { name, slug, logoUrl, sortOrder } });
+    brandIds.set(name, brand.id);
+  }
   for (const prod of products) {
+    const { brand, ...productData } = prod;
+    let brandId = brandIds.get(brand);
+    if (!brandId) {
+      const record = await prisma.brand.upsert({
+        where: { slug: brand.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') },
+        update: { name: brand, isActive: true },
+        create: { name: brand, slug: brand.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') },
+      });
+      brandId = record.id;
+      brandIds.set(brand, brandId);
+    }
     await prisma.product.create({
-      data: prod,
+      data: { ...productData, brandId },
     });
   }
 
