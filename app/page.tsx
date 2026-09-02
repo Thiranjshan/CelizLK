@@ -8,36 +8,24 @@ import Image from 'next/image';
 export const revalidate = 60; // ISR revalidate every 60 seconds
 
 export default async function HomePage() {
-  // 1. Fetch Carousel Slides (Data-driven list of slide objects)
-  const carouselSlides = [
-    {
-      id: 'soundcore-liberty-4-nc',
-      label: 'NEW ARRIVAL',
-      title: 'Soundcore Liberty 4 NC',
-      description: 'Advanced noise cancelling. Premium sound. All day comfort.',
-      image: '/soundcore-liberty-4-nc.jpg',
-      buttonText: 'Shop Now',
-      buttonLink: '/category/earbuds',
+  // 1. Fetch Hero Banners from Database
+  const banners = await prisma.heroBanner.findMany({
+    where: { isActive: true },
+    orderBy: { order: 'asc' },
+    select: {
+      id: true,
+      imageUrl: true,
+      buttonLabel: true,
+      buttonLink: true,
     },
-    {
-      id: 'nitrocharge-65w',
-      label: 'PROMO OFFER',
-      title: 'Celiz NitroCharge 65W GaN',
-      description: 'Power up your laptop, phone, and tablet simultaneously. Compact, ultra-safe, and 3x faster than standard brick chargers.',
-      image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?q=80&w=800&auto=format&fit=crop',
-      buttonText: 'Order Now',
-      buttonLink: '/product/celiz-nitrocharge-65w-gan-fast-charger',
-    },
-    {
-      id: 'vector-horizon',
-      label: 'FEATURED PRODUCT',
-      title: 'Celiz Vector Horizon AMOLED',
-      description: 'Vibrant always-on AMOLED screen, bluetooth calls, 24/7 fitness tracker, and 10-day battery life.',
-      image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop',
-      buttonText: 'Explore Wearable',
-      buttonLink: '/product/celiz-vector-horizon-amoled-smartwatch',
-    }
-  ];
+  });
+
+  const carouselSlides = banners.map((banner) => ({
+    id: banner.id,
+    image: banner.imageUrl,
+    buttonLabel: banner.buttonLabel,
+    buttonLink: banner.buttonLink,
+  }));
 
   // 2. Fetch Categories from DB
   const dbCategories = await prisma.category.findMany();
@@ -132,41 +120,6 @@ export default async function HomePage() {
         {/* Hero Carousel Banner Section */}
         <HeroCarousel slides={carouselSlides} />
 
-        {/* Shop By Category Section */}
-        <section style={{ padding: '3rem 0 4rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: '2rem' }}>
-            <div>
-              <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-headline)' }}>Shop by Category</h2>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginTop: '0.25rem' }}>Find high-performance gadgets tailored to your daily needs</p>
-            </div>
-            <Link href="/products" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--accent-purple)', fontWeight: 700, fontSize: '0.9rem' }}>
-              <span>View all</span>
-              <ArrowRight size={16} />
-            </Link>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
-            {categories.map((cat) => (
-              <Link key={cat.slug} href={`/category/${cat.slug}`} className="cat-card" style={{ background: 'var(--bg-surface)' }}>
-                <div style={{ width: '100%', height: '140px', borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF' }}>
-                  <img 
-                    src={cat.image} 
-                    alt={cat.name} 
-                    style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain' }}
-                  />
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
-                  <div>
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-headline)' }}>{cat.name}</h3>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>{cat.desc}</p>
-                  </div>
-                  <span style={{ color: 'var(--text-secondary)', fontWeight: 800, fontSize: '1.1rem' }}>→</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-
         {/* Product merchandising sections */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', margin: '1rem 0 5rem' }} className="homepage-product-grid-wrapper">
           {/* New Arrivals */}
@@ -201,6 +154,41 @@ export default async function HomePage() {
             </div>
           </section>
         </div>
+
+         {/* Shop By Category Section */}
+        <section style={{ padding: '3rem 0 4rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: '2rem' }}>
+            <div>
+              <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-headline)' }}>Shop by Category</h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginTop: '0.25rem' }}>Find high-performance gadgets tailored to your daily needs</p>
+            </div>
+            <Link href="/products" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--accent-purple)', fontWeight: 700, fontSize: '0.9rem' }}>
+              <span>View all</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
+            {categories.map((cat) => (
+              <Link key={cat.slug} href={`/category/${cat.slug}`} className="cat-card" style={{ background: 'var(--bg-surface)' }}>
+                <div style={{ width: '100%', height: '140px', borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF' }}>
+                  <img 
+                    src={cat.image} 
+                    alt={cat.name} 
+                    style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-headline)' }}>{cat.name}</h3>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>{cat.desc}</p>
+                  </div>
+                  <span style={{ color: 'var(--text-secondary)', fontWeight: 800, fontSize: '1.1rem' }}>→</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
 
        {/* Genuine products. Trusted brands. Section */}
 <section

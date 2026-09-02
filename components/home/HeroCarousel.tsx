@@ -6,13 +6,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CarouselSlide {
   id: string;
-  label: string;
-  title: string;
-  description: string;
   image: string;
-  buttonText: string;
+  buttonLabel: string;
   buttonLink: string;
-  status?: string;
 }
 
 interface HeroCarouselProps {
@@ -51,24 +47,21 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {slides.map((slide) => (
-          <div key={slide.id} className="hero-carousel-slide">
-            <div className="hero-carousel-content">
-              <span className="hero-carousel-label">{slide.label}</span>
-              <h1 className="hero-carousel-title">{slide.title}</h1>
-              <p className="hero-carousel-desc">{slide.description}</p>
-              <Link href={slide.buttonLink} className="btn-primary hero-carousel-cta">
-                <span>{slide.buttonText}</span>
-                <ChevronRight size={16} style={{ marginLeft: 4 }} />
-              </Link>
-            </div>
+          <div 
+            key={slide.id} 
+            className="hero-carousel-slide"
+            style={{
+              backgroundImage: `url(${slide.image})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          >
+            <div className="hero-carousel-overlay" />
             
-            <div className="hero-carousel-image-wrap">
-              <img 
-                src={slide.image} 
-                alt={slide.title}
-                className="hero-carousel-img"
-              />
-            </div>
+            <Link href={slide.buttonLink} className="hero-carousel-cta">
+              {slide.buttonLabel}
+            </Link>
           </div>
         ))}
       </div>

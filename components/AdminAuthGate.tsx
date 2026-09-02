@@ -39,6 +39,7 @@ export default function AdminAuthGate({ children, active }: { children: (session
     { href: '/admin/products', label: 'Products', icon: Package },
     { href: '/admin/categories', label: 'Categories', icon: LayoutGrid },
     { href: '/admin/brands', label: 'Brands', icon: Tag },
+    { href: '/admin/hero-banners', label: 'Hero Banners', icon: LayoutGrid },
     { href: '/admin/inventory', label: 'Inventory', icon: Boxes },
     { href: '/admin/customers', label: 'Customers', icon: Users },
   ];

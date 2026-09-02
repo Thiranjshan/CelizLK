@@ -193,6 +193,19 @@ model Brand {
   updatedAt DateTime  @updatedAt
 }
 
+model HeroBanner {
+  id           String   @id @default(uuid())
+  imageUrl     String
+  buttonLabel  String
+  buttonLink   String
+  order        Int      @default(1)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isActive, order])
+}
+
 model InventoryLog {
   id          String   @id @default(uuid())
   productId   String
