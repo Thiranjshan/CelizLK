@@ -1980,7 +1980,7 @@ h6 {
 
 .brand-mega-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: .7rem;
   padding: 1.25rem 0;
 }
@@ -1988,22 +1988,24 @@ h6 {
 .brand-mega-item {
   display: flex;
   align-items: center;
-  gap: .7rem;
+  justify-content: center; /* added */
   min-width: 0;
   padding: .65rem .7rem;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   color: var(--text-primary);
-  font-size: .84rem;
-  font-weight: 650;
   transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
 }
 
 .brand-mega-item:hover,
 .brand-mega-item:focus-visible {
-  color: var(--accent-purple);
-  background: var(--accent-glow);
-  border-color: var(--border-color);
+  color: inherit;
+  background: transparent;
+  border-color: transparent;
+}
+.brand-mega-item:hover .brand-mega-logo,
+.brand-mega-item:focus-visible .brand-mega-logo {
+  transform: scale(1.30);
 }
 
 .brand-mega-logo {
@@ -2015,6 +2017,8 @@ h6 {
   flex: 0 0 48px;
   color: var(--accent-purple);
   font-weight: 800;
+  transition: transform var(--transition-fast);
+
 }
 
 .brand-mega-logo img {

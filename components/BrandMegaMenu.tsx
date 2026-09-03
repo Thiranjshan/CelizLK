@@ -27,7 +27,6 @@ export default function BrandMegaMenu({ brands, onNavigate }: BrandMegaMenuProps
             <span className="brand-mega-logo">
               {brand.logoUrl ? <Image src={brand.logoUrl} alt="" width={48} height={40} /> : <span aria-hidden="true">{brand.name.slice(0, 1)}</span>}
             </span>
-            <span>{brand.name}</span>
           </Link>
         ))}
       </div>
