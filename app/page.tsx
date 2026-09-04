@@ -28,45 +28,44 @@ export default async function HomePage() {
   }));
 
   // 2. Fetch Categories from DB
-  const dbCategories = await prisma.category.findMany();
+  const dbCategories = await prisma.category.findMany({
+    include: {
+      products: {
+        where: { isActive: true },
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+        select: { images: true },
+      },
+    },
+  });
   
-  // Category mapping for premium Unsplash imagery and sublabels
-  const categoryMap: Record<string, { image: string; label: string }> = {
-    'earbuds': { 
-      image: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=800&auto=format&fit=crop', 
-      label: 'Earbuds & Headphones' 
-    },
-    'chargers': { 
-      image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?q=80&w=800&auto=format&fit=crop', 
-      label: 'Fast charging essentials' 
-    },
-    'power-banks': { 
-      image: 'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?q=80&w=800&auto=format&fit=crop', 
-      label: 'Power for everyday' 
-    },
-    'smartwatches': { 
-      image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop', 
-      label: 'Stay smart, stay connected' 
-    },
-    'accessories': { 
-      image: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?q=80&w=800&auto=format&fit=crop', 
-      label: 'Cases, holders & more' 
-    },
+  // Keep the existing category descriptions while product images come from the catalog.
+  const categoryLabels: Record<string, string> = {
+    'earbuds': 'Earbuds & Headphones',
+    'chargers': 'Fast charging essentials',
+    'power-banks': 'Power for everyday',
+    'smartwatches': 'Stay smart, stay connected',
+    'accessories': 'Cases, holders & more',
   };
 
   const categories = dbCategories.map((cat) => {
-    const details = categoryMap[cat.slug] || {
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop',
-      label: 'Explore Catalog'
-    };
+    const productImages = cat.products[0]?.images;
+    let image = '';
+    try {
+      const parsedImages = productImages ? JSON.parse(productImages) : [];
+      image = Array.isArray(parsedImages) && typeof parsedImages[0] === 'string' ? parsedImages[0] : '';
+    } catch {
+      image = '';
+    }
+
     return {
       id: cat.id,
       name: cat.name,
       slug: cat.slug,
-      image: details.image,
-      desc: details.label,
+      image,
+      desc: categoryLabels[cat.slug] || 'Explore Catalog',
     };
-  });
+  }).filter((category) => category.image);
 
   // 3. Fetch New Arrivals (marked isNewArrival: true)
   let rawNewArrivals = await prisma.product.findMany({
@@ -170,21 +169,9 @@ export default async function HomePage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
             {categories.map((cat) => (
-              <Link key={cat.slug} href={`/category/${cat.slug}`} className="cat-card" style={{ background: 'var(--bg-surface)' }}>
-                <div style={{ width: '100%', height: '140px', borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF' }}>
-                  <img 
-                    src={cat.image} 
-                    alt={cat.name} 
-                    style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain' }}
-                  />
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
-                  <div>
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-headline)' }}>{cat.name}</h3>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>{cat.desc}</p>
-                  </div>
-                  <span style={{ color: 'var(--text-secondary)', fontWeight: 800, fontSize: '1.1rem' }}>→</span>
-                </div>
+              <Link key={cat.slug} href={`/category/${cat.slug}`} className="cat-card homepage-category-card">
+                <img className="homepage-category-image" src={cat.image} alt={cat.name} />
+                <h3 className="homepage-category-name">{cat.name}</h3>
               </Link>
             ))}
           </div>
