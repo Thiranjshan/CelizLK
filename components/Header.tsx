@@ -151,13 +151,15 @@ export default function Header() {
               </Link>
 
               {/* Mobile menu toggle */}
-              <button
-                className="mobile-menu-toggle"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                aria-label="Toggle Menu"
-              >
-                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-              </button>
+              {!mobileMenuOpen && (
+                <button
+                  className="mobile-menu-toggle"
+                  onClick={() => setMobileMenuOpen(true)}
+                  aria-label="Open Menu"
+                >
+                  <Menu size={20} />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -193,7 +195,17 @@ export default function Header() {
         {mobileMenuOpen && (
           <div className="mobile-nav-drawer">
             <div className="container mobile-nav-content">
-              
+              <div className="mobile-nav-header">
+                <span className="mobile-nav-title">Menu</span>
+                <button
+                  type="button"
+                  className="mobile-menu-toggle mobile-menu-close"
+                  onClick={closeMobileNavigation}
+                  aria-label="Close Menu"
+                >
+                  <X size={20} />
+                </button>
+              </div>
 
               <ul className="mobile-nav-list">
                 <li className="mobile-nav-section-title">Shop Categories</li>
