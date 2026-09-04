@@ -10,6 +10,7 @@ import CategoryMegaMenu from '@/components/CategoryMegaMenu';
 import BrandMegaMenu from '@/components/BrandMegaMenu';
 
 interface Brand { id: string; name: string; slug: string; logoUrl: string | null; }
+interface Category { id: string; name: string; slug: string; parentId: string | null; }
 
 export default function Header() {
   const pathname = usePathname();
@@ -17,6 +18,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [brandsOpen, setBrandsOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const hasHydrated = useSyncExternalStore(() => () => undefined, () => true, () => false);
@@ -26,7 +28,11 @@ export default function Header() {
   const wishlistCount = hasHydrated ? wishlist.length : 0;
   const user = useStore((state) => hasHydrated ? state.user : null);
 
-  useEffect(() => { fetch('/api/brands').then((response) => response.ok ? response.json() : []).then(setBrands).catch(() => undefined); }, []);
+  useEffect(() => {
+    // Load navigation data from the catalog so admin changes appear in the header.
+    fetch('/api/brands').then((response) => response.ok ? response.json() : []).then(setBrands).catch(() => undefined);
+    fetch('/api/categories').then((response) => response.ok ? response.json() : []).then(setCategories).catch(() => undefined);
+  }, []);
 
   if (pathname.startsWith('/admin') || pathname.startsWith('/checkout')) return null;
 
@@ -38,12 +44,11 @@ export default function Header() {
     }
   };
 
+  // Show only top-level catalog categories; Deals is a product filter, not a category record.
   const navCategories = [
-    { name: 'Audio', href: '/category/earbuds' },
-    { name: 'Chargers & Cables', href: '/category/chargers' },
-    { name: 'Power Banks', href: '/category/power-banks' },
-    { name: 'Smartwatches', href: '/category/smartwatches' },
-    { name: 'Accessories', href: '/category/accessories' },
+    ...categories
+      .filter((category) => category.parentId === null)
+      .map((category) => ({ name: category.name, href: `/category/${category.slug}` })),
     { name: 'Deals', href: '/products?filter=deals' },
   ];
 
