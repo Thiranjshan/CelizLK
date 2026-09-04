@@ -134,7 +134,8 @@ export default function Header() {
 
               {/* Account */}
               {user ? (
-                <Link href={user.role === 'ADMIN' ? '/admin' : '/account'} className="nav-link-btn" aria-label="Account">
+                // Storefront account navigation must not expose the separate admin area.
+                <Link href="/account" className="nav-link-btn" aria-label="Account">
                   <User size={20} />
                 </Link>
               ) : (
@@ -192,17 +193,7 @@ export default function Header() {
         {mobileMenuOpen && (
           <div className="mobile-nav-drawer">
             <div className="container mobile-nav-content">
-              {/* Search bar inside mobile drawer */}
-              <form onSubmit={handleSearchSubmit} className="mobile-search-bar">
-                <Search className="search-icon" />
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="search-input"
-                />
-              </form>
+              
 
               <ul className="mobile-nav-list">
                 <li className="mobile-nav-section-title">Shop Categories</li>

@@ -55,11 +55,13 @@ export default function ProductCard({ product }: ProductCardProps) {
           <span className="product-badge badge-out-of-stock">Sold Out</span>
         ) : (
           <>
-            {((product as any).isNewArrival) && (
+            {/* {((product as any).isNewArrival) && (
               <span className="product-badge badge-new">New</span>
-            )}
+            )} */}
             {discountPercent > 0 && (
-              <span className="product-badge badge-sale">Sale</span>
+              <span className="badge badge-cancelled" style={{ background: '#EF4444', color: 'white' }}>
+                  Save {discountPercent}%
+                </span>
             )}
           </>
         )}
