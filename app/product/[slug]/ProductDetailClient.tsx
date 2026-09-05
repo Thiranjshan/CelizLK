@@ -191,24 +191,15 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
         </div>
       </div>
 
-      {/* Dynamic Category Specifications Section */}
-      {product.specs && Object.keys(product.specs).length > 0 && (
+      {/* Technical Specifications */}
+      {product.specs && (
         <section style={{ background: 'var(--bg-white)', padding: '2.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', marginBottom: '5rem' }}>
           <h2 className="section-title" style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>
             Technical Specifications
           </h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
-            {Object.entries(product.specs).map(([key, val]) => (
-              <div key={key} style={{ background: 'var(--bg-light)', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>
-                  {key.replace(/_/g, ' ')}
-                </div>
-                <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--primary-indigo)', marginTop: '0.25rem' }}>
-                  {String(val)}
-                </div>
-              </div>
-            ))}
+          <div style={{ background: 'var(--bg-light)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', whiteSpace: 'pre-wrap', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+            {product.specs}
           </div>
         </section>
       )}

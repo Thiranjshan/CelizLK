@@ -88,7 +88,7 @@ export default async function HomePage() {
     ...p,
     brand: p.brandRecord,
     images: JSON.parse(p.images),
-    specs: JSON.parse(p.specs),
+    specs: p.specs,
     createdAt: p.createdAt.toISOString(),
   }));
 
@@ -103,7 +103,7 @@ export default async function HomePage() {
     ...p,
     brand: p.brandRecord,
     images: JSON.parse(p.images),
-    specs: JSON.parse(p.specs),
+    specs: p.specs,
     createdAt: p.createdAt.toISOString(),
   }));
 

@@ -137,19 +137,7 @@ model Category {
   seoTitle       String?
   seoDescription String?
   products       Product[]
-  attributes     CategoryAttribute[]
   createdAt      DateTime            @default(now())
-}
-
-model CategoryAttribute {
-  id           String   @id @default(uuid())
-  categoryId   String
-  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  attributeKey String
-  attributeLabel String
-  dataType     String   @default("text") // text | number | boolean
-  unit         String?
-  isComparable Boolean  @default(true)
 }
 
 model Product {
@@ -165,7 +153,7 @@ model Product {
   brandId        String
   brandRecord    Brand       @relation(fields: [brandId], references: [id])
   images         String      // JSON array of image URLs
-  specs          String      // JSON object of spec key-value pairs
+  specs          String      // Plain-text technical specifications
   seoTitle       String?
   seoDescription String?
   isActive       Boolean     @default(true)

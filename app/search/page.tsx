@@ -45,7 +45,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       ...product,
       brand: product.brandRecord,
       images: JSON.parse(product.images),
-      specs: JSON.parse(product.specs),
+      specs: product.specs,
       createdAt: product.createdAt.toISOString(),
     }));
   } catch (error) {

@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   if (!admin) return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 });
   if (!hasAdminPermission(admin.role, ['PRODUCT_MANAGER'])) return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
   const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' }, include: { category: true, brandRecord: true } });
-  return NextResponse.json(products.map((product) => ({ ...product, images: JSON.parse(product.images), specs: JSON.parse(product.specs) })));
+  return NextResponse.json(products.map((product) => ({ ...product, images: JSON.parse(product.images), specs: product.specs })));
 }
 
 export async function PATCH(request: Request) {
@@ -80,8 +80,8 @@ export async function PATCH(request: Request) {
     ).slice(0, 12);
     data.images = JSON.stringify(validImages);
   }
-  if (body.specs && typeof body.specs === 'object' && !Array.isArray(body.specs)) {
-    data.specs = JSON.stringify(body.specs);
+  if (typeof body.specs === 'string') {
+    data.specs = body.specs.slice(0, 10000);
   }
 
   if (!productId || !Object.keys(data).length) return NextResponse.json({ error: 'No valid product changes supplied.' }, { status: 400 });
@@ -146,7 +146,7 @@ export async function PATCH(request: Request) {
   return NextResponse.json({
     ...product,
     images: JSON.parse(product.images),
-    specs: JSON.parse(product.specs),
+    specs: product.specs,
     brand: await prisma.brand.findUnique({ where: { id: product.brandId || '' } })
   });
 }
@@ -166,7 +166,7 @@ export async function POST(request: Request) {
   if (!brand) return NextResponse.json({ error: 'Selected brand does not exist.' }, { status: 400 });
   if (!brand.isActive) return NextResponse.json({ error: 'Inactive brands cannot be assigned to new products.' }, { status: 400 });
   try {
-    const product = await prisma.product.create({ data: { name, slug, description: String(body.description).slice(0, 5000), price, discountPrice, stockQty, categoryId: body.categoryId, brandId: body.brandId, images: JSON.stringify(Array.isArray(body.images) ? body.images.slice(0, 12) : []), specs: JSON.stringify(body.specs && typeof body.specs === 'object' ? body.specs : {}), isFeatured: body.isFeatured === true, isNewArrival: body.isNewArrival === true, status: body.status === 'DRAFT' ? 'DRAFT' : 'ACTIVE' }, include: { brandRecord: true } });
+    const product = await prisma.product.create({ data: { name, slug, description: String(body.description).slice(0, 5000), price, discountPrice, stockQty, categoryId: body.categoryId, brandId: body.brandId, images: JSON.stringify(Array.isArray(body.images) ? body.images.slice(0, 12) : []), specs: typeof body.specs === 'string' ? body.specs.slice(0, 10000) : '', isFeatured: body.isFeatured === true, isNewArrival: body.isNewArrival === true, status: body.status === 'DRAFT' ? 'DRAFT' : 'ACTIVE' }, include: { brandRecord: true } });
     if (stockQty) await prisma.inventoryLog.create({ data: { productId: product.id, change: stockQty, reason: 'Initial stock', adminUserId: admin.id } });
     await writeAudit(admin.id, 'CREATE', 'PRODUCT', product.id, { name, slug, price, stockQty }); return NextResponse.json(product, { status: 201 });
   } catch { return NextResponse.json({ error: 'Product slug already exists or category is invalid.' }, { status: 409 }); }

@@ -24,7 +24,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     ...rawProduct,
     brand: rawProduct.brandRecord,
     images: JSON.parse(rawProduct.images),
-    specs: JSON.parse(rawProduct.specs),
+    specs: rawProduct.specs,
     createdAt: rawProduct.createdAt.toISOString(),
   };
 
@@ -43,7 +43,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     ...p,
     brand: p.brandRecord,
     images: JSON.parse(p.images),
-    specs: JSON.parse(p.specs),
+    specs: p.specs,
     createdAt: p.createdAt.toISOString(),
   }));
 

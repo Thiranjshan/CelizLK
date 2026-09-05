@@ -33,7 +33,7 @@ export interface Product {
   brandId: string;
   brand?: Brand | null;
   images: string[]; // parsed from JSON
-  specs: Record<string, string | number | boolean>; // parsed from JSON
+  specs: string;
   seoTitle?: string | null;
   seoDescription?: string | null;
   isActive: boolean;

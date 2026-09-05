@@ -52,7 +52,7 @@ export async function GET(request: Request) {
       ...p,
       brand: p.brandRecord,
       images: JSON.parse(p.images),
-      specs: JSON.parse(p.specs),
+      specs: p.specs,
     }));
 
     return NextResponse.json(formatted);
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
         categoryId,
         brandId,
         images: typeof images === 'string' ? images : JSON.stringify(images),
-        specs: typeof specs === 'string' ? specs : JSON.stringify(specs || {}),
+        specs: typeof specs === 'string' ? specs.slice(0, 10000) : '',
         isFeatured: Boolean(isFeatured),
       },
     });

@@ -19,7 +19,7 @@ export async function GET(
     const formatted = {
       ...product,
       images: JSON.parse(product.images),
-      specs: JSON.parse(product.specs),
+      specs: product.specs,
     };
 
     return NextResponse.json(formatted);

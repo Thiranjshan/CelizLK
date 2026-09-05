@@ -31,7 +31,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     ...p,
     brand: p.brandRecord,
     images: JSON.parse(p.images),
-    specs: JSON.parse(p.specs),
+    specs: p.specs,
     createdAt: p.createdAt.toISOString(),
   }));
 

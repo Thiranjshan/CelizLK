@@ -21,7 +21,6 @@ async function main() {
   await prisma.contactMessage.deleteMany();
   await prisma.product.deleteMany();
   await prisma.brand.deleteMany();
-  await prisma.categoryAttribute.deleteMany();
   await prisma.category.deleteMany();
   await prisma.profile.deleteMany();
   await prisma.user.deleteMany();
@@ -124,20 +123,6 @@ async function main() {
       seoTitle: 'Tech Gadget Accessories | Celiz LK',
       seoDescription: 'Premium mobile and desktop accessories in Sri Lanka.',
     },
-  });
-
-  // Category Attributes (For Future Comparison Engine)
-  await prisma.categoryAttribute.createMany({
-    data: [
-      { categoryId: earbudsCat.id, attributeKey: 'battery_life_hrs', attributeLabel: 'Battery Life', dataType: 'number', unit: 'hours', isComparable: true },
-      { categoryId: earbudsCat.id, attributeKey: 'bluetooth_ver', attributeLabel: 'Bluetooth Version', dataType: 'text', isComparable: true },
-      { categoryId: earbudsCat.id, attributeKey: 'anc_support', attributeLabel: 'Active Noise Cancellation', dataType: 'boolean', isComparable: true },
-      { categoryId: earbudsCat.id, attributeKey: 'water_rating', attributeLabel: 'Water Resistance', dataType: 'text', isComparable: true },
-      { categoryId: chargersCat.id, attributeKey: 'max_wattage', attributeLabel: 'Max Output Wattage', dataType: 'number', unit: 'W', isComparable: true },
-      { categoryId: chargersCat.id, attributeKey: 'port_count', attributeLabel: 'Number of Ports', dataType: 'number', isComparable: true },
-      { categoryId: powerBanksCat.id, attributeKey: 'capacity_mah', attributeLabel: 'Capacity', dataType: 'number', unit: 'mAh', isComparable: true },
-      { categoryId: powerBanksCat.id, attributeKey: 'fast_charging_protocol', attributeLabel: 'Fast Charge Support', dataType: 'text', isComparable: true },
-    ],
   });
 
   // Sample Products
@@ -311,7 +296,7 @@ async function main() {
       brandIds.set(brand, brandId);
     }
     await prisma.product.create({
-      data: { ...productData, brandId },
+      data: { ...productData, specs: '', brandId },
     });
   }
 
