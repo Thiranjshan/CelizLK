@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { ShoppingBag, Zap, ShieldCheck, Truck, ArrowLeft, Check, Plus, Minus } from 'lucide-react';
 import { Product } from '@/lib/types';
 import { useStore } from '@/lib/store';
@@ -119,9 +121,9 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
             </span>
           </div>
 
-          <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '2rem', fontSize: '0.975rem' }}>
-            {product.description}
-          </p>
+          <div className="product-markdown product-description">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{product.description}</ReactMarkdown>
+          </div>
 
           {/* Quantity Selector */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem' }}>
@@ -195,11 +197,11 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
       {product.specs && (
         <section style={{ background: 'var(--bg-white)', padding: '2.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', marginBottom: '5rem' }}>
           <h2 className="section-title" style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>
-            Technical Specifications
+            About this ...
           </h2>
 
-          <div style={{ background: 'var(--bg-light)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', whiteSpace: 'pre-wrap', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-            {product.specs}
+          <div className="product-markdown product-specifications" style={{ background: 'var(--bg-light)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{product.specs}</ReactMarkdown>
           </div>
         </section>
       )}

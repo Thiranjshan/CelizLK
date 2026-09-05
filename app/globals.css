@@ -87,6 +87,69 @@ textarea {
   font-family: var(--font-body);
 }
 
+.product-markdown {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.product-description {
+  margin-bottom: 2rem;
+  font-size: 0.975rem;
+}
+
+.product-markdown h2,
+.product-markdown h3,
+.product-markdown h4 {
+  margin: 1.25rem 0 0.5rem;
+}
+
+.product-markdown h2:first-child,
+.product-markdown h3:first-child,
+.product-markdown h4:first-child {
+  margin-top: 0;
+}
+
+.product-markdown p {
+  margin: 0 0 0.85rem;
+}
+
+.product-markdown ul,
+.product-markdown ol {
+  margin: 0 0 0.85rem;
+  padding-left: 1.5rem;
+}
+
+.product-markdown li + li {
+  margin-top: 0.25rem;
+}
+
+.product-markdown strong {
+  color: var(--text-primary);
+}
+
+.product-markdown a {
+  color: var(--accent-purple);
+  text-decoration: underline;
+}
+
+.product-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.product-markdown th,
+.product-markdown td {
+  border: 1px solid var(--border-color);
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+}
+
+.product-markdown th {
+  color: var(--text-primary);
+  background: var(--bg-white);
+}
+
 /* Headings */
 h1,
 h2,
