@@ -4,6 +4,8 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
+  // Seed script for local demo data only. Do NOT run this in production unless the
+  // database is intentionally disposable and the required environment variables are set.
   console.log('Seeding Celiz LK database...');
 
   if (process.env.ALLOW_DESTRUCTIVE_SEED !== 'true') {
@@ -27,6 +29,26 @@ async function main() {
   await prisma.adminRefreshToken.deleteMany();
   await prisma.auditLog.deleteMany();
   await prisma.adminUser.deleteMany();
+  await prisma.deliveryZone.deleteMany();
+
+  const deliveryZones = [
+    { name: 'Colombo', district: 'Colombo', fee: 350, isActive: true },
+    { name: 'Kandy', district: 'Kandy', fee: 450, isActive: true },
+    { name: 'Gampaha', district: 'Gampaha', fee: 400, isActive: true },
+    { name: 'Kalutara', district: 'Kalutara', fee: 420, isActive: true },
+    { name: 'Galle', district: 'Galle', fee: 500, isActive: true },
+    { name: 'Matara', district: 'Matara', fee: 520, isActive: true },
+    { name: 'Negombo', district: 'Negombo', fee: 380, isActive: true },
+    { name: 'Kurunegala', district: 'Kurunegala', fee: 430, isActive: true },
+  ];
+
+  for (const zone of deliveryZones) {
+    await prisma.deliveryZone.upsert({
+      where: { district: zone.district },
+      update: { ...zone },
+      create: { ...zone },
+    });
+  }
 
   await prisma.adminUser.create({
     data: {

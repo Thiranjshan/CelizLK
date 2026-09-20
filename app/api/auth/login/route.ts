@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server';
-import { createAccessToken, issueRefreshToken, publicUser, refreshCookie, verifyPassword } from '@/lib/auth';
+import { createAccessToken, issueRefreshToken, publicUser, refreshCookie, userRateLimit, verifyPassword } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
   const body = await request.json();
   const email = String(body.email || '').trim().toLowerCase();
   const password = String(body.password || '');
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown';
+
+  if (!userRateLimit(`user-login:${ip}`)) {
+    return NextResponse.json({ error: 'Too many login attempts. Try again later.' }, { status: 429 });
+  }
+
   const user = await prisma.user.findUnique({ where: { email } });
   const genericError = NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 });
   if (!user) return genericError;

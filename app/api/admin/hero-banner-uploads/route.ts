@@ -3,12 +3,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { NextResponse } from 'next/server';
 import { getAdminFromRequest, hasAdminPermission, writeAudit } from '@/lib/admin-auth';
-
-const allowedTypes: Record<string, string> = {
-  'image/jpeg': '.jpg',
-  'image/png': '.png',
-  'image/webp': '.webp',
-};
+import { ALLOWED_UPLOAD_MIME_TYPES, validateUploadedImage } from '@/lib/security';
 
 export async function POST(request: Request) {
   const admin = await getAdminFromRequest(request);
@@ -25,24 +20,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No file provided.' }, { status: 400 });
     }
 
-    if (!allowedTypes[file.type]) {
-      return NextResponse.json(
-        { error: 'Upload a JPEG, PNG, or WebP image.' },
-        { status: 400 },
-      );
-    }
-
-    if (file.size === 0 || file.size > 5 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: 'Image must be smaller than 5MB.' },
-        { status: 400 },
-      );
+    const validation = validateUploadedImage(file);
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
     const directory = path.join(process.cwd(), 'public', 'uploads');
     await mkdir(directory, { recursive: true });
 
-    const filename = `${randomUUID()}${allowedTypes[file.type]}`;
+    const filename = `${randomUUID()}${ALLOWED_UPLOAD_MIME_TYPES[file.type]}`;
     const filePath = path.join(directory, filename);
 
     await writeFile(filePath, Buffer.from(await file.arrayBuffer()));

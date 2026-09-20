@@ -2,11 +2,26 @@ import { createHash, randomBytes } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { jwtVerify, SignJWT } from 'jose';
 import { prisma } from '@/lib/prisma';
+import { getEnv } from '@/lib/env';
 
 const accessSecret = new TextEncoder().encode(
-  process.env.JWT_ACCESS_SECRET || 'celiz-development-access-secret-change-me'
+  getEnv('JWT_ACCESS_SECRET', 'celiz-development-access-secret-change-me')
 );
 export const refreshCookieName = 'celiz_refresh_token';
+
+const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+export function userRateLimit(key: string, limit = 10, windowMs = 15 * 60 * 1000) {
+  const now = Date.now();
+  const current = loginAttempts.get(key);
+
+  if (!current || current.resetAt <= now) {
+    loginAttempts.set(key, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+
+  current.count += 1;
+  return current.count <= limit;
+}
 
 export const publicUser = (user: {
   id: string;

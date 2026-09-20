@@ -2,11 +2,14 @@ import { createHash, randomBytes } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { jwtVerify, SignJWT } from 'jose';
 import { prisma } from '@/lib/prisma';
+import { getEnv } from '@/lib/env';
 
-const configuredSecret = process.env.ADMIN_JWT_SECRET;
 function getSecret() {
-  if (process.env.NODE_ENV === 'production' && (!configuredSecret || configuredSecret.length < 32)) throw new Error('ADMIN_JWT_SECRET must be configured with at least 32 characters in production.');
-  return new TextEncoder().encode(configuredSecret || 'celiz-development-admin-secret-change-me');
+  const configuredSecret = getEnv('ADMIN_JWT_SECRET', 'celiz-development-admin-secret-change-me');
+  if (process.env.NODE_ENV === 'production' && configuredSecret.length < 32) {
+    throw new Error('ADMIN_JWT_SECRET must be configured with at least 32 characters in production.');
+  }
+  return new TextEncoder().encode(configuredSecret);
 }
 export const adminRefreshCookieName = 'celiz_admin_refresh_token';
 export const adminRoles = ['SUPER_ADMIN', 'PRODUCT_MANAGER', 'ORDER_MANAGER', 'SUPPORT_STAFF', 'MARKETING'] as const;
