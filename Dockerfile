@@ -14,6 +14,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ARG DATABASE_URL="postgresql://user:pass@localhost:5432/db?sslmode=disable"
 ENV DATABASE_URL=$DATABASE_URL NEXT_TELEMETRY_DISABLED=1
+ENV JWT_ACCESS_SECRET="build-only-placeholder-secret-32-characters-min"
+ENV ADMIN_JWT_SECRET="build-only-placeholder-admin-secret-32-chars-min"
 RUN npx prisma generate
 RUN npm run build
 
