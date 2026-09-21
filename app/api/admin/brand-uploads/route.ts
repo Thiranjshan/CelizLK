@@ -28,11 +28,12 @@ export async function POST(request: Request) {
     if (!brand) return NextResponse.json({ error: 'Brand not found.' }, { status: 404 });
 
     const extension = ALLOWED_UPLOAD_MIME_TYPES[file.type];
-    const directory = path.join(process.cwd(), 'public', 'images', 'brands');
-    await mkdir(directory, { recursive: true });
-    const filename = `${brand.slug}${extension}`;
+    const directory = path.join(process.cwd(), 'public', 'uploads', 'brands');
+await mkdir(directory, { recursive: true });
+const safeSlug = brand.slug.replace(/[^a-z0-9-]/gi, '');
+const filename = `${safeSlug}-${Date.now()}${extension}`;
     await writeFile(path.join(directory, filename), Buffer.from(await file.arrayBuffer()));
-    const logoUrl = `/images/brands/${filename}`;
+    const logoUrl = `/uploads/brands/${filename}`;
     await prisma.brand.update({ where: { id: brand.id }, data: { logoUrl } });
     await writeAudit(admin.id, 'UPLOAD', 'BRAND_LOGO', brand.id, { type: file.type, size: file.size, logoUrl });
     return NextResponse.json({ url: logoUrl }, { status: 201 });

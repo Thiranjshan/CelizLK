@@ -82,6 +82,7 @@ The app already sets basic headers in next.config.ts:
 - Restrict SSH access and use a non-root service user.
 - Set up service monitoring and log rotation.
 - Keep OS packages patched.
+- Persist uploaded media outside the container. For Docker, mount a host directory to `/app/public/uploads` (for example, `-v /srv/celiz/uploads:/app/public/uploads`) and ensure it is writable by UID 1001.
 
 ## Final deployment gate
 
