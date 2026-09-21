@@ -2266,6 +2266,10 @@ h6 {
 
 /* Responsive display helper */
 @media (max-width: 900px) {
+  .header-topbar-wrapper {
+    display: none;
+  }
+
   .desktop-only {
     display: none !important;
   }
