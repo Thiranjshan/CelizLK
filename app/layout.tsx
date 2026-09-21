@@ -6,6 +6,7 @@ import ToastContainer from '@/components/ToastContainer';
 import AuthBootstrap from '@/components/AuthBootstrap';
 import WhatsAppButton from '@/components/WhaatsAppBtton';
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: 'Celiz LK — Online Tech Gadgets Store Sri Lanka',
   description: 'Shop authentic wireless earbuds, GaN fast chargers, power banks, and smartwatches in Sri Lanka with fast islandwide delivery.',
