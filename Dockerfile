@@ -16,6 +16,11 @@ ARG DATABASE_URL="postgresql://user:pass@localhost:5432/db?sslmode=disable"
 ENV DATABASE_URL=$DATABASE_URL NEXT_TELEMETRY_DISABLED=1
 ENV JWT_ACCESS_SECRET="build-only-placeholder-secret-32-characters-min"
 ENV ADMIN_JWT_SECRET="build-only-placeholder-admin-secret-32-chars-min"
+ENV BANK_TRANSFER_BANK_NAME="Commercial Bank"
+ENV BANK_TRANSFER_ACCOUNT_NAME="Celiz LK (Pvt) Ltd"
+ENV BANK_TRANSFER_ACCOUNT_NUMBER="1000-2345-6789"
+ENV BANK_TRANSFER_BRANCH="Colombo Main"
+ENV ALLOW_DESTRUCTIVE_SEED="true"
 RUN npx prisma generate
 RUN npm run build
 
