@@ -48,7 +48,13 @@ function OrdersManager({ token }: { token: string }) {
       .then(setOrders).catch((e) => setError(e.message)).finally(() => setLoading(false));
   }, [token]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    fetch('/api/admin/orders', { headers: { Authorization: `Bearer ${token}` } })
+      .then(async (response) => { const result = await response.json(); if (!response.ok) throw new Error(result.error); return result; })
+      .then(setOrders)
+      .catch((reason) => setError(reason instanceof Error ? reason.message : 'Unable to load orders.'))
+      .finally(() => setLoading(false));
+  }, [token]);
 
   async function updateStatus(order: Order, status: string) {
     const r = await fetch('/api/admin/orders', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ id: order.id, status }) });

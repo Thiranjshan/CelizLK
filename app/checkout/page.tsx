@@ -97,11 +97,13 @@ function CheckoutContent() {
   // Prefill user name/phone when loaded
   useEffect(() => {
     if (user) {
-      setFormData((prev) => ({
-        ...prev,
-        fullName: prev.fullName || user.fullName || '',
-        phone: prev.phone || user.phone || '',
-      }));
+      queueMicrotask(() => {
+        setFormData((prev) => ({
+          ...prev,
+          fullName: prev.fullName || user.fullName || '',
+          phone: prev.phone || user.phone || '',
+        }));
+      });
     }
   }, [user]);
 
@@ -724,7 +726,7 @@ function CheckoutContent() {
                     style={{ width: 18, height: 18, accentColor: 'var(--accent-purple)', cursor: 'pointer' }}
                   />
                   <span>
-                    I have read and agree to Celiz LK's{' '}
+                    I have read and agree to Celiz LK&apos;s{' '}
                     <Link href="/terms-and-conditions" target="_blank" style={{ color: 'var(--accent-purple)', fontWeight: 700, textDecoration: 'underline' }}>
                       Terms & Conditions
                     </Link>

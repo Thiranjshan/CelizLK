@@ -208,7 +208,7 @@ export const useStore = create<StoreState>()(
         const { user: currentUser, cart: currentCart, userCarts, guestCart } = get();
 
         // 1. Save current active cart under current user if logged in
-        let updatedUserCarts = { ...userCarts };
+        const updatedUserCarts = { ...userCarts };
         if (currentUser) {
           updatedUserCarts[currentUser.id] = currentCart;
         }
@@ -256,7 +256,7 @@ export const useStore = create<StoreState>()(
 
       logout: () => {
         const { user, cart, userCarts } = get();
-        let updatedUserCarts = { ...userCarts };
+        const updatedUserCarts = { ...userCarts };
         if (user) {
           updatedUserCarts[user.id] = cart;
         }

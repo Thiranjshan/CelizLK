@@ -39,7 +39,24 @@ function ProductsManager({ token, adminRole }: { token: string; adminRole: strin
     if (brandResponse.ok) setBrands(brandData);
   }
 
-  useEffect(() => { load().catch((reason) => setError(reason instanceof Error ? reason.message : 'Failed to load catalog data.')); }, [token]);
+  useEffect(() => {
+    async function loadInitialCatalog() {
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
+        const [productResponse, categoryResponse, brandResponse] = await Promise.all([fetch('/api/admin/products', { headers, cache: 'no-store' }), fetch('/api/admin/categories', { headers, cache: 'no-store' }), fetch('/api/admin/brands', { headers, cache: 'no-store' })]);
+        const productData = await productResponse.json();
+        const categoryData = await categoryResponse.json();
+        const brandData = await brandResponse.json();
+        if (!productResponse.ok) throw new Error(productData.error);
+        setProducts(productData);
+        if (categoryResponse.ok) setCategories(categoryData);
+        if (brandResponse.ok) setBrands(brandData);
+      } catch (reason) {
+        setError(reason instanceof Error ? reason.message : 'Failed to load catalog data.');
+      }
+    }
+    void loadInitialCatalog();
+  }, [token]);
 
   function selectProduct(product: Product) {
     setEditingId(product.id);

@@ -18,7 +18,19 @@ export default function AddressesPage() {
   const [showForm, setShowForm] = useState(false);
 
   async function load() { const response = await fetch('/api/addresses', { headers: { Authorization: `Bearer ${token}` } }); if (!response.ok) throw new Error('Unable to load addresses.'); setAddresses(await response.json()); }
-  useEffect(() => { if (token) load().catch((reason) => setError(reason.message)); }, [token]);
+  useEffect(() => {
+    if (!token) return;
+    async function loadInitialAddresses() {
+      try {
+        const response = await fetch('/api/addresses', { headers: { Authorization: `Bearer ${token}` } });
+        if (!response.ok) throw new Error('Unable to load addresses.');
+        setAddresses(await response.json());
+      } catch (reason) {
+        setError(reason instanceof Error ? reason.message : 'Unable to load addresses.');
+      }
+    }
+    void loadInitialAddresses();
+  }, [token]);
   if (!token) return <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}><h2>Sign in to manage addresses</h2><Link href="/login" className="btn-primary">Sign in</Link></div>;
   async function save(event: React.FormEvent) { event.preventDefault(); setError(''); const response = await fetch(editing ? `/api/addresses/${editing}` : '/api/addresses', { method: editing ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(form) }); const result = await response.json(); if (!response.ok) { setError(result.error); return; } setForm(empty); setEditing(null); await load(); }
   async function remove(id: string) { const response = await fetch(`/api/addresses/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (!response.ok) setError('Unable to delete address.'); else await load(); }

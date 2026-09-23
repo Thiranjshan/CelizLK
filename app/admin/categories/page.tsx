@@ -31,7 +31,17 @@ function CategoriesManager({ token }: { token: string }) {
   }
 
   useEffect(() => {
-    load().catch((reason) => setError(reason instanceof Error ? reason.message : 'Failed to load categories.'));
+    async function loadInitialCategories() {
+      try {
+        const response = await fetch('/api/admin/categories', { headers: { Authorization: `Bearer ${token}` } });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error);
+        setCategories(result);
+      } catch (reason) {
+        setError(reason instanceof Error ? reason.message : 'Failed to load categories.');
+      }
+    }
+    void loadInitialCategories();
   }, [token]);
 
   function reset() {

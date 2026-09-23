@@ -23,8 +23,8 @@ export default function WishlistPage() {
         if (!res.ok) throw new Error('Failed to load products');
         const data = await res.json();
         setProducts(data);
-      } catch (err: any) {
-        setError(err.message || 'Something went wrong');
+      } catch (reason) {
+        setError(reason instanceof Error ? reason.message : 'Something went wrong');
       } finally {
         setLoading(false);
       }

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(request: Request) {
@@ -10,7 +11,7 @@ export async function GET(request: Request) {
     const featured = searchParams.get('featured');
     const sort = searchParams.get('sort'); // price-asc, price-desc, newest
 
-    const where: any = { isActive: true };
+    const where: Prisma.ProductWhereInput = { isActive: true };
 
     if (categorySlug) {
       const category = await prisma.category.findUnique({
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
       ];
     }
 
-    let orderBy: any = { createdAt: 'desc' };
+    let orderBy: Prisma.ProductOrderByWithRelationInput = { createdAt: 'desc' };
     if (sort === 'price-asc') orderBy = { price: 'asc' };
     if (sort === 'price-desc') orderBy = { price: 'desc' };
 

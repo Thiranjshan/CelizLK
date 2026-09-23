@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import type { Prisma } from '@prisma/client';
 import ProductCard from '@/components/ProductCard';
 import Link from 'next/link';
 
@@ -22,7 +23,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   ]);
 
   // Build filter query
-  const where: any = { isActive: true };
+  const where: Prisma.ProductWhereInput = { isActive: true };
   if (category) {
     const selectedCat = categories.find((c) => c.slug === category);
     if (selectedCat) where.categoryId = selectedCat.id;
@@ -32,7 +33,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     if (selectedBrand) where.brandId = selectedBrand.id;
   }
 
-  let orderBy: any = { createdAt: 'desc' };
+  let orderBy: Prisma.ProductOrderByWithRelationInput = { createdAt: 'desc' };
   if (sort === 'price-asc') orderBy = { price: 'asc' };
   if (sort === 'price-desc') orderBy = { price: 'desc' };
 

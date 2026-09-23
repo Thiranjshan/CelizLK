@@ -35,6 +35,7 @@ jobs:
         continue-on-error: true   # remove this line once you've cleaned up existing vulnerabilities
 
   build:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

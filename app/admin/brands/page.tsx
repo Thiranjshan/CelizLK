@@ -13,7 +13,19 @@ export default function BrandsPage() { return <AdminAuthGate active="brands">{(_
 function BrandsManager({ token }: { token: string }) {
   const [brands, setBrands] = useState<Brand[]>([]); const [form, setForm] = useState(emptyForm); const [editingId, setEditingId] = useState<string | null>(null); const [error, setError] = useState(''); const [message, setMessage] = useState('');
   async function load() { const response = await fetch('/api/admin/brands', { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }); const result = await response.json(); if (!response.ok) throw new Error(result.error); setBrands(result); }
-  useEffect(() => { load().catch((reason) => setError(reason instanceof Error ? reason.message : 'Unable to load brands.')); }, [token]);
+  useEffect(() => {
+    async function loadInitialBrands() {
+      try {
+        const response = await fetch('/api/admin/brands', { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error);
+        setBrands(result);
+      } catch (reason) {
+        setError(reason instanceof Error ? reason.message : 'Unable to load brands.');
+      }
+    }
+    void loadInitialBrands();
+  }, [token]);
   function reset() { setEditingId(null); setForm(emptyForm); }
   function edit(brand: Brand) { setEditingId(brand.id); setForm({ name: brand.name, slug: brand.slug, logoUrl: brand.logoUrl || '', isActive: brand.isActive, sortOrder: String(brand.sortOrder) }); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   async function upload(event: ChangeEvent<HTMLInputElement>) { const file = event.target.files?.[0]; if (!file) return; if (!editingId) { setError('Create the brand before uploading its logo.'); event.target.value = ''; return; } const body = new FormData(); body.append('file', file); body.append('brandId', editingId); const response = await fetch('/api/admin/brand-uploads', { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body }); const result = await response.json(); if (response.ok) { setForm((current) => ({ ...current, logoUrl: result.url })); setMessage('Brand logo uploaded.'); } else setError(result.error); event.target.value = ''; }

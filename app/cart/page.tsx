@@ -40,7 +40,7 @@ export default function CartPage() {
           </div>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' }}>Your Cart is Empty</h2>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-            Looks like you haven't added any high-tech gadgets to your cart yet.
+            Looks like you haven&apos;t added any high-tech gadgets to your cart yet.
           </p>
           <Link href="/products" className="btn-primary">
             Explore Tech Products
