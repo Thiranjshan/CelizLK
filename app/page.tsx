@@ -432,6 +432,7 @@ export default async function HomePage() {
               gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
               gap: "2.5rem",
             }}
+            className="homepage-promos-grid"
           >
             <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
               <div style={{ color: "var(--accent-purple)", flexShrink: 0 }}>

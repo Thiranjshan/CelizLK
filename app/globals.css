@@ -1653,6 +1653,27 @@ h6 {
   .footer-grid {
     grid-template-columns: 1fr;
   }
+
+  .site-footer .container {
+    text-align: center;
+  }
+
+  .footer-links {
+    align-items: center;
+  }
+
+  .footer-social-links {
+    justify-content: center !important;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .footer-payment-methods {
+    justify-content: center;
+  }
 }
 
 /* Product Card Custom Badges & Wishlist Overlay */
@@ -2299,6 +2320,15 @@ h6 {
   .brands-trust-layout {
     grid-template-columns: 1fr !important;
     gap: 2rem !important;
+    text-align: center;
+  }
+
+  .homepage-promos-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .homepage-promos-grid > div {
+    justify-content: center;
     text-align: center;
   }
 
