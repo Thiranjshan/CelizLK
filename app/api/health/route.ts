@@ -1,6 +1,22 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+// Health checks must never be served from Next's cache, and must never be
+// pre-rendered at build time (there's no database available during build).
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const DB_TIMEOUT_MS = 3000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`Database check timed out after ${ms}ms`)), ms),
+    ),
+  ]);
+}
+
 export async function GET() {
   const checks = {
     app: {
@@ -22,7 +38,10 @@ export async function GET() {
   }
 
   try {
-    const result = await prisma.$queryRaw<{ ok: number }[]>`SELECT 1 AS ok`;
+    const result = await withTimeout(
+      prisma.$queryRaw<{ ok: number }[]>`SELECT 1 AS ok`,
+      DB_TIMEOUT_MS,
+    );
     const databaseReachable = Array.isArray(result) && result.length > 0 && Number(result[0]?.ok) === 1;
 
     checks.database = {
@@ -30,10 +49,13 @@ export async function GET() {
       message: databaseReachable ? 'Database reachable' : 'Database query did not return the expected result',
     };
   } catch (error) {
+    // Full detail goes to server logs only. The public response stays generic
+    // so it doesn't hand an attacker connection strings, table names, or
+    // internal error text.
     console.error('Health check DB probe failed', error);
     checks.database = {
       status: 'unhealthy',
-      message: error instanceof Error ? error.message : 'Database connection failed',
+      message: 'Database connection failed',
     };
   }
 
@@ -45,6 +67,11 @@ export async function GET() {
       timestamp: new Date().toISOString(),
       checks,
     },
-    { status: healthy ? 200 : 503 },
+    {
+      status: healthy ? 200 : 503,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      },
+    },
   );
 }
