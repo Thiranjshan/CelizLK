@@ -10,11 +10,13 @@ interface ProductsPageProps {
     category?: string;
     brand?: string;
     sort?: string;
+    featured?: string;
+    newArrivals?: string;
   }>;
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const { category, brand, sort } = await searchParams;
+  const { category, brand, sort, featured, newArrivals } = await searchParams;
 
   // Fetch categories for sidebar filter
   const [categories, brands] = await Promise.all([
@@ -32,6 +34,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     const selectedBrand = brands.find((item) => item.slug === brand);
     if (selectedBrand) where.brandId = selectedBrand.id;
   }
+  if (featured === 'true') where.isFeatured = true;
+  if (newArrivals === 'true') where.isNewArrival = true;
 
   let orderBy: Prisma.ProductOrderByWithRelationInput = { createdAt: 'desc' };
   if (sort === 'price-asc') orderBy = { price: 'asc' };
@@ -54,7 +58,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   return (
     <div className="container" style={{ padding: '3rem 1.25rem 5rem 1.25rem' }}>
       <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2.25rem', fontWeight: 800 }}>Product Catalog</h1>
+        <h1 style={{ fontSize: '2.25rem', fontWeight: 800 }}>
+          {featured === 'true' ? 'Featured Products' : newArrivals === 'true' ? 'New Arrivals' : 'Product Catalog'}
+        </h1>
         <p style={{ color: 'var(--text-secondary)' }}>
           Browse our complete range of certified high-tech Sri Lanka gadgets
         </p>

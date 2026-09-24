@@ -1,10 +1,18 @@
 import type { Metadata } from 'next';
+import { Oxygen } from 'next/font/google';
 import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ToastContainer from '@/components/ToastContainer';
 import AuthBootstrap from '@/components/AuthBootstrap';
 import WhatsAppButton from '@/components/WhaatsAppBtton';
+
+const oxygen = Oxygen({
+  subsets: ['latin'],
+  weight: ['300', '400', '700'],
+  variable: '--font-oxygen',
+  display: 'swap',
+});
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -24,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={oxygen.variable}>
       <body>
         <AuthBootstrap />
         <Header />

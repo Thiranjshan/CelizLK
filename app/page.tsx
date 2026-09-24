@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import ProductCard from "@/components/ProductCard";
 import HeroCarousel from "@/components/home/HeroCarousel";
+import ProductCarousel from "@/components/home/ProductCarousel";
 import {
   Award,
   ShieldCheck,
@@ -82,7 +82,7 @@ export default async function HomePage() {
   // 3. Fetch New Arrivals (marked isNewArrival: true)
   let rawNewArrivals = await prisma.product.findMany({
     where: { isNewArrival: true, isActive: true },
-    take: 3,
+    take: 10,
     include: { category: true, brandRecord: true },
   });
 
@@ -91,7 +91,7 @@ export default async function HomePage() {
     rawNewArrivals = await prisma.product.findMany({
       where: { isActive: true },
       orderBy: { createdAt: "desc" },
-      take: 3,
+      take: 10,
       include: { category: true, brandRecord: true },
     });
   }
@@ -107,7 +107,7 @@ export default async function HomePage() {
   // 4. Fetch Featured Products (marked isFeatured: true)
   const rawFeaturedProducts = await prisma.product.findMany({
     where: { isFeatured: true, isActive: true },
-    take: 3,
+    take: 10,
     include: { category: true, brandRecord: true },
   });
 
@@ -132,109 +132,8 @@ export default async function HomePage() {
         <HeroCarousel slides={carouselSlides} />
 
         {/* Product merchandising sections */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "3rem",
-            margin: "1rem 0 5rem",
-          }}
-          className="homepage-product-grid-wrapper"
-        >
-          {/* New Arrivals */}
-          <section>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "end",
-                marginBottom: "2rem",
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: "1.75rem",
-                  fontWeight: 800,
-                  color: "var(--text-headline)",
-                }}
-              >
-                New Arrivals
-              </h2>
-              <Link
-                href="/products?sort=newest"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.4rem",
-                  color: "var(--accent-purple)",
-                  fontWeight: 700,
-                  fontSize: "0.9rem",
-                }}
-              >
-                <span>View all</span>
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-                gap: "1.5rem",
-              }}
-            >
-              {newArrivals.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </section>
-
-          {/* Featured Products */}
-          <section>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "end",
-                marginBottom: "2rem",
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: "1.75rem",
-                  fontWeight: 800,
-                  color: "var(--text-headline)",
-                }}
-              >
-                Featured Products
-              </h2>
-              <Link
-                href="/products"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.4rem",
-                  color: "var(--accent-purple)",
-                  fontWeight: 700,
-                  fontSize: "0.9rem",
-                }}
-              >
-                <span>View all</span>
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-                gap: "1.5rem",
-              }}
-            >
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </section>
-        </div>
+        <ProductCarousel title="Featured Products" viewAllHref="/products?featured=true" products={featuredProducts} />
+        <ProductCarousel title="New Arrivals" viewAllHref="/products?newArrivals=true" products={newArrivals} />
 
         {/* Shop By Category Section */}
         <section style={{ padding: "3rem 0 4rem" }}>

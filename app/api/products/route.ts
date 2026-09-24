@@ -9,6 +9,7 @@ export async function GET(request: Request) {
     const brandSlug = searchParams.get('brand');
     const search = searchParams.get('search');
     const featured = searchParams.get('featured');
+    const newArrivals = searchParams.get('newArrivals');
     const sort = searchParams.get('sort'); // price-asc, price-desc, newest
 
     const where: Prisma.ProductWhereInput = { isActive: true };
@@ -29,6 +30,10 @@ export async function GET(request: Request) {
 
     if (featured === 'true') {
       where.isFeatured = true;
+    }
+
+    if (newArrivals === 'true') {
+      where.isNewArrival = true;
     }
 
     if (search) {

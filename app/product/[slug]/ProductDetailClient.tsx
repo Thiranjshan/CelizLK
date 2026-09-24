@@ -15,6 +15,51 @@ interface ProductDetailClientProps {
   relatedProducts: Product[];
 }
 
+interface ProductSpecSection {
+  title: string;
+  points: string[];
+}
+
+function parseProductSpecs(specs: string): ProductSpecSection[] {
+  try {
+    const parsed = JSON.parse(specs) as unknown;
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return Object.entries(parsed as Record<string, unknown>).map(([title, value]) => ({
+        title: title.replace(/[_-]+/g, ' ').replace(/\b\w/g, (character) => character.toUpperCase()),
+        points: Array.isArray(value)
+          ? value.map((item) => String(item))
+          : [String(value)],
+      }));
+    }
+  } catch {
+  }
+
+  const sections: ProductSpecSection[] = [];
+  const ungroupedPoints: string[] = [];
+  let currentSection: ProductSpecSection | null = null;
+
+  for (const rawLine of specs.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    const heading = line.match(/^\*\*(.+?)\*\*$/);
+    const bullet = line.match(/^[-*]\s+(.+)$/);
+
+    if (heading) {
+      if (currentSection) sections.push(currentSection);
+      currentSection = { title: heading[1].trim(), points: [] };
+    } else if (bullet) {
+      if (currentSection) currentSection.points.push(bullet[1].trim());
+      else ungroupedPoints.push(bullet[1].trim());
+    } else if (line) {
+      if (currentSection) currentSection.points.push(line);
+      else ungroupedPoints.push(line);
+    }
+  }
+
+  if (currentSection) sections.push(currentSection);
+  if (ungroupedPoints.length) sections.unshift({ title: 'Technical Specifications', points: ungroupedPoints });
+  return sections;
+}
+
 export default function ProductDetailClient({ product, relatedProducts }: ProductDetailClientProps) {
   const router = useRouter();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -95,9 +140,9 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
           </h1>
 
           {/* Pricing */}
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '1.5rem', background: 'var(--bg-light)', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '1.5rem', background: 'var(--bg-light)',  borderRadius: 'var(--radius-md)' }}>
             <span style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--primary-indigo)' }}>
-              LKR {(product.discountPrice ?? product.price).toLocaleString()}
+              <span style={{ color: 'var(--accent-purple'}}>LKR</span> {(product.discountPrice ?? product.price).toLocaleString()}
             </span>
             {product.discountPrice && (
               <>
@@ -195,13 +240,23 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
 
       {/* Technical Specifications */}
       {product.specs && (
-        <section style={{ background: 'var(--bg-white)', padding: '2.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', marginBottom: '5rem' }}>
-          <h2 className="section-title" style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>
-            About this ...
-          </h2>
+        <section className="product-specifications-section" style={{ marginBottom: '5rem' }}>
 
-          <div className="product-markdown product-specifications" style={{ background: 'var(--bg-light)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{product.specs}</ReactMarkdown>
+          <div className="product-markdown product-specifications">
+            {parseProductSpecs(product.specs).map((section, sectionIndex) => (
+              <div className="product-specification-row" key={`${section.title}-${sectionIndex}`}>
+                <h3 >{section.title}</h3>
+                <ul>
+                  {section.points.map((point, pointIndex) => (
+                    <li key={`${point}-${pointIndex}`}>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ p: ({ children }) => <>{children}</> }}>
+                        {point}
+                      </ReactMarkdown>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </section>
       )}

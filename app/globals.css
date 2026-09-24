@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800;900&display=swap');
-
 :root {
   /* Brand Design Tokens */
   --primary-purple: #6D28D9;
@@ -48,8 +46,9 @@
 
   --transition-fast: 0.12s ease;
   --transition-normal: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  --font-heading: 'Poppins', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-family-base: var(--font-oxygen), sans-serif;
+  --font-heading: var(--font-family-base);
+  --font-body: var(--font-family-base);
 }
 
 * {
@@ -148,6 +147,91 @@ textarea {
 .product-markdown th {
   color: var(--text-primary);
   background: var(--bg-white);
+}
+
+.product-specifications-section {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  padding: 1.75rem 0;
+  background: var(--bg-surface);
+  border: none;
+  border-radius: 0;
+}
+
+.product-specifications-section > .section-title,
+.product-specifications {
+  width: 100%;
+  max-width: 1240px;
+  margin-right: auto;
+  margin-left: auto;
+  background: transparent;
+  color: #f4f1fa;
+  line-height: 1.45;
+  padding-right: 1.25rem;
+  padding-left: 1.25rem;
+  border: none;
+  border-radius: 0;
+}
+
+.product-specification-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr);
+  gap: 2rem;
+  align-items: start;
+  padding: .8rem 0;
+  border-bottom: 1px solid #d8b4fe;
+}
+
+.product-specification-row h3 {
+  text-align: center;
+}
+
+.product-specification-row:last-child {
+  border-bottom: none;
+}
+
+.product-specification-row h3 {
+  color: #000;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.product-specification-row ul {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .25rem;
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.product-specification-row li {
+  color: #000;
+}
+
+.product-specification-row li::marker {
+  color: #000;
+}
+
+.product-specifications-section,
+.product-specifications-section * {
+  color: #000 !important;
+}
+
+.product-specification-row li::marker {
+  color: #000 !important;
+}
+
+@media (max-width: 640px) {
+  .product-specification-row {
+    grid-template-columns: 1fr;
+    gap: .75rem;
+  }
+
+  .product-specification-row ul {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Headings */
@@ -508,6 +592,74 @@ h6 {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.5rem;
+}
+
+.homepage-product-carousel {
+  width: 100%;
+  min-width: 0;
+  margin: 1rem 0 4rem;
+}
+
+.homepage-product-carousel-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.homepage-product-carousel-heading h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-headline);
+}
+
+.homepage-product-carousel-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.homepage-product-carousel-view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--accent-purple);
+  font-weight: 700;
+  font-size: .9rem;
+  white-space: nowrap;
+}
+
+.homepage-product-carousel-viewport {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  outline: none;
+}
+
+.homepage-product-carousel-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.homepage-product-carousel-viewport:focus-visible {
+  outline: 2px solid var(--accent-purple);
+  outline-offset: 4px;
+}
+
+.homepage-product-carousel-track {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 1.5rem;
+  width: max-content;
+}
+
+.homepage-product-carousel-card {
+  flex: 0 0 clamp(220px, 24vw, 280px);
+  min-width: 0;
 }
 
 .product-card {
@@ -2316,13 +2468,6 @@ h6 {
 }
 
 /* Homepage Responsive Layout Adjustments */
-@media (max-width: 992px) {
-  .homepage-product-grid-wrapper {
-    grid-template-columns: 1fr !important;
-    gap: 3rem !important;
-  }
-}
-
 @media (max-width: 768px) {
   .brands-trust-layout {
     grid-template-columns: 1fr !important;
@@ -2344,6 +2489,20 @@ h6 {
     align-items: center !important;
     text-align: center !important;
     padding: 2.5rem 1.5rem !important;
+  }
+
+  .homepage-product-carousel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .homepage-product-carousel-actions {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .homepage-product-carousel-card {
+    flex-basis: min(78vw, 280px);
   }
 }
 

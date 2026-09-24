@@ -312,7 +312,7 @@ export default function CustomerOrderDetailPage() {
             >
               <strong
                 style={{
-                  fontFamily: 'monospace',
+                  fontFamily: 'var(--font-family-base)',
                   letterSpacing: '0.05em',
                 }}
               >
