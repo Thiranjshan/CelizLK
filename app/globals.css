@@ -960,6 +960,13 @@ h6 {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 3.5rem;
+  min-width: 0;
+}
+
+.product-detail-main-grid > div,
+.product-detail-media-column,
+.product-detail-info-column {
+  min-width: 0;
 }
 
 .product-detail-main-image {
@@ -970,12 +977,49 @@ h6 {
   background: #F9FAFB;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
+  min-width: 0;
 }
 
 .product-detail-main-image img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  max-width: 100%;
+}
+
+.product-detail-brand,
+.product-detail-title,
+.product-detail-price,
+.product-detail-price-original,
+.product-detail-price-badge,
+.product-detail-stock-note,
+.product-detail-description,
+.product-detail-description * {
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.product-detail-title,
+.product-detail-price,
+.product-detail-price-original,
+.product-detail-description,
+.product-detail-stock-note {
+  max-width: 100%;
+}
+
+.product-detail-price-row,
+.product-detail-stock-row {
+  min-width: 0;
+}
+
+.product-detail-price-row {
+  flex-wrap: wrap;
+}
+
+.product-detail-description {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .collection-page {
@@ -3063,12 +3107,26 @@ h6 {
   .product-detail-gallery-strip {
     gap: 0.625rem;
     padding-bottom: 0.125rem;
+    flex-wrap: wrap;
   }
 
   .product-detail-thumb {
-    flex-basis: 62px;
-    width: 62px;
-    height: 62px;
+    flex-basis: clamp(46px, 16vw, 64px);
+    width: clamp(46px, 16vw, 64px);
+    height: clamp(46px, 16vw, 64px);
+  }
+
+  .product-detail-info-column {
+    min-width: 0;
+  }
+
+  .product-detail-title,
+  .product-detail-price,
+  .product-detail-price-original,
+  .product-detail-stock-note,
+  .product-detail-description {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .product-detail-actions {
@@ -3126,6 +3184,8 @@ h6 {
   -webkit-overflow-scrolling: touch;
   touch-action: pan-x pan-y;
   scroll-snap-type: x proximity;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .product-detail-gallery-strip::-webkit-scrollbar {
@@ -3133,9 +3193,10 @@ h6 {
 }
 
 .product-detail-thumb {
-  flex: 0 0 72px;
-  width: 72px;
-  height: 72px;
+  flex: 0 0 clamp(52px, 12vw, 72px);
+  width: clamp(52px, 12vw, 72px);
+  height: clamp(52px, 12vw, 72px);
+  max-width: 100%;
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--bg-white);
@@ -3152,6 +3213,7 @@ h6 {
   height: 100%;
   object-fit: cover;
   display: block;
+  max-width: 100%;
 }
 
 .auth-card {

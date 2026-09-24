@@ -100,7 +100,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
       {/* Main Grid */}
       <div className="product-detail-main-grid" style={{ marginBottom: '5rem', background: 'var(--bg-white)', padding: '2.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
         {/* Left Column: Image Gallery */}
-        <div>
+        <div className="product-detail-media-column">
           <div className="product-detail-main-image">
             <img src={currentImage} alt={product.name} />
           </div>
@@ -125,26 +125,26 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
         </div>
 
         {/* Right Column: Details & Purchasing */}
-        <div>
-          <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-purple)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
+        <div className="product-detail-info-column">
+          <div className="product-detail-brand" style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-purple)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
             {product.brand?.name || 'Gadget'} • {product.category?.name || 'Gadgets'}
           </div>
 
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1.25, marginBottom: '1rem', color: 'var(--primary-indigo)' }}>
+          <h1 className="product-detail-title" style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1.25, marginBottom: '1rem', color: 'var(--primary-indigo)' }}>
             {product.name}
           </h1>
 
           {/* Pricing */}
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '1.5rem', background: 'var(--bg-light)',  borderRadius: 'var(--radius-md)' }}>
-            <span style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--primary-indigo)' }}>
+          <div className="product-detail-price-row" style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '1.5rem', background: 'var(--bg-light)', borderRadius: 'var(--radius-md)', flexWrap: 'wrap' }}>
+            <span className="product-detail-price" style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--primary-indigo)' }}>
               <span style={{ color: 'var(--accent-purple)' }}>LKR</span> {(product.discountPrice ?? product.price).toLocaleString()}
             </span>
             {product.discountPrice && (
               <>
-                <span style={{ fontSize: '1.1rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                <span className="product-detail-price-original" style={{ fontSize: '1.1rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
                   LKR {product.price.toLocaleString()}
                 </span>
-                <span className="badge badge-cancelled" style={{ background: '#EF4444', color: 'white' }}>
+                <span className="badge badge-cancelled product-detail-price-badge" style={{ background: '#EF4444', color: 'white' }}>
                   Save {discountPercent}%
                 </span>
               </>
@@ -152,16 +152,16 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
           </div>
 
           {/* Stock availability */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+          <div className="product-detail-stock-row" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
             <span className="badge badge-paid" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
               <Check size={14} /> In Stock ({product.stockQty} available)
             </span>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            <span className="product-detail-stock-note" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               • Eligible for Islandwide Fast Express Delivery
             </span>
           </div>
 
-          <div className="product-markdown product-description">
+          <div className="product-markdown product-description product-detail-description">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{product.description}</ReactMarkdown>
           </div>
 
