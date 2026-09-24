@@ -15,6 +15,11 @@ const oxygen = Oxygen({
 });
 
 export const dynamic = "force-dynamic";
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   title: 'Celiz LK — Online Tech Gadgets Store Sri Lanka',
   description: 'Shop authentic wireless earbuds, GaN fast chargers, power banks, and smartwatches in Sri Lanka with fast islandwide delivery.',

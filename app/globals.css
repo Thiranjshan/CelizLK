@@ -3029,6 +3029,29 @@ h6 {
     gap: 0.75rem;
   }
 
+  .checkout-topbar-inner {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    min-width: 0;
+  }
+
+  .checkout-brand-link,
+  .checkout-ssl-pill,
+  .checkout-discard-button {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .checkout-ssl-pill {
+    width: 100%;
+    justify-content: center;
+    order: 3;
+  }
+
+  .checkout-discard-button {
+    margin-left: auto;
+  }
+
   .checkout-stepper {
     flex-direction: column;
     align-items: flex-start;

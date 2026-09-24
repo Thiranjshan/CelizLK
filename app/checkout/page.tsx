@@ -343,20 +343,21 @@ function CheckoutContent() {
     <div style={{ minHeight: '100vh', background: '#F8FAFC', paddingBottom: '5rem' }}>
       {/* Focused Top Header Bar (No main header/footer) */}
       <header className="checkout-topbar" style={{ background: 'var(--bg-white)', borderBottom: '1px solid var(--border-color)', position: 'sticky', top: 0, zIndex: 100, boxShadow: 'var(--shadow-sm)' }}>
-        <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem' }}>
-          <Link href="/products" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '1.3rem', fontWeight: 900, fontFamily: 'var(--font-heading)', color: 'var(--text-headline)', textDecoration: 'none' }}>
+        <div className="container checkout-topbar-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', padding: '1rem 1.25rem', minWidth: 0 }}>
+          <Link href="/products" className="checkout-brand-link" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '1.3rem', fontWeight: 900, fontFamily: 'var(--font-heading)', color: 'var(--text-headline)', textDecoration: 'none', minWidth: 0, flexShrink: 0 }}>
             <div style={{ width: 34, height: 34, background: 'var(--brand-gradient)', color: 'white', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>C</div>
             <span>Celiz <span style={{ color: 'var(--accent-purple)' }}>LK</span></span>
           </Link>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--success)', fontSize: '0.85rem', fontWeight: 700, background: 'var(--success-bg)', padding: '0.4rem 0.85rem', borderRadius: 'var(--radius-md)' }}>
-            <ShieldCheck size={16} />
+          <div className="checkout-ssl-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--success)', fontSize: '0.85rem', fontWeight: 700, background: 'var(--success-bg)', padding: '0.4rem 0.85rem', borderRadius: 'var(--radius-md)', minWidth: 0, whiteSpace: 'normal', textAlign: 'center', flex: '1 1 auto' }}>
+            <ShieldCheck size={16} style={{ flexShrink: 0 }} />
             <span>256-Bit SSL Encrypted Checkout</span>
           </div>
 
           <button
+            className="checkout-discard-button"
             onClick={() => setShowDiscardModal(true)}
-            style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', border: '1px solid var(--border-color)', padding: '0.4rem 0.85rem', borderRadius: 'var(--radius-md)', background: 'var(--bg-white)' }}
+            style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', border: '1px solid var(--border-color)', padding: '0.4rem 0.85rem', borderRadius: 'var(--radius-md)', background: 'var(--bg-white)', whiteSpace: 'normal', minWidth: 0, flexShrink: 0 }}
           >
             <span>Discard Checkout</span>
           </button>
