@@ -60,6 +60,7 @@ export default function CustomerOrderDetailPage() {
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', alignItems: 'end', margin: '1rem 0 1.5rem' }}><div><h1 style={{ margin: 0 }}>Order #{order.orderNumber}</h1><p style={{ color: 'var(--text-secondary)', margin: '.4rem 0 0' }}>Placed {new Date(order.createdAt).toLocaleString()}</p></div><strong style={{ fontSize: '1.2rem' }}>{statusLabel(order.status)}</strong></div>
     <section className="admin-form-panel" style={{ marginBottom: '1rem' }}><h2>Order timeline</h2><div style={{ display: 'grid', gap: '.9rem' }}>{steps.map((step) => { const event = eventByStatus.get(step); const complete = Boolean(event); const current = step === order.status; return <div key={step} style={{ display: 'flex', gap: '.75rem', alignItems: 'flex-start', opacity: complete || current ? 1 : .45 }}><span aria-hidden="true" style={{ width: 26, height: 26, borderRadius: '50%', display: 'grid', placeItems: 'center', background: current ? 'var(--primary-indigo)' : complete ? 'var(--success)' : 'var(--border-color)', color: 'white', fontWeight: 800 }}>{step === 'CANCELLED' ? 'x' : complete ? '✓' : '·'}</span><div><strong>{event?.label || statusLabel(step)}</strong>{event && <div style={{ color: 'var(--text-secondary)', fontSize: '.85rem' }}>{new Date(event.createdAt).toLocaleString()}</div>}</div></div>; })}</div></section>
     <div
+      className="order-detail-grid"
       style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',

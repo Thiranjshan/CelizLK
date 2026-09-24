@@ -342,7 +342,7 @@ function CheckoutContent() {
   return (
     <div style={{ minHeight: '100vh', background: '#F8FAFC', paddingBottom: '5rem' }}>
       {/* Focused Top Header Bar (No main header/footer) */}
-      <header style={{ background: 'var(--bg-white)', borderBottom: '1px solid var(--border-color)', position: 'sticky', top: 0, zIndex: 100, boxShadow: 'var(--shadow-sm)' }}>
+      <header className="checkout-topbar" style={{ background: 'var(--bg-white)', borderBottom: '1px solid var(--border-color)', position: 'sticky', top: 0, zIndex: 100, boxShadow: 'var(--shadow-sm)' }}>
         <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem' }}>
           <Link href="/products" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '1.3rem', fontWeight: 900, fontFamily: 'var(--font-heading)', color: 'var(--text-headline)', textDecoration: 'none' }}>
             <div style={{ width: 34, height: 34, background: 'var(--brand-gradient)', color: 'white', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>C</div>
@@ -365,7 +365,7 @@ function CheckoutContent() {
 
       <div className="container" style={{ maxWidth: 1100, padding: '2.5rem 1.25rem' }}>
         {/* Stepper Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '2.5rem', background: 'var(--bg-white)', padding: '1.25rem 2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+        <div className="checkout-stepper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '2.5rem', background: 'var(--bg-white)', padding: '1.25rem 2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
           <div
             onClick={() => setStep(1)}
             style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', opacity: step === 1 ? 1 : 0.8 }}
@@ -378,7 +378,7 @@ function CheckoutContent() {
             </span>
           </div>
 
-          <ChevronRight size={18} color="var(--text-muted)" />
+          <ChevronRight className="step-divider" size={18} color="var(--text-muted)" />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', opacity: step === 2 ? 1 : 0.5 }}>
             <div style={{ width: 32, height: 32, borderRadius: '50%', background: step === 2 ? 'var(--accent-purple)' : 'var(--border-color)', color: step === 2 ? 'white' : 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.9rem' }}>
@@ -391,7 +391,7 @@ function CheckoutContent() {
         </div>
 
         {/* Main Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '2.5rem', alignItems: 'start' }}>
+        <div className="checkout-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '2.5rem', alignItems: 'start' }}>
           {/* Left Column: Form Steps */}
           <div>
             {step === 1 ? (
@@ -403,7 +403,7 @@ function CheckoutContent() {
                     <span>Contact Information</span>
                   </h3>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                  <div className="checkout-contact-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
                     <div className="form-group">
                       <label className="form-label" style={{ fontWeight: 700 }}>Full Name *</label>
                       <input
@@ -548,7 +548,7 @@ function CheckoutContent() {
                         />
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                      <div className="checkout-address-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                         <div className="form-group">
                           <label className="form-label" style={{ fontWeight: 700 }}>City *</label>
                           <input

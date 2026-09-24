@@ -63,7 +63,7 @@ export default function AddressesPage() {
       )}
 
       {/* Saved addresses list — now on top */}
-      <div style={{ display: 'grid', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div className="address-list" style={{ display: 'grid', gap: '1rem', marginBottom: '1.5rem' }}>
         {addresses.length === 0 && !showForm && (
           <p style={{ color: 'var(--text-secondary)' }}>
             You haven&apos;t saved any addresses yet.

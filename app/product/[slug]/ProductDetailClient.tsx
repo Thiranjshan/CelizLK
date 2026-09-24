@@ -105,21 +105,18 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
           </div>
 
           {images.length > 1 && (
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <div className="product-detail-gallery-strip">
               {images.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setSelectedImageIndex(idx)}
+                  className="product-detail-thumb"
                   style={{
-                    width: 72,
-                    height: 72,
-                    borderRadius: 'var(--radius-md)',
-                    overflow: 'hidden',
                     border: selectedImageIndex === idx ? '2px solid var(--accent-purple)' : '1px solid var(--border-color)',
                     opacity: selectedImageIndex === idx ? 1 : 0.6,
                   }}
                 >
-                  <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={img} alt="" />
                 </button>
               ))}
             </div>

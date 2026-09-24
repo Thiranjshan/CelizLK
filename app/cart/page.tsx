@@ -54,7 +54,7 @@ export default function CartPage() {
     <div className="container" style={{ padding: '3rem 1.25rem 5rem 1.25rem' }}>
       <h1 style={{ fontSize: '2.25rem', fontWeight: 800, marginBottom: '2rem' }}>Shopping Cart</h1>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '2.5rem', alignItems: 'start' }}>
+      <div className="cart-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '2.5rem', alignItems: 'start' }}>
         {/* Cart Items List */}
         <div>
           {/* Free shipping threshold banner */}
@@ -87,17 +87,17 @@ export default function CartPage() {
               const mainImg = images[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop';
 
               return (
-                <div key={item.product.id} style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', padding: '1.25rem', borderBottom: '1px solid var(--border-color)', opacity: isSelected ? 1 : 0.65 }}>
+                <div key={item.product.id} className="cart-item-row" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', padding: '1.25rem', borderBottom: '1px solid var(--border-color)', opacity: isSelected ? 1 : 0.65 }}>
                   <input
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => toggleCartItemSelection(item.product.id)}
-                    style={{ width: 18, height: 18, accentColor: 'var(--accent-purple)', cursor: 'pointer' }}
+                    style={{ width: 18, height: 18, accentColor: 'var(--accent-purple)', cursor: 'pointer', flexShrink: 0 }}
                   />
 
-                  <img src={mainImg} alt={item.product.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 'var(--radius-md)', background: '#F9FAFB', border: '1px solid var(--border-color)' }} />
+                  <img src={mainImg} alt={item.product.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 'var(--radius-md)', background: '#F9FAFB', border: '1px solid var(--border-color)', flexShrink: 0 }} />
 
-                  <div style={{ flex: 1 }}>
+                  <div className="cart-item-content" style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-purple)', textTransform: 'uppercase' }}>
                       {item.product.brand?.name || 'Gadget'}
                     </div>
@@ -109,24 +109,26 @@ export default function CartPage() {
                     </div>
                   </div>
 
-                  {/* Quantity controls */}
-                  <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                    <button onClick={() => updateQuantity(item.product.id, item.quantity - 1)} style={{ padding: '0.4rem 0.6rem', color: 'var(--text-secondary)' }}>
-                      <Minus size={14} />
-                    </button>
-                    <span style={{ fontWeight: 800, padding: '0 0.75rem', fontSize: '0.9rem' }}>{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item.product.id, item.quantity + 1)} style={{ padding: '0.4rem 0.6rem', color: 'var(--text-secondary)' }}>
-                      <Plus size={14} />
+                  <div className="cart-item-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    {/* Quantity controls */}
+                    <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', flexShrink: 0 }}>
+                      <button onClick={() => updateQuantity(item.product.id, item.quantity - 1)} style={{ padding: '0.4rem 0.6rem', color: 'var(--text-secondary)' }}>
+                        <Minus size={14} />
+                      </button>
+                      <span style={{ fontWeight: 800, padding: '0 0.75rem', fontSize: '0.9rem' }}>{item.quantity}</span>
+                      <button onClick={() => updateQuantity(item.product.id, item.quantity + 1)} style={{ padding: '0.4rem 0.6rem', color: 'var(--text-secondary)' }}>
+                        <Plus size={14} />
+                      </button>
+                    </div>
+
+                    <div style={{ width: 120, textAlign: 'right', fontWeight: 900, fontSize: '1.05rem', color: 'var(--primary-indigo)', flexShrink: 0 }}>
+                      LKR {(unitPrice * item.quantity).toLocaleString()}
+                    </div>
+
+                    <button onClick={() => removeFromCart(item.product.id)} style={{ color: 'var(--text-muted)', padding: '0.5rem', flexShrink: 0 }}>
+                      <Trash2 size={18} />
                     </button>
                   </div>
-
-                  <div style={{ width: 120, textAlign: 'right', fontWeight: 900, fontSize: '1.05rem', color: 'var(--primary-indigo)' }}>
-                    LKR {(unitPrice * item.quantity).toLocaleString()}
-                  </div>
-
-                  <button onClick={() => removeFromCart(item.product.id)} style={{ color: 'var(--text-muted)', padding: '0.5rem' }}>
-                    <Trash2 size={18} />
-                  </button>
                 </div>
               );
             })}
@@ -140,7 +142,7 @@ export default function CartPage() {
         </div>
 
         {/* Summary Card */}
-        <div style={{ background: 'var(--bg-white)', padding: '1.75rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+        <div className="cart-summary-card" style={{ background: 'var(--bg-white)', padding: '1.75rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
           <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
             Order Summary
           </h3>
