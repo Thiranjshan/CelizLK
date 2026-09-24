@@ -1202,6 +1202,13 @@ h6 {
   flex-wrap: wrap;
 }
 
+.admin-upload-row-dragging {
+  border: 1px dashed var(--accent-purple);
+  border-radius: 5px;
+  background: var(--accent-glow);
+  padding: .75rem;
+}
+
 .admin-image-thumb {
   position: relative;
   width: 82px;

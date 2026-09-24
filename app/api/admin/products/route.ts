@@ -1,6 +1,8 @@
+import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { getAdminFromRequest, hasAdminPermission, writeAudit } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
+import { isValidProductSlug, normalizeProductImages, normalizeProductSlug, PRODUCT_DESCRIPTION_MAX_LENGTH, PRODUCT_NAME_MAX_LENGTH, PRODUCT_SPECS_MAX_LENGTH } from '@/lib/product-validation';
 
 export async function GET(request: Request) {
   const admin = await getAdminFromRequest(request);
@@ -15,6 +17,7 @@ export async function PATCH(request: Request) {
   if (!admin) return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 });
   if (!hasAdminPermission(admin.role, ['PRODUCT_MANAGER'])) return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
   const body = await request.json();
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ error: 'Invalid product details.' }, { status: 400 });
   const productId = typeof body.id === 'string' ? body.id : '';
   const data: {
     name?: string;
@@ -33,30 +36,54 @@ export async function PATCH(request: Request) {
     specs?: string;
   } = {};
 
-  if (typeof body.name === 'string' && body.name.trim().length >= 2) {
-    data.name = body.name.trim().slice(0, 160);
+  if (body.name !== undefined) {
+    if (typeof body.name !== 'string' || body.name.trim().length < 2 || body.name.trim().length > PRODUCT_NAME_MAX_LENGTH) {
+      return NextResponse.json({ error: 'Product name must be between 2 and 160 characters.' }, { status: 400 });
+    }
+    data.name = body.name.trim();
   }
-  if (typeof body.slug === 'string' && body.slug.trim().length >= 2) {
-    data.slug = body.slug.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  if (body.slug !== undefined && (typeof body.slug !== 'string' || (body.slug.trim() && !isValidProductSlug(normalizeProductSlug(body.slug))))) {
+    return NextResponse.json({ error: 'Slug must contain only lowercase letters, numbers, and hyphens.' }, { status: 400 });
+  }
+  if (typeof body.slug === 'string' && body.slug.trim()) {
+    data.slug = normalizeProductSlug(body.slug);
   } else if (data.name) {
-    data.slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    data.slug = normalizeProductSlug(data.name);
   }
-  if (typeof body.description === 'string' && body.description.trim().length >= 1) {
-    data.description = body.description.trim().slice(0, 5000);
+  if (body.description !== undefined) {
+    if (typeof body.description !== 'string' || body.description.trim().length < 1 || body.description.length > PRODUCT_DESCRIPTION_MAX_LENGTH) {
+      return NextResponse.json({ error: 'Description must be between 1 and 5000 characters.' }, { status: 400 });
+    }
+    data.description = body.description.trim();
   }
-  if (typeof body.brandId === 'string' && body.brandId.trim().length >= 1) {
+  if (body.brandId !== undefined) {
+    if (typeof body.brandId !== 'string' || !body.brandId.trim()) {
+      return NextResponse.json({ error: 'A valid brand is required.' }, { status: 400 });
+    }
     data.brandId = body.brandId.trim();
   }
-  if (typeof body.categoryId === 'string' && body.categoryId.trim().length > 0) {
+  if (body.categoryId !== undefined) {
+    if (typeof body.categoryId !== 'string' || !body.categoryId.trim()) {
+      return NextResponse.json({ error: 'A valid category is required.' }, { status: 400 });
+    }
     data.categoryId = body.categoryId.trim();
   }
-  if (Number.isFinite(body.price) && body.price >= 0) {
+  if (body.price !== undefined && (!Number.isFinite(body.price) || body.price < 0)) {
+    return NextResponse.json({ error: 'Price must be a valid non-negative number.' }, { status: 400 });
+  }
+  if (body.price !== undefined) {
     data.price = Number(body.price);
+  }
+  if (body.discountPrice !== undefined && body.discountPrice !== null && (!Number.isFinite(body.discountPrice) || body.discountPrice < 0)) {
+    return NextResponse.json({ error: 'Discount price must be a valid non-negative number.' }, { status: 400 });
   }
   if (body.discountPrice === null || (Number.isFinite(body.discountPrice) && body.discountPrice >= 0)) {
     data.discountPrice = body.discountPrice === null ? null : Number(body.discountPrice);
   }
-  if (Number.isInteger(body.stockQty) && body.stockQty >= 0) {
+  if (body.stockQty !== undefined && (!Number.isInteger(body.stockQty) || body.stockQty < 0)) {
+    return NextResponse.json({ error: 'Stock quantity must be a non-negative integer.' }, { status: 400 });
+  }
+  if (body.stockQty !== undefined) {
     data.stockQty = body.stockQty;
   }
   if (typeof body.isActive === 'boolean') {
@@ -75,13 +102,15 @@ export async function PATCH(request: Request) {
     }
   }
   if (Array.isArray(body.images)) {
-    const validImages = body.images.filter(
-      (img: unknown) => typeof img === 'string' && img.trim().length > 0 && (/^https?:\/\//.test(img) || img.startsWith('/') || img.startsWith('data:image/'))
-    ).slice(0, 12);
-    data.images = JSON.stringify(validImages);
+    data.images = JSON.stringify(normalizeProductImages(body.images));
+  } else if (body.images !== undefined) {
+    return NextResponse.json({ error: 'Images must be an array of valid image URLs.' }, { status: 400 });
   }
-  if (typeof body.specs === 'string') {
-    data.specs = body.specs.slice(0, 10000);
+  if (body.specs !== undefined) {
+    if (typeof body.specs !== 'string' || body.specs.length > PRODUCT_SPECS_MAX_LENGTH) {
+      return NextResponse.json({ error: 'Technical specifications cannot exceed 10000 characters.' }, { status: 400 });
+    }
+    data.specs = body.specs;
   }
 
   if (!productId || !Object.keys(data).length) return NextResponse.json({ error: 'No valid product changes supplied.' }, { status: 400 });
@@ -156,18 +185,37 @@ export async function POST(request: Request) {
   if (!admin) return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 });
   if (!hasAdminPermission(admin.role, ['PRODUCT_MANAGER'])) return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
   const body = await request.json();
-  const name = String(body.name || '').trim();
-  const slug = String(body.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-')).replace(/^-|-$/g, '');
-  const price = Number(body.price);
-  const stockQty = Number(body.stockQty ?? 0);
-  const discountPrice = body.discountPrice === null || body.discountPrice === undefined ? null : Number(body.discountPrice);
-  if (name.length < 2 || name.length > 160 || !slug || !Number.isFinite(price) || price < 0 || !Number.isInteger(stockQty) || stockQty < 0 || (discountPrice !== null && (!Number.isFinite(discountPrice) || discountPrice < 0 || discountPrice > price)) || typeof body.categoryId !== 'string' || typeof body.brandId !== 'string' || !body.description) return NextResponse.json({ error: 'Invalid product details.' }, { status: 400 });
-  const brand = await prisma.brand.findUnique({ where: { id: body.brandId } });
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ error: 'Invalid product details.' }, { status: 400 });
+  const name = typeof body.name === 'string' ? body.name.trim() : '';
+  const slug = normalizeProductSlug(typeof body.slug === 'string' && body.slug.trim() ? body.slug : name);
+  const price = body.price;
+  const stockQty = body.stockQty ?? 0;
+  const discountPrice = body.discountPrice === null || body.discountPrice === undefined ? null : body.discountPrice;
+  const description = typeof body.description === 'string' ? body.description.trim() : '';
+  const categoryId = typeof body.categoryId === 'string' ? body.categoryId.trim() : '';
+  const brandId = typeof body.brandId === 'string' ? body.brandId.trim() : '';
+  if (name.length < 2 || name.length > PRODUCT_NAME_MAX_LENGTH || !isValidProductSlug(slug) || typeof price !== 'number' || !Number.isFinite(price) || price < 0 || typeof stockQty !== 'number' || !Number.isInteger(stockQty) || stockQty < 0 || (discountPrice !== null && (typeof discountPrice !== 'number' || !Number.isFinite(discountPrice) || discountPrice < 0 || discountPrice > price)) || description.length < 10 || description.length > PRODUCT_DESCRIPTION_MAX_LENGTH || !categoryId || !brandId || (typeof body.specs !== 'undefined' && (typeof body.specs !== 'string' || body.specs.length > PRODUCT_SPECS_MAX_LENGTH))) return NextResponse.json({ error: 'Invalid product details.' }, { status: 400 });
+  const brand = await prisma.brand.findUnique({ where: { id: brandId } });
   if (!brand) return NextResponse.json({ error: 'Selected brand does not exist.' }, { status: 400 });
   if (!brand.isActive) return NextResponse.json({ error: 'Inactive brands cannot be assigned to new products.' }, { status: 400 });
+  const category = await prisma.category.findUnique({ where: { id: categoryId } });
+  if (!category) return NextResponse.json({ error: 'Selected category does not exist.' }, { status: 400 });
+  const status = body.status === 'DRAFT' || body.status === 'ARCHIVED' ? body.status : body.status === 'ACTIVE' || body.status === undefined ? 'ACTIVE' : null;
+  if (!status) return NextResponse.json({ error: 'Invalid product status.' }, { status: 400 });
+  let product;
   try {
-    const product = await prisma.product.create({ data: { name, slug, description: String(body.description).slice(0, 5000), price, discountPrice, stockQty, categoryId: body.categoryId, brandId: body.brandId, images: JSON.stringify(Array.isArray(body.images) ? body.images.slice(0, 12) : []), specs: typeof body.specs === 'string' ? body.specs.slice(0, 10000) : '', isFeatured: body.isFeatured === true, isNewArrival: body.isNewArrival === true, status: body.status === 'DRAFT' ? 'DRAFT' : 'ACTIVE' }, include: { brandRecord: true } });
-    if (stockQty) await prisma.inventoryLog.create({ data: { productId: product.id, change: stockQty, reason: 'Initial stock', adminUserId: admin.id } });
-    await writeAudit(admin.id, 'CREATE', 'PRODUCT', product.id, { name, slug, price, stockQty }); return NextResponse.json(product, { status: 201 });
-  } catch { return NextResponse.json({ error: 'Product slug already exists or category is invalid.' }, { status: 409 }); }
+    product = await prisma.product.create({ data: { name, slug, description, price, discountPrice, stockQty, categoryId, brandId, images: JSON.stringify(normalizeProductImages(body.images)), specs: typeof body.specs === 'string' ? body.specs : '', isFeatured: body.isFeatured === true, isNewArrival: body.isNewArrival === true, status, isActive: status === 'ACTIVE' }, include: { brandRecord: true } });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      return NextResponse.json({ error: 'Product slug already exists.' }, { status: 409 });
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+      return NextResponse.json({ error: 'Selected category or brand does not exist.' }, { status: 400 });
+    }
+    console.error('Failed to create product', error);
+    return NextResponse.json({ error: 'Failed to create product.' }, { status: 500 });
+  }
+  if (stockQty) await prisma.inventoryLog.create({ data: { productId: product.id, change: stockQty, reason: 'Initial stock', adminUserId: admin.id } });
+  await writeAudit(admin.id, 'CREATE', 'PRODUCT', product.id, { name, slug, price, stockQty });
+  return NextResponse.json(product, { status: 201 });
 }

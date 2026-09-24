@@ -13,14 +13,13 @@ export async function POST(request: Request) {
   try {
     const form = await request.formData();
     const file = form.get('file');
-    const validation = validateUploadedImage(file instanceof File ? file : new File([''], 'invalid'));
-
-    if (!validation.ok) {
-      return NextResponse.json({ error: validation.error }, { status: 400 });
-    }
-
     if (!(file instanceof File)) {
       return NextResponse.json({ error: 'No file provided.' }, { status: 400 });
+    }
+
+    const validation = validateUploadedImage(file);
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
     const directory = path.join(process.cwd(), 'public', 'uploads');
