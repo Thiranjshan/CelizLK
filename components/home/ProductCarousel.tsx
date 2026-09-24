@@ -1,9 +1,8 @@
 'use client';
 
-import { useRef } from 'react';
-import { useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import { Product } from '@/lib/types';
 
@@ -38,6 +37,18 @@ export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel,
   const visibleProducts = products.slice(0, 10);
   const visibleTiles = tiles;
 
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkScrollability = useCallback(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const atStart = el.scrollLeft <= 4;
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 6;
+    setCanScrollLeft(!atStart);
+    setCanScrollRight(!atEnd);
+  }, []);
+
   function clearTimers() {
     if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
     if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
@@ -46,6 +57,9 @@ export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel,
     animationFrameRef.current = null;
     inactivityTimerRef.current = null;
     hintingRef.current = false;
+    if (viewportRef.current) {
+      viewportRef.current.style.scrollSnapType = '';
+    }
   }
 
   function markInteraction() {
@@ -57,10 +71,28 @@ export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel,
     }, 5000);
   }
 
+  const scrollPrev = () => {
+    markInteraction();
+    if (!viewportRef.current) return;
+    const card = viewportRef.current.querySelector<HTMLElement>('.homepage-product-carousel-card');
+    const scrollAmount = card ? card.offsetWidth * 1.5 : 260;
+    viewportRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+  };
+
+  const scrollNext = () => {
+    markInteraction();
+    if (!viewportRef.current) return;
+    const card = viewportRef.current.querySelector<HTMLElement>('.homepage-product-carousel-card');
+    const scrollAmount = card ? card.offsetWidth * 1.5 : 260;
+    viewportRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  };
+
   useEffect(() => {
     const section = sectionRef.current;
     const viewport = viewportRef.current;
     if (!section || !viewport || typeof IntersectionObserver === 'undefined') return;
+
+    checkScrollability();
 
     const scheduleHint = (delay: number) => {
       if (!visibleRef.current || hintingRef.current || hintTimerRef.current) return;
@@ -79,6 +111,7 @@ export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel,
         if (targetPosition === originalPosition) return;
 
         hintingRef.current = true;
+        viewport.style.scrollSnapType = 'none';
         const startedAt = performance.now();
         const leftDuration = 420;
         const returnStart = 260;
@@ -103,6 +136,8 @@ export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel,
               viewport.scrollLeft = originalPosition;
               animationFrameRef.current = null;
               hintingRef.current = false;
+              viewport.style.scrollSnapType = '';
+              checkScrollability();
               return;
             }
           }
@@ -118,7 +153,10 @@ export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel,
     const observer = new IntersectionObserver(([entry]) => {
       visibleRef.current = entry.isIntersecting;
       clearTimers();
-      if (entry.isIntersecting) scheduleHint(hintPlayedRef.current ? 5000 : 1200);
+      if (entry.isIntersecting) {
+        checkScrollability();
+        scheduleHint(hintPlayedRef.current ? 5000 : 1200);
+      }
     }, { threshold: 0.35 });
 
     observer.observe(section);
@@ -128,7 +166,7 @@ export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel,
       scheduleHintRef.current = null;
       visibleRef.current = false;
     };
-  }, []);
+  }, [checkScrollability]);
 
   const actionHref = ctaHref ?? viewAllHref;
   const actionLabel = ctaLabel ?? (viewAllHref ? 'View all' : '');
@@ -146,16 +184,45 @@ export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel,
     >
       <div className="homepage-product-carousel-heading">
         <h2 id={`${title.toLowerCase().replace(/\s+/g, '-')}-heading`}>{title}</h2>
-        {actionHref && actionLabel ? (
-          <div className="homepage-product-carousel-actions">
+        <div className="homepage-product-carousel-actions">
+          {actionHref && actionLabel ? (
             <Link href={actionHref} className="homepage-product-carousel-view-all">
               <span>{actionLabel}</span>
               <ArrowRight size={16} />
             </Link>
+          ) : null}
+          <div className="homepage-carousel-nav-group" aria-label={`${title} carousel controls`}>
+            <button
+              type="button"
+              onClick={scrollPrev}
+              disabled={!canScrollLeft}
+              className="homepage-carousel-nav-btn"
+              aria-label={`Scroll ${title} left`}
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={scrollNext}
+              disabled={!canScrollRight}
+              className="homepage-carousel-nav-btn"
+              aria-label={`Scroll ${title} right`}
+            >
+              <ChevronRight size={16} />
+            </button>
           </div>
-        ) : null}
+        </div>
       </div>
-      <div className="homepage-product-carousel-viewport" ref={viewportRef} onScroll={() => { if (!hintingRef.current) markInteraction(); }} tabIndex={0} aria-label={`Scrollable ${title} products`}>
+      <div
+        className="homepage-product-carousel-viewport"
+        ref={viewportRef}
+        onScroll={() => {
+          if (!hintingRef.current) markInteraction();
+          checkScrollability();
+        }}
+        tabIndex={0}
+        aria-label={`Scrollable ${title} products`}
+      >
         <div className="homepage-product-carousel-track">
           {visibleProducts.length > 0
             ? visibleProducts.map((product) => (

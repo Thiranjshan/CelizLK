@@ -18,14 +18,20 @@ interface HeroCarouselProps {
 export default function HeroCarousel({ slides }: HeroCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const touchStartRef = React.useRef<{ x: number; y: number } | null>(null);
 
   const handleNext = useCallback(() => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
+    setCurrentIndex((prevIndex) => (prevIndex + 1 < slides.length ? prevIndex + 1 : 0));
   }, [slides.length]);
 
-  const handlePrev = useCallback(() => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + slides.length) % slides.length);
+
+  const goToNextClamped = useCallback(() => {
+    setCurrentIndex((prevIndex) => Math.min(slides.length - 1, prevIndex + 1));
   }, [slides.length]);
+
+  const goToPrevClamped = useCallback(() => {
+    setCurrentIndex((prevIndex) => Math.max(0, prevIndex - 1));
+  }, []);
 
   useEffect(() => {
     if (isHovered) return;
@@ -35,11 +41,43 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
 
   if (!slides || slides.length === 0) return null;
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current || e.changedTouches.length === 0) return;
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+    const deltaX = touchStartRef.current.x - endX;
+    const deltaY = touchStartRef.current.y - endY;
+    touchStartRef.current = null;
+
+    // Detect horizontal swipe (horizontal movement > vertical movement and > 40px)
+    if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX > 0) {
+        // Swiped left -> next slide
+        goToNextClamped();
+      } else {
+        // Swiped right -> prev slide
+        goToPrevClamped();
+      }
+    }
+  };
+
   return (
     <div 
       className="hero-carousel-container"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      style={{ touchAction: 'pan-y' }}
     >
       {/* Slides Inner */}
       <div 
@@ -70,17 +108,21 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
       {slides.length > 1 && (
         <>
           <button 
-            onClick={handlePrev} 
+            onClick={goToPrevClamped} 
             className="hero-carousel-nav-btn prev"
             aria-label="Previous Slide"
+            disabled={currentIndex === 0}
+            style={{ opacity: currentIndex === 0 ? 0.45 : 1, cursor: currentIndex === 0 ? 'not-allowed' : 'pointer' }}
           >
             <ChevronLeft size={18} />
           </button>
           
           <button 
-            onClick={handleNext} 
+            onClick={goToNextClamped} 
             className="hero-carousel-nav-btn next"
             aria-label="Next Slide"
+            disabled={currentIndex === slides.length - 1}
+            style={{ opacity: currentIndex === slides.length - 1 ? 0.45 : 1, cursor: currentIndex === slides.length - 1 ? 'not-allowed' : 'pointer' }}
           >
             <ChevronRight size={18} />
           </button>

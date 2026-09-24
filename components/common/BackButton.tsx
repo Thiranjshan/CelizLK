@@ -3,17 +3,35 @@
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-export default function BackButton({ label = 'Back' }: { label?: string }) {
+interface BackButtonProps {
+  label?: string;
+  fallbackHref?: string;
+  className?: string;
+}
+
+export default function BackButton({ label = 'Back', fallbackHref = '/', className }: BackButtonProps) {
   const router = useRouter();
 
   function goBack() {
-    const hasInternalReferrer = document.referrer.startsWith(window.location.origin) && window.history.length > 1;
-    if (hasInternalReferrer) router.back();
-    else router.push('/');
+    if (typeof window !== 'undefined') {
+      const hasInternalReferrer =
+        document.referrer &&
+        document.referrer.startsWith(window.location.origin) &&
+        window.history.length > 1;
+      if (hasInternalReferrer) {
+        router.back();
+        return;
+      }
+    }
+    router.push(fallbackHref);
   }
 
   return (
-    <button type="button" onClick={goBack} className="page-back-button">
+    <button
+      type="button"
+      onClick={goBack}
+      className={className ? `page-back-button ${className}` : 'page-back-button'}
+    >
       <ArrowLeft size={16} /> {label}
     </button>
   );

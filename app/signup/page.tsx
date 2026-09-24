@@ -56,8 +56,8 @@ function SignupContent() {
   const loginHref = returnTo ? `/login?returnTo=${encodeURIComponent(returnTo)}` : '/login';
 
   return (
-    <div className="container" style={{ maxWidth: 520, padding: '5rem 1.25rem' }}>
-      <div style={{ background: 'var(--bg-white)', padding: '2.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+    <div className="container" style={{ maxWidth: 520, padding: '4rem 1.25rem' }}>
+      <div className="auth-card">
         <h1>Create your account</h1>
         <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 2rem' }}>Save your details and track every order.</p>
         <form onSubmit={submit}>

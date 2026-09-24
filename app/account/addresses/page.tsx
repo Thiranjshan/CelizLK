@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useStore } from '@/lib/store';
-import { ArrowLeft, Plus, Pencil, Trash2, Star } from 'lucide-react';
+import { Plus, Pencil, Trash2, Star } from 'lucide-react';
+import BackButton from '@/components/common/BackButton';
 
 
 interface Address { id: string; label: string; recipientName: string; phone: string; addressLine1: string; addressLine2?: string | null; city: string; district: string; postalCode?: string | null; isDefault: boolean; }
@@ -38,21 +39,7 @@ export default function AddressesPage() {
 
   return (
     <div className="container" style={{ maxWidth: 900, padding: '3rem 1.25rem 5rem' }}>
-      <Link
-        href="/account"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 38,
-          height: 38,
-          background: 'var(--primary-indigo)',
-          borderRadius: 8,
-          textDecoration: 'none',
-        }}
-      >
-        <ArrowLeft size={20} strokeWidth={3} color="#fff" />
-      </Link>
+      <BackButton fallbackHref="/account" />
 
       <h1 style={{ margin: '1.5rem 0 1.25rem' }}>Saved addresses</h1>
 

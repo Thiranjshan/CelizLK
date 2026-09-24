@@ -95,6 +95,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
 
   return (
     <div className="container" style={{ padding: '3rem 1.25rem 5rem 1.25rem' }}>
+      <BackButton fallbackHref="/products" label="Back to products" />
 
       {/* Main Grid */}
       <div className="product-detail-main-grid" style={{ marginBottom: '5rem', background: 'var(--bg-white)', padding: '2.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
