@@ -4,11 +4,8 @@ import HeroCarousel from "@/components/home/HeroCarousel";
 import ProductCarousel from "@/components/home/ProductCarousel";
 import {
   Award,
-  ShieldCheck,
   Truck,
   Headphones,
-  MessageCircle,
-  ArrowRight,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -122,7 +119,6 @@ export default async function HomePage() {
   const trustedBrands = await prisma.brand.findMany({
     where: { isActive: true },
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-    take: 12,
   });
 
   return (
@@ -135,75 +131,19 @@ export default async function HomePage() {
         <ProductCarousel title="Featured Products" viewAllHref="/products?featured=true" products={featuredProducts} />
         <ProductCarousel title="New Arrivals" viewAllHref="/products?newArrivals=true" products={newArrivals} />
 
-        {/* Shop By Category Section */}
-        <section style={{ padding: "3rem 0 4rem" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "end",
-              marginBottom: "2rem",
-            }}
-          >
-            <div>
-              <h2
-                style={{
-                  fontSize: "1.75rem",
-                  fontWeight: 800,
-                  color: "var(--text-headline)",
-                }}
-              >
-                Shop by Category
-              </h2>
-              <p
-                style={{
-                  color: "var(--text-secondary)",
-                  fontSize: "0.95rem",
-                  marginTop: "0.25rem",
-                }}
-              >
-                Find high-performance gadgets tailored to your daily needs
-              </p>
-            </div>
-            <Link
-              href="/products"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.4rem",
-                color: "var(--accent-purple)",
-                fontWeight: 700,
-                fontSize: "0.9rem",
-              }}
-            >
-              <span>View all</span>
-              <ArrowRight size={16} />
-            </Link>
-          </div>
+        <ProductCarousel
+          title="Shop by Category"
+          ctaHref="/categories"
+          ctaLabel="Browse all categories"
+          tiles={categories.map((category) => ({ id: category.id, name: category.name, image: category.image, href: `/category/${category.slug}`, kind: 'category', showName: true }))}
+        />
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: "1.25rem",
-            }}
-          >
-            {categories.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/category/${cat.slug}`}
-                className="cat-card homepage-category-card"
-              >
-                <img
-                  className="homepage-category-image"
-                  src={cat.image}
-                  alt={cat.name}
-                />
-                <h3 className="homepage-category-name">{cat.name}</h3>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <ProductCarousel
+          title="Shop by Brand"
+          ctaHref="/brands"
+          ctaLabel="Browse all brands"
+          tiles={trustedBrands.filter((brand) => brand.logoUrl).map((brand) => ({ id: brand.id, name: brand.name, image: brand.logoUrl as string, href: `/brand/${brand.slug}`, kind: 'brand', showName: false }))}
+        />
 
         {/* Genuine products. Trusted brands. Section */}
         <section

@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ShoppingBag, Zap, ShieldCheck, Truck, ArrowLeft, Check, Plus, Minus } from 'lucide-react';
+import { ShoppingBag, Zap, ShieldCheck, Truck, Check, Plus, Minus } from 'lucide-react';
 import { Product } from '@/lib/types';
 import { useStore } from '@/lib/store';
-import ProductCard from '@/components/ProductCard';
+import ProductCarousel from '@/components/home/ProductCarousel';
+import BackButton from '@/components/common/BackButton';
 
 interface ProductDetailClientProps {
   product: Product;
@@ -95,16 +95,13 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
 
   return (
     <div className="container" style={{ padding: '3rem 1.25rem 5rem 1.25rem' }}>
-      <Link href="/products" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)', marginBottom: '1.5rem', fontWeight: 600 }}>
-        <ArrowLeft size={16} /> Back to Catalog
-      </Link>
 
       {/* Main Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3.5rem', marginBottom: '5rem', background: 'var(--bg-white)', padding: '2.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+      <div className="product-detail-main-grid" style={{ marginBottom: '5rem', background: 'var(--bg-white)', padding: '2.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
         {/* Left Column: Image Gallery */}
         <div>
-          <div style={{ width: '100%', height: 420, borderRadius: 'var(--radius-lg)', overflow: 'hidden', background: '#F9FAFB', border: '1px solid var(--border-color)', marginBottom: '1rem' }}>
-            <img src={currentImage} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div className="product-detail-main-image">
+            <img src={currentImage} alt={product.name} />
           </div>
 
           {images.length > 1 && (
@@ -142,7 +139,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
           {/* Pricing */}
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '1.5rem', background: 'var(--bg-light)',  borderRadius: 'var(--radius-md)' }}>
             <span style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--primary-indigo)' }}>
-              <span style={{ color: 'var(--accent-purple'}}>LKR</span> {(product.discountPrice ?? product.price).toLocaleString()}
+              <span style={{ color: 'var(--accent-purple)' }}>LKR</span> {(product.discountPrice ?? product.price).toLocaleString()}
             </span>
             {product.discountPrice && (
               <>
@@ -191,7 +188,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
           </div>
 
           {/* Action CTAs */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: stockError ? '0.75rem' : '2.5rem' }}>
+          <div className="product-detail-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: stockError ? '0.75rem' : '2.5rem' }}>
             <button
               onClick={() => {
                 if (quantity <= 0 || product.stockQty <= 0) {
@@ -262,18 +259,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
       )}
 
       {/* Related Products Section */}
-      {relatedProducts.length > 0 && (
-        <section>
-          <h2 className="section-title" style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>
-            You May Also Like
-          </h2>
-          <div className="products-grid">
-            {relatedProducts.map((rel) => (
-              <ProductCard key={rel.id} product={rel} />
-            ))}
-          </div>
-        </section>
-      )}
+      {relatedProducts.length > 0 && <ProductCarousel title="You May Also Like" viewAllHref="/products" products={relatedProducts} />}
     </div>
   );
 }

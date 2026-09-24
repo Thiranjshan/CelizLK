@@ -9,11 +9,23 @@ import { Product } from '@/lib/types';
 
 interface ProductCarouselProps {
   title: string;
-  viewAllHref: string;
-  products: Product[];
+  viewAllHref?: string;
+  ctaHref?: string;
+  ctaLabel?: string;
+  products?: Product[];
+  tiles?: CarouselTile[];
 }
 
-export default function ProductCarousel({ title, viewAllHref, products }: ProductCarouselProps) {
+export interface CarouselTile {
+  id: string;
+  name: string;
+  image: string;
+  href: string;
+  kind?: 'category' | 'brand';
+  showName?: boolean;
+}
+
+export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel, products = [], tiles = [] }: ProductCarouselProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const visibleRef = useRef(false);
@@ -24,6 +36,7 @@ export default function ProductCarousel({ title, viewAllHref, products }: Produc
   const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scheduleHintRef = useRef<((delay: number) => void) | null>(null);
   const visibleProducts = products.slice(0, 10);
+  const visibleTiles = tiles;
 
   function clearTimers() {
     if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
@@ -117,6 +130,9 @@ export default function ProductCarousel({ title, viewAllHref, products }: Produc
     };
   }, []);
 
+  const actionHref = ctaHref ?? viewAllHref;
+  const actionLabel = ctaLabel ?? (viewAllHref ? 'View all' : '');
+
   return (
     <section
       className="homepage-product-carousel"
@@ -130,20 +146,34 @@ export default function ProductCarousel({ title, viewAllHref, products }: Produc
     >
       <div className="homepage-product-carousel-heading">
         <h2 id={`${title.toLowerCase().replace(/\s+/g, '-')}-heading`}>{title}</h2>
-        <div className="homepage-product-carousel-actions">
-          <Link href={viewAllHref} className="homepage-product-carousel-view-all">
-            <span>View all</span>
-            <ArrowRight size={16} />
-          </Link>
-        </div>
+        {actionHref && actionLabel ? (
+          <div className="homepage-product-carousel-actions">
+            <Link href={actionHref} className="homepage-product-carousel-view-all">
+              <span>{actionLabel}</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+        ) : null}
       </div>
       <div className="homepage-product-carousel-viewport" ref={viewportRef} onScroll={() => { if (!hintingRef.current) markInteraction(); }} tabIndex={0} aria-label={`Scrollable ${title} products`}>
         <div className="homepage-product-carousel-track">
-          {visibleProducts.map((product) => (
-            <div className="homepage-product-carousel-card" key={product.id}>
-              <ProductCard product={product} />
-            </div>
-          ))}
+          {visibleProducts.length > 0
+            ? visibleProducts.map((product) => (
+              <div className="homepage-product-carousel-card" key={product.id}>
+                <ProductCard product={product} />
+              </div>
+            ))
+            : visibleTiles.map((tile) => (
+              <div
+                className={`homepage-product-carousel-card homepage-tile-carousel-card ${tile.kind === 'brand' ? 'homepage-brand-tile-carousel-card' : ''}`}
+                key={tile.id}
+              >
+                <Link href={tile.href} className={`homepage-tile-carousel-link ${tile.kind === 'brand' ? 'homepage-brand-tile-carousel-link' : ''}`}>
+                  <span className="homepage-tile-carousel-image"><img src={tile.image} alt={tile.name} loading="lazy" /></span>
+                  {tile.showName !== false ? <strong>{tile.name}</strong> : null}
+                </Link>
+              </div>
+            ))}
         </div>
       </div>
     </section>

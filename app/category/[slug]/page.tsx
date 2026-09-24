@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma';
 import ProductCard from '@/components/ProductCard';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import BackButton from '@/components/common/BackButton';
 
 export const revalidate = 30;
 
@@ -23,7 +23,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   const rawProducts = await prisma.product.findMany({
     where: { categoryId: category.id, isActive: true },
-    orderBy: { createdAt: 'desc' },
+    orderBy: [{ stockQty: 'desc' }, { createdAt: 'desc' }],
     include: { category: true, brandRecord: true },
   });
 
@@ -37,9 +37,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <div className="container" style={{ padding: '3rem 1.25rem 5rem 1.25rem' }}>
-      <Link href="/products" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)', marginBottom: '1.5rem', fontWeight: 600 }}>
-        <ArrowLeft size={16} /> Back to Catalog
-      </Link>
+      <BackButton label="Back" />
 
       <div style={{ background: 'var(--brand-gradient)', color: 'white', padding: '2.5rem 2rem', borderRadius: 'var(--radius-lg)', marginBottom: '2.5rem', boxShadow: 'var(--shadow-md)' }}>
         <h1 style={{ fontSize: '2.25rem', color: 'white', marginBottom: '0.5rem' }}>{category.name}</h1>
