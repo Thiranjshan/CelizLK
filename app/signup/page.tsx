@@ -45,7 +45,7 @@ function SignupContent() {
       setAccessToken(data.accessToken);
       addToast('success', 'Account created successfully.');
       const targetPath = returnTo?.startsWith('/') ? returnTo : '/account';
-      router.push(targetPath);
+      router.replace(targetPath);
     } catch (error) {
       addToast('error', error instanceof Error ? error.message : 'Unable to create account.');
     } finally {

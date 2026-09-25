@@ -128,22 +128,32 @@ export default async function HomePage() {
         <HeroCarousel slides={carouselSlides} />
 
         {/* Product merchandising sections */}
-        <ProductCarousel title="Featured Products" viewAllHref="/products?featured=true" products={featuredProducts} />
-        <ProductCarousel title="New Arrivals" viewAllHref="/products?newArrivals=true" products={newArrivals} />
-
         <ProductCarousel
-          title="Shop by Category"
+          title="Explore Collections"
           ctaHref="/categories"
+          tiles={[
+            {
+              id: 'shop-all',
+              name: 'Shop All',
+              image: '/images/shop-all-feature.png',
+              href: '/products',
+              kind: 'category',
+              showName: true,
+              isShopAll: true,
+            },
+            ...categories.map((category) => ({
+              id: category.id,
+              name: category.name,
+              image: category.image,
+              href: `/category/${category.slug}`,
+              kind: 'category' as const,
+              showName: true,
+            })),
+          ]}
           ctaLabel="Browse all categories"
-          tiles={categories.map((category) => ({ id: category.id, name: category.name, image: category.image, href: `/category/${category.slug}`, kind: 'category', showName: true }))}
         />
 
-        <ProductCarousel
-          title="Shop by Brand"
-          ctaHref="/brands"
-          ctaLabel="Browse all brands"
-          tiles={trustedBrands.filter((brand) => brand.logoUrl).map((brand) => ({ id: brand.id, name: brand.name, image: brand.logoUrl as string, href: `/brand/${brand.slug}`, kind: 'brand', showName: false }))}
-        />
+        <ProductCarousel title="New Arrivals" viewAllHref="/products?newArrivals=true" products={newArrivals} />
 
         {/* Genuine products. Trusted brands. Section */}
         <section
@@ -255,6 +265,12 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+        
+
+        <ProductCarousel title="Featured Products" viewAllHref="/products?featured=true" products={featuredProducts} />
+
+
+        
 
         {/* Why Celiz LK Promos grid */}
         <section

@@ -40,7 +40,7 @@ function LoginContent() {
       setUser(data.user);
       setAccessToken(data.accessToken);
       const targetPath = returnTo?.startsWith('/') ? returnTo : '/';
-      router.push(targetPath);
+      router.replace(targetPath);
       addToast('success', 'Welcome back.');
     } catch (error) {
       addToast('error', error instanceof Error ? error.message : 'Unable to sign in.');

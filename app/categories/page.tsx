@@ -41,7 +41,7 @@ export default async function CategoriesPage() {
     name: 'Shop All',
     slug: 'shop-all',
     href: '/products',
-    image: normalizedCategories[0]?.image || '',
+    image: '/images/shop-all-feature.png',
   };
 
   const categoryCards = [shopAllCard, ...normalizedCategories.map((category) => ({
@@ -79,6 +79,7 @@ export default async function CategoriesPage() {
                 {!isShopAll ? <small>{category.slug === 'shop-all' ? '' : 'Shop now'}</small> : null}
               </span>
             </Link>
+            
           );
         })}
       </div>

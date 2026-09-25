@@ -22,6 +22,7 @@ export interface CarouselTile {
   href: string;
   kind?: 'category' | 'brand';
   showName?: boolean;
+  isShopAll?: boolean;
 }
 
 export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel, products = [], tiles = [] }: ProductCarouselProps) {
@@ -230,17 +231,33 @@ export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel,
                 <ProductCard product={product} />
               </div>
             ))
-            : visibleTiles.map((tile) => (
-              <div
-                className={`homepage-product-carousel-card homepage-tile-carousel-card ${tile.kind === 'brand' ? 'homepage-brand-tile-carousel-card' : ''}`}
-                key={tile.id}
-              >
-                <Link href={tile.href} className={`homepage-tile-carousel-link ${tile.kind === 'brand' ? 'homepage-brand-tile-carousel-link' : ''}`}>
-                  <span className="homepage-tile-carousel-image"><img src={tile.image} alt={tile.name} loading="lazy" /></span>
-                  {tile.showName !== false ? <strong>{tile.name}</strong> : null}
-                </Link>
-              </div>
-            ))}
+            : visibleTiles.map((tile) => {
+              const isCategoryTile = tile.kind === 'category';
+              const isBrandTile = tile.kind === 'brand';
+              const isShopAllTile = Boolean(tile.isShopAll);
+
+              return (
+                <div
+                  className={`homepage-product-carousel-card homepage-tile-carousel-card ${isBrandTile ? 'homepage-brand-tile-carousel-card' : ''} ${isCategoryTile ? 'homepage-category-tile-carousel-card' : ''} ${isShopAllTile ? 'homepage-shop-all-tile-carousel-card' : ''}`}
+                  key={tile.id}
+                >
+                  <Link
+                    href={tile.href}
+                    className={`homepage-tile-carousel-link ${isBrandTile ? 'homepage-brand-tile-carousel-link' : ''} ${isCategoryTile ? 'homepage-category-tile-carousel-link' : ''} ${isShopAllTile ? 'homepage-shop-all-tile-carousel-link' : ''}`}
+                  >
+                    <span className="homepage-tile-carousel-image">
+                      <img src={tile.image} alt={tile.name} loading="lazy" />
+                    </span>
+                    {tile.showName !== false ? (
+                      <>
+                        <strong>{tile.name}</strong>
+                        {isShopAllTile ? <span className="homepage-shop-all-tile-explore">Explore</span> : null}
+                      </>
+                    ) : null}
+                  </Link>
+                </div>
+              );
+            })}
         </div>
       </div>
     </section>
