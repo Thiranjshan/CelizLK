@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
   const user = await prisma.user.findUnique({ where: { email } });
   const genericError = NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 });
-  if (!user) return genericError;
+  if (!user || !user.passwordHash) return genericError;
   if (user.lockUntil && user.lockUntil > new Date()) return genericError;
   if (!(await verifyPassword(password, user.passwordHash))) {
     const attempts = user.failedLoginAttempts + 1;

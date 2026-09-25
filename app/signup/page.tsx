@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -54,12 +55,24 @@ function SignupContent() {
   }
 
   const loginHref = returnTo ? `/login?returnTo=${encodeURIComponent(returnTo)}` : '/login';
+  const googleAuthHref = returnTo ? `/api/auth/google?returnTo=${encodeURIComponent(returnTo)}` : '/api/auth/google';
 
   return (
     <div className="container" style={{ maxWidth: 520, padding: '4rem 1.25rem' }}>
       <div className="auth-card">
         <h1>Create your account</h1>
         <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 2rem' }}>Save your details and track every order.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+          <a href={googleAuthHref} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', background: '#fff', color: '#1f2937', border: '1px solid #d1d5db', borderRadius: 999, padding: '0.8rem 1rem', fontWeight: 600, textDecoration: 'none' }}>
+            <Image src="/google-logo.png" alt="Google" width={18} height={18} style={{ display: 'block' }} />
+            Continue with Google
+          </a>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+          <span style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>or</span>
+          <span style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
+        </div>
         <form onSubmit={submit}>
           <div className="form-group">
             <label className="form-label">Full name</label>
