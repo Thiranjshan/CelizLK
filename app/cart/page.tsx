@@ -20,7 +20,7 @@ export default function CartPage() {
   }, 0);
 
   const allSelected = cart.length > 0 && cart.every((item) => item.selected !== false);
-  const shippingFee = getCartSubtotal > 15000 ? 0 : 350;
+  const shippingFee = Number(process.env.NEXT_PUBLIC_DELIVERY_FEE_LKR ?? 350);
   const grandTotal = getCartSubtotal + shippingFee;
 
   const handleCheckoutClick = (e: React.MouseEvent) => {
@@ -57,13 +57,6 @@ export default function CartPage() {
       <div className="cart-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '2.5rem', alignItems: 'start' }}>
         {/* Cart Items List */}
         <div>
-          {/* Free shipping threshold banner */}
-          <div style={{ background: getCartSubtotal > 15000 ? 'var(--success-bg)' : 'var(--warning-bg)', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', fontSize: '0.9rem', color: getCartSubtotal > 15000 ? 'var(--success)' : 'var(--warning)', fontWeight: 700 }}>
-            {getCartSubtotal > 15000
-              ? '🎉 Congratulations! You unlocked FREE islandwide shipping.'
-              : `Add LKR ${(15000 - getCartSubtotal).toLocaleString()} more to your cart to qualify for FREE Shipping!`}
-          </div>
-
           <div style={{ background: 'var(--bg-white)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
             <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border-color)', fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
@@ -154,8 +147,8 @@ export default function CartPage() {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem', color: 'var(--text-secondary)' }}>
             <span>Islandwide Shipping</span>
-            <span style={{ fontWeight: 700, color: shippingFee === 0 ? 'var(--success)' : 'var(--text-headline)' }}>
-              {shippingFee === 0 ? 'FREE' : `LKR ${shippingFee}`}
+            <span style={{ fontWeight: 700, color: 'var(--text-headline)' }}>
+              LKR {shippingFee.toLocaleString()}
             </span>
           </div>
 

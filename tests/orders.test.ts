@@ -193,10 +193,9 @@ test('creates and authenticates a checkout customer without duplicate accounts',
   assert.equal(await prisma.user.count({ where: { email } }), 1);
 });
 
-test('returns active delivery-zone fees and rejects unknown districts', async () => {
-  const colombo = await getDeliveryZone(new Request('http://localhost/api/delivery-zones?district=Colombo'));
-  assert.equal(colombo.status, 200);
-  assert.equal((await colombo.json()).fee, 350);
-  const unknown = await getDeliveryZone(new Request('http://localhost/api/delivery-zones?district=Unknown'));
-  assert.equal(unknown.status, 404);
+test('returns the configured flat delivery fee without district validation', async () => {
+  const response = await getDeliveryZone(new Request('http://localhost/api/delivery-zones?district=Colombo'));
+  assert.equal(response.status, 200);
+  const payload = await response.json();
+  assert.equal(payload.fee, Number(process.env.DELIVERY_FEE_LKR ?? 350));
 });

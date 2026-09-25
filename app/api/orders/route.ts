@@ -89,9 +89,6 @@ export async function POST(request: Request) {
     if (error instanceof Error && error.message === 'INVALID_PAYMENT_METHOD') {
       return NextResponse.json({ error: 'Invalid payment method.' }, { status: 400 });
     }
-    if (error instanceof Error && error.message === 'DELIVERY_AREA_UNAVAILABLE') {
-      return NextResponse.json({ error: 'This delivery area is currently unavailable.' }, { status: 409 });
-    }
     if (error instanceof Error && ['PRODUCT_UNAVAILABLE', 'INSUFFICIENT_STOCK', 'STOCK_CONFLICT'].includes(error.message)) {
       return NextResponse.json({ error: 'One or more products are unavailable or out of stock.' }, { status: 409 });
     }

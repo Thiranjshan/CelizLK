@@ -40,7 +40,7 @@ export default function TermsAndConditionsPage() {
               3. Islandwide Express Shipping & Delivery
             </h2>
             <p>
-              Delivery timeframe for standard islandwide orders across Sri Lanka is 1-3 business days. Deliveries are fulfilled through recognized local courier partners. Free shipping applies to qualifying order amounts.
+              Delivery timeframe for standard islandwide orders across Sri Lanka is 1-3 business days. Deliveries are fulfilled through recognized local courier partners. A single standard delivery fee applies to all islandwide orders.
             </p>
           </div>
 

@@ -11,6 +11,8 @@ export default function WhatsAppButton() {
     '/order-success',
     '/checkout',
     '/admin',
+    '/login',
+    '/signup',
   ];
 
   const shouldHide = hiddenPaths.some(

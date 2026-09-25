@@ -3239,6 +3239,34 @@ h6 {
 }
 
 /* Homepage Responsive Layout Adjustments */
+.checkout-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.checkout-layout > * {
+  min-width: 0;
+}
+
+.checkout-contact-grid,
+.checkout-address-grid {
+  display: grid;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.checkout-contact-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.checkout-address-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 @media (max-width: 768px) {
   .brands-trust-layout {
     grid-template-columns: 1fr !important;
@@ -3256,6 +3284,10 @@ h6 {
   .checkout-success-grid,
   .checkout-main-grid {
     grid-template-columns: 1fr !important;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .checkout-contact-grid,
@@ -3264,6 +3296,10 @@ h6 {
   .checkout-receipt-grid,
   .account-settings-list {
     grid-template-columns: 1fr !important;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .cart-item-row {

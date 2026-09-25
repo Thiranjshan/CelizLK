@@ -78,7 +78,6 @@ function CheckoutContent() {
   const [savedAddresses, setSavedAddresses] = useState<{ id: string; label: string; recipientName: string; phone: string; addressLine1: string; addressLine2?: string | null; city: string; district: string; postalCode?: string | null }[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
-  const [resolvedDeliveryFee, setResolvedDeliveryFee] = useState<number | null>(null);
 
   const [formData, setFormData] = useState({
     fullName: user?.fullName || '',
@@ -134,16 +133,8 @@ function CheckoutContent() {
       .catch(() => setShowNewAddressForm(true));
   }, [accessToken]);
 
-  // Fetch dynamic delivery fee per district
-  useEffect(() => {
-    if (!formData.district) return;
-    fetch(`/api/delivery-zones?district=${encodeURIComponent(formData.district)}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((zone) => setResolvedDeliveryFee(zone?.fee ?? null))
-      .catch(() => setResolvedDeliveryFee(null));
-  }, [formData.district]);
-
-  const shippingFee = subtotal > 15000 ? 0 : (resolvedDeliveryFee ?? 350);
+  const deliveryFee = Number(process.env.NEXT_PUBLIC_DELIVERY_FEE_LKR ?? 350);
+  const shippingFee = deliveryFee;
   const totalPayable = subtotal + shippingFee;
 
   const selectSavedAddress = (addr: typeof savedAddresses[0]) => {
@@ -392,7 +383,7 @@ function CheckoutContent() {
         </div>
 
         {/* Main Grid */}
-        <div className="checkout-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '2.5rem', alignItems: 'start' }}>
+        <div className="checkout-layout" style={{ display: 'grid', gap: '2.5rem', alignItems: 'start', width: '100%', maxWidth: '100%' }}>
           {/* Left Column: Form Steps */}
           <div>
             {step === 1 ? (
@@ -404,7 +395,7 @@ function CheckoutContent() {
                     <span>Contact Information</span>
                   </h3>
 
-                  <div className="checkout-contact-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                  <div className="checkout-contact-grid" style={{ display: 'grid', gap: '1.25rem', width: '100%', maxWidth: '100%' }}>
                     <div className="form-group">
                       <label className="form-label" style={{ fontWeight: 700 }}>Full Name *</label>
                       <input
@@ -549,7 +540,7 @@ function CheckoutContent() {
                         />
                       </div>
 
-                      <div className="checkout-address-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                      <div className="checkout-address-grid" style={{ display: 'grid', gap: '1rem', width: '100%', maxWidth: '100%' }}>
                         <div className="form-group">
                           <label className="form-label" style={{ fontWeight: 700 }}>City *</label>
                           <input
@@ -830,8 +821,8 @@ function CheckoutContent() {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
                 <span>Islandwide Delivery</span>
-                <span style={{ color: shippingFee === 0 ? 'var(--success)' : 'inherit', fontWeight: 700 }}>
-                  {shippingFee === 0 ? 'FREE' : `LKR ${shippingFee}`}
+                <span style={{ fontWeight: 700 }}>
+                  LKR {shippingFee.toLocaleString()}
                 </span>
               </div>
 
