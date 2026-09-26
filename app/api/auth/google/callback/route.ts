@@ -131,7 +131,9 @@ export async function GET(request: NextRequest) {
 
     const accessToken = await createAccessToken(updatedUser);
     const nextPath = getSafeReturnTo(storedState.returnTo ?? null);
-    const response = NextResponse.redirect(new URL(nextPath, request.url));
+    const base = process.env.APP_URL || request.url;
+    
+    const response = NextResponse.redirect(new URL(nextPath, base));
     response.cookies.set({
       name: 'celiz_access_token',
       value: accessToken,

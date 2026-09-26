@@ -91,7 +91,7 @@ jobs:
           script: |
             set -e
             cd ~/app
-            docker compose pull
+            docker compose --profile tools pull
             docker compose --profile tools run --rm migrate
             docker compose up -d
             docker image prune -f
