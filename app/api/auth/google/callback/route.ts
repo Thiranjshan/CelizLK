@@ -11,7 +11,9 @@ function getSafeReturnTo(value: string | null) {
 }
 
 function redirectToLogin(request: NextRequest, message: string) {
-  return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(message)}`, request.url));
+  const base = process.env.APP_URL || request.url;
+
+  return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(message)}`, base));
 }
 
 export async function GET(request: NextRequest) {

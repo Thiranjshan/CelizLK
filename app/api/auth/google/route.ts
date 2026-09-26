@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const stateCookieName = 'google_oauth_state';
 
+
+
 function getSafeReturnTo(value: string | null) {
   const candidate = value?.trim() || '/';
   return candidate.startsWith('/') && !candidate.startsWith('//') ? candidate : '/';
@@ -11,9 +13,11 @@ function getSafeReturnTo(value: string | null) {
 export async function GET(request: NextRequest) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const redirectUri = process.env.GOOGLE_REDIRECT_URI;
+  const base = process.env.APP_URL || request.url;
 
+  
   if (!clientId || !redirectUri) {
-    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent('Google sign-in is not configured.')}`, request.url));
+    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent('Google sign-in is not configured.')}`, base));
   }
 
   const state = randomBytes(32).toString('hex');
