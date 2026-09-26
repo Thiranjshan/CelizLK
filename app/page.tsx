@@ -77,21 +77,12 @@ export default async function HomePage() {
     .filter((category) => category.image);
 
   // 3. Fetch New Arrivals (marked isNewArrival: true)
-  let rawNewArrivals = await prisma.product.findMany({
+  const rawNewArrivals = await prisma.product.findMany({
     where: { isNewArrival: true, isActive: true },
     take: 10,
     include: { category: true, brandRecord: true },
   });
 
-  // Fallback to latest products if none are marked isNewArrival
-  if (rawNewArrivals.length === 0) {
-    rawNewArrivals = await prisma.product.findMany({
-      where: { isActive: true },
-      orderBy: { createdAt: "desc" },
-      take: 10,
-      include: { category: true, brandRecord: true },
-    });
-  }
 
   const newArrivals = rawNewArrivals.map((p) => ({
     ...p,
