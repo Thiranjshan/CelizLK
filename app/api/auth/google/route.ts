@@ -10,9 +10,9 @@ function getSafeReturnTo(value: string | null) {
 
 export async function GET(request: NextRequest) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/google/callback';
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
 
-  if (!clientId) {
+  if (!clientId || !redirectUri) {
     return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent('Google sign-in is not configured.')}`, request.url));
   }
 
@@ -25,8 +25,6 @@ export async function GET(request: NextRequest) {
   authUrl.searchParams.set('redirect_uri', redirectUri);
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('scope', 'openid email profile');
-  authUrl.searchParams.set('access_type', 'offline');
-  authUrl.searchParams.set('prompt', 'consent');
   authUrl.searchParams.set('state', state);
 
   const response = NextResponse.redirect(authUrl.toString());
