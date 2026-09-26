@@ -192,26 +192,7 @@ export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel,
               <ArrowRight size={16} />
             </Link>
           ) : null}
-          <div className="homepage-carousel-nav-group" aria-label={`${title} carousel controls`}>
-            <button
-              type="button"
-              onClick={scrollPrev}
-              disabled={!canScrollLeft}
-              className="homepage-carousel-nav-btn"
-              aria-label={`Scroll ${title} left`}
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <button
-              type="button"
-              onClick={scrollNext}
-              disabled={!canScrollRight}
-              className="homepage-carousel-nav-btn"
-              aria-label={`Scroll ${title} right`}
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
+          
         </div>
       </div>
       <div

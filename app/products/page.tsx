@@ -133,19 +133,19 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               >
                 Newest
               </Link>
-              <span>|</span>
+              <span>| Price: </span>
               <Link
                 href={buildProductsUrl({ category: selectedCategories, brand: selectedBrands, sort: 'price-asc', featured: isFeaturedView ? 'true' : undefined, newArrivals: isNewArrivalView ? 'true' : undefined })}
                 className={sort === 'price-asc' ? 'active' : ''}
               >
-                Price: Low to High
+                Low to High
               </Link>
-              <span>|</span>
+              <span>:</span>
               <Link
                 href={buildProductsUrl({ category: selectedCategories, brand: selectedBrands, sort: 'price-desc', featured: isFeaturedView ? 'true' : undefined, newArrivals: isNewArrivalView ? 'true' : undefined })}
                 className={sort === 'price-desc' ? 'active' : ''}
               >
-                Price: High to Low
+                High to Low
               </Link>
             </div>
           </div>
