@@ -144,7 +144,7 @@ export default async function HomePage() {
           ctaLabel="Browse all categories"
         />
 
-        <ProductCarousel title="New Arrivals" viewAllHref="/products?newArrivals=true" products={newArrivals} />
+        <ProductCarousel title="Just In" viewAllHref="/products?newArrivals=true" products={newArrivals} />
 
         {/* Genuine products. Trusted brands. Section */}
         <section
