@@ -1094,7 +1094,6 @@ h6 {
 
 .product-detail-main-image {
   width: 100%;
-  aspect-ratio: 1;
   margin-bottom: 1rem;
   overflow: hidden;
   background: #F9FAFB;
@@ -1104,9 +1103,9 @@ h6 {
 }
 
 .product-detail-main-image img {
+  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: contain;
+  height: auto;
   max-width: 100%;
 }
 
@@ -1129,6 +1128,42 @@ h6 {
 .product-detail-description,
 .product-detail-stock-note {
   max-width: 100%;
+}
+
+.product-detail-heading-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.product-detail-heading-row .product-detail-title {
+  flex: 1;
+}
+
+.product-detail-share-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 40px;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-white);
+  color: var(--text-headline);
+  font-size: 0.875rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: var(--transition-fast);
+}
+
+.product-detail-share-button:hover,
+.product-detail-share-button:focus-visible {
+  border-color: var(--accent-purple);
+  color: var(--accent-purple);
 }
 
 .product-detail-price-row,
@@ -2514,15 +2549,57 @@ h6 {
 @media (max-width: 640px) {
   .header-content {
     gap: 0.75rem;
+    position: relative;
   }
 
   .search-bar {
     display: none;
-    /* Mobile view can use search route */
+  }
+
+  .search-bar.mobile-search-open {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    right: 0;
+    z-index: 101;
+    display: block;
+    width: auto;
+    max-width: none;
+    padding: 0.5rem;
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+  }
+
+  .nav-actions .mobile-search-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.3rem;
+    color: var(--text-headline);
+    border-radius: var(--radius-full);
+  }
+
+  .nav-actions .mobile-search-toggle:hover {
+    background: var(--bg-surface);
+  }
+
+  .nav-actions {
+    gap: 0.15rem;
+  }
+
+  .nav-actions .nav-link-btn,
+  .nav-actions .cart-icon-btn {
+    padding: 0.3rem;
+  }
+
+  .mobile-menu-toggle {
+    padding: 0.3rem;
   }
 
   .brand-logo-image {
-    width: 150px;
+    width: 125px;
     height: 48px;
   }
 
@@ -2606,7 +2683,13 @@ h6 {
   }
 }
 
-/* Product Card Custom Badges & Wishlist Overlay */
+@media (max-width: 360px) {
+  .brand-logo-image {
+    width: 105px;
+  }
+}
+
+/* Product Card Custom Badges */
 .product-card-badges {
   position: absolute;
   top: 12px;
@@ -2641,33 +2724,6 @@ h6 {
 .badge-out-of-stock {
   background: var(--text-secondary);
   color: #FFFFFF;
-}
-
-.product-card-wishlist-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 5;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(4px);
-  border-radius: var(--radius-full);
-  padding: 0.45rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border-color);
-  transition: var(--transition-fast);
-}
-
-.product-card-wishlist-btn:hover {
-  background: #FFFFFF;
-  border-color: var(--accent-purple);
-  transform: scale(1.05);
-}
-
-.product-card-wishlist-btn.active {
-  background: #FFFFFF;
-  border-color: var(--accent-purple);
 }
 
 .product-card.out-of-stock .product-image-wrap img {
@@ -3114,11 +3170,37 @@ h6 {
   cursor: pointer;
 }
 
+.mobile-menu-icon-stack {
+  display: grid;
+  width: 20px;
+  height: 20px;
+}
+
+.mobile-menu-icon {
+  grid-area: 1 / 1;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.mobile-menu-icon-hidden {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-menu-icon {
+    transition: none;
+  }
+}
+
+.mobile-search-toggle {
+  display: none;
+}
+
 /* Mobile Nav Drawer */
 .mobile-nav-drawer {
   position: absolute;
   top: 100%;
-  right: 0;
+  left: 0;
   width: min(360px, calc(100vw - 2rem));
   max-height: calc(100vh - 90px);
   background: #FFFFFF;
@@ -3130,22 +3212,6 @@ h6 {
   padding: 1.5rem 0;
   box-shadow: var(--shadow-md);
   animation: slideDownMobile 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.mobile-nav-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.mobile-nav-title {
-  font-weight: 800;
-  color: var(--text-headline);
-}
-
-.mobile-menu-close {
-  display: flex;
 }
 
 @keyframes slideDownMobile {
@@ -3424,10 +3490,6 @@ h6 {
     grid-template-columns: 1fr;
     gap: 2rem;
     padding: 1.25rem !important;
-  }
-
-  .product-detail-main-image {
-    min-height: 280px;
   }
 
   .product-detail-gallery-strip {

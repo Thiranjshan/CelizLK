@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ShoppingBag, Zap, ShieldCheck, Truck, Check, Plus, Minus } from 'lucide-react';
+import { ShoppingBag, Zap, ShieldCheck, Truck, Check, Plus, Minus, Share } from 'lucide-react';
 import { Product } from '@/lib/types';
 import { useStore } from '@/lib/store';
 import ProductCarousel from '@/components/home/ProductCarousel';
@@ -67,6 +67,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   const [stockError, setStockError] = useState('');
   const addToCart = useStore((state) => state.addToCart);
   const setBuyNowItem = useStore((state) => state.setBuyNowItem);
+  const addToast = useStore((state) => state.addToast);
   const user = useStore((state) => state.user);
 
   const images = Array.isArray(product.images) ? product.images : [];
@@ -93,10 +94,33 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
     }
   };
 
+  const handleShare = async () => {
+    const url = window.location.href;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: product.name,
+          text: `Check out ${product.name} at Celiz LK`,
+          url,
+        });
+        return;
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return;
+    }
+
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+      await navigator.clipboard.writeText(url);
+      addToast('success', 'Product link copied to clipboard.');
+    } catch {
+      addToast('error', 'Unable to share or copy the product link.');
+    }
+  };
+
   return (
     <div className="container" style={{ padding: '3rem 1.25rem 5rem 1.25rem' }}>
-      <BackButton fallbackHref="/products" label="Back to products" />
-
       {/* Main Grid */}
       <div className="product-detail-main-grid" style={{ marginBottom: '5rem', background: 'var(--bg-white)', padding: '2.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
         {/* Left Column: Image Gallery */}
@@ -130,9 +154,20 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
             {product.brand?.name || 'Gadget'} • {product.category?.name || 'Gadgets'}
           </div>
 
-          <h1 className="product-detail-title" style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1.25, marginBottom: '1rem', color: 'var(--primary-indigo)' }}>
-            {product.name}
-          </h1>
+          <div className="product-detail-heading-row">
+            <h1 className="product-detail-title" style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1.25, marginBottom: 0, color: 'var(--primary-indigo)' }}>
+              {product.name}
+            </h1>
+            <button
+              type="button"
+              onClick={handleShare}
+              className="product-detail-share-button"
+              aria-label={`Share ${product.name}`}
+              title="Share product"
+            >
+              <Share size={18} />
+            </button>
+          </div>
 
           {/* Pricing */}
           <div className="product-detail-price-row" style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '1.5rem', background: 'var(--bg-light)', borderRadius: 'var(--radius-md)', flexWrap: 'wrap' }}>

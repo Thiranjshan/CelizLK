@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState, useSyncExternalStore } from 'react';
-import { ShoppingBag, Search, User, Heart, Menu, X, MessageCircle } from 'lucide-react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { ShoppingBag, Search, User, Menu, X, MessageCircle } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import CategoryMegaMenu from '@/components/CategoryMegaMenu';
 import BrandMegaMenu from '@/components/BrandMegaMenu';
@@ -16,7 +16,9 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brandsOpen, setBrandsOpen] = useState(false);
@@ -24,8 +26,6 @@ export default function Header() {
   const hasHydrated = useSyncExternalStore(() => () => undefined, () => true, () => false);
   const cart = useStore((state) => state.cart);
   const cartCount = hasHydrated ? cart.filter((item) => item.selected !== false).reduce((sum, item) => sum + item.quantity, 0) : 0;
-  const wishlist = useStore((state) => state.wishlist);
-  const wishlistCount = hasHydrated ? wishlist.length : 0;
   const user = useStore((state) => hasHydrated ? state.user : null);
 
   useEffect(() => {
@@ -34,6 +34,10 @@ export default function Header() {
     fetch('/api/categories').then((response) => response.ok ? response.json() : []).then(setCategories).catch(() => undefined);
   }, []);
 
+  useEffect(() => {
+    if (mobileSearchOpen) searchInputRef.current?.focus();
+  }, [mobileSearchOpen]);
+
   if (pathname.startsWith('/admin') || pathname.startsWith('/checkout')) return null;
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -41,6 +45,7 @@ export default function Header() {
     if (searchQuery.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setMobileMenuOpen(false);
+      setMobileSearchOpen(false);
     }
   };
 
@@ -97,6 +102,22 @@ export default function Header() {
       <header className="site-header">
         <div className="container">
           <div className="header-content">
+
+              {/* Mobile menu toggle */}
+              <button
+                type="button"
+                className="mobile-menu-toggle"
+                onClick={() => mobileMenuOpen ? closeMobileNavigation() : setMobileMenuOpen(true)}
+                aria-label={mobileMenuOpen ? 'Close Menu' : 'Open Menu'}
+                aria-expanded={mobileMenuOpen}
+                aria-controls={mobileMenuOpen ? 'mobile-nav-drawer' : undefined}
+              >
+                <span className="mobile-menu-icon-stack" aria-hidden="true">
+                  <Menu className={`mobile-menu-icon ${mobileMenuOpen ? 'mobile-menu-icon-hidden' : ''}`} size={20} />
+                  <X className={`mobile-menu-icon ${mobileMenuOpen ? '' : 'mobile-menu-icon-hidden'}`} size={20} />
+                </span>
+              </button>
+
             {/* Logo */}
             <Link href="/" className="brand-logo">
               <Image
@@ -111,9 +132,14 @@ export default function Header() {
             </Link>
 
             {/* Global Search Bar */}
-            <form onSubmit={handleSearchSubmit} className="search-bar">
+            <form
+              id="header-search-form"
+              onSubmit={handleSearchSubmit}
+              className={`search-bar ${mobileSearchOpen ? 'mobile-search-open' : ''}`}
+            >
               <Search className="search-icon" />
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search earbuds, chargers, smartwatches..."
                 value={searchQuery}
@@ -124,13 +150,16 @@ export default function Header() {
 
             {/* Action Buttons */}
             <div className="nav-actions">
-              {/* Wishlist */}
-              <Link href="/wishlist" className="nav-link-btn" aria-label="Wishlist">
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <Heart size={20} />
-                  {wishlistCount > 0 && <span className="cart-badge">{wishlistCount}</span>}
-                </div>
-              </Link>
+              <button
+                type="button"
+                className="mobile-search-toggle"
+                aria-label={mobileSearchOpen ? 'Close search' : 'Open search'}
+                aria-expanded={mobileSearchOpen}
+                aria-controls="header-search-form"
+                onClick={() => setMobileSearchOpen((open) => !open)}
+              >
+                {mobileSearchOpen ? <X size={20} /> : <Search size={20} />}
+              </button>
 
               {/* Account */}
               {user ? (
@@ -150,16 +179,6 @@ export default function Header() {
                 {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
               </Link>
 
-              {/* Mobile menu toggle */}
-              {!mobileMenuOpen && (
-                <button
-                  className="mobile-menu-toggle"
-                  onClick={() => setMobileMenuOpen(true)}
-                  aria-label="Open Menu"
-                >
-                  <Menu size={20} />
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -193,20 +212,8 @@ export default function Header() {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="mobile-nav-drawer">
+          <div className="mobile-nav-drawer" id="mobile-nav-drawer">
             <div className="container mobile-nav-content">
-              <div className="mobile-nav-header">
-                <span className="mobile-nav-title">Menu</span>
-                <button
-                  type="button"
-                  className="mobile-menu-toggle mobile-menu-close"
-                  onClick={closeMobileNavigation}
-                  aria-label="Close Menu"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
               <ul className="mobile-nav-list">
                 <li className="mobile-nav-section-title">Shop Categories</li>
                 <li className="mobile-nav-item">

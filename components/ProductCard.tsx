@@ -1,10 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingBag, Heart } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import { Product } from '@/lib/types';
 import { useStore } from '@/lib/store';
-import { useSyncExternalStore } from 'react';
 
 interface ProductCardProps {
   product: Product;
@@ -12,12 +11,6 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const addToCart = useStore((state) => state.addToCart);
-  const wishlist = useStore((state) => state.wishlist);
-  const toggleWishlist = useStore((state) => state.toggleWishlist);
-  
-  // Safe hydration handling
-  const hasHydrated = useSyncExternalStore(() => () => undefined, () => true, () => false);
-  const isWishlisted = hasHydrated ? wishlist.includes(product.id) : false;
 
   const images = Array.isArray(product.images)
     ? product.images
@@ -32,12 +25,6 @@ export default function ProductCard({ product }: ProductCardProps) {
     : 0;
 
   const isOutOfStock = product.stockQty <= 0;
-
-  const handleWishlistToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleWishlist(product.id);
-  };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -66,20 +53,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           </>
         )}
       </div>
-
-      {/* Wishlist Button */}
-      <button 
-        onClick={handleWishlistToggle} 
-        className={`product-card-wishlist-btn ${isWishlisted ? 'active' : ''}`}
-        aria-label={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
-      >
-        <Heart 
-          size={16} 
-          fill={isWishlisted ? "var(--accent-purple)" : "transparent"} 
-          color={isWishlisted ? "var(--accent-purple)" : "var(--text-secondary)"} 
-          strokeWidth={isWishlisted ? 0 : 2}
-        />
-      </button>
 
       {/* Product Image */}
       <Link href={`/product/${product.slug}`} className="product-image-wrap">

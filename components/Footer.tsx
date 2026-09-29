@@ -110,7 +110,7 @@ export default function Footer() {
               </a>
 
               <a
-                href="https://tiktok.com"
+                href="https://www.tiktok.com/@celizlk"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="social-icon-btn"

@@ -12,3 +12,11 @@ test('product detail layout includes mobile-safe sizing and wrapping rules', () 
   assert.match(css, /flex-wrap:\s*wrap/);
   assert.match(css, /max-width:\s*100%/);
 });
+
+test('product detail images preserve their natural aspect ratio', () => {
+  const imageFrame = css.match(/\.product-detail-main-image\s*\{([^}]+)\}/)?.[1] ?? '';
+  const image = css.match(/\.product-detail-main-image img\s*\{([^}]+)\}/)?.[1] ?? '';
+
+  assert.doesNotMatch(imageFrame, /aspect-ratio\s*:/);
+  assert.match(image, /height:\s*auto/);
+});
