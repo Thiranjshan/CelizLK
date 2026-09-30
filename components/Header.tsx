@@ -168,7 +168,7 @@ export default function Header() {
           <div className="header-topbar-left">
             <span>Islandwide Express Delivery</span>
             <span className="separator">|</span>
-            <span>100% Genuine Products</span>
+            <span>100% Authentic Products</span>
             <span className="separator">|</span>
             <span>Official Warranty</span>
           </div>
@@ -369,6 +369,7 @@ export default function Header() {
                   </li>
                 ))}
               </ul>
+
             </div>
           </div>
         )}
