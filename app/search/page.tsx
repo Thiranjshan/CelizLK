@@ -1,17 +1,29 @@
 import Link from 'next/link';
 import { Search, RotateCcw } from 'lucide-react';
+import type { Prisma } from '@prisma/client';
 import ProductCard from '@/components/ProductCard';
 import { prisma } from '@/lib/prisma';
+import { ProductSearchResult, searchProducts } from '@/lib/product-search';
 
 interface SearchPageProps {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string | string[]; page?: string | string[] }>;
+}
+
+const PAGE_SIZE = 12;
+
+function getPageHref(query: string, page: number): string {
+  return `/search?q=${encodeURIComponent(query)}&page=${page}`;
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const { q } = await searchParams;
-  const query = q?.trim() || '';
+  const { q, page: pageParam } = await searchParams;
+  const rawQuery = (Array.isArray(q) ? q[0] : q)?.trim() || '';
+  const rawPage = Array.isArray(pageParam) ? pageParam[0] : pageParam;
+  const parsedPage = Number.parseInt(rawPage || '1', 10);
+  const page = Number.isSafeInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const offset = (page - 1) * PAGE_SIZE;
 
-  if (!query) {
+  if (!rawQuery) {
     return (
       <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}>
         <Search size={42} color="var(--accent-purple)" style={{ margin: '0 auto 1rem' }} />
@@ -26,30 +38,59 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     );
   }
 
-  let products;
-  try {
-    const rawProducts = await prisma.product.findMany({
-      where: {
-        isActive: true,
-        OR: [
-          { name: { contains: query } },
-          { description: { contains: query } },
-          { brandRecord: { name: { contains: query } } },
-        ],
-      },
-      orderBy: { createdAt: 'desc' },
-      include: { category: true, brandRecord: true },
-    });
+  let query = rawQuery;
+  let products: ProductSearchResult[] = [];
+  let total = 0;
+  let searchFailed = false;
 
-    products = rawProducts.map((product) => ({
-      ...product,
-      brand: product.brandRecord,
-      images: JSON.parse(product.images),
-      specs: product.specs,
-      createdAt: product.createdAt.toISOString(),
-    }));
-  } catch (error) {
-    console.error('Error searching products:', error);
+  if (process.env.SEARCH_MODE === 'legacy') {
+    const where: Prisma.ProductWhereInput = {
+      isActive: true,
+      OR: [
+        { name: { contains: rawQuery } },
+        { description: { contains: rawQuery } },
+        { brandRecord: { name: { contains: rawQuery } } },
+      ],
+    };
+
+    try {
+      const [rawProducts, count] = await Promise.all([
+        prisma.product.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip: offset,
+          take: PAGE_SIZE,
+          include: { category: true, brandRecord: true },
+        }),
+        prisma.product.count({ where }),
+      ]);
+
+      products = rawProducts.map((product) => ({
+        ...product,
+        brand: product.brandRecord,
+        images: JSON.parse(product.images),
+        createdAt: product.createdAt.toISOString(),
+      }));
+      total = count;
+    } catch (error) {
+      console.error('Error searching products:', error);
+      searchFailed = true;
+    }
+  } else {
+    const result = await searchProducts(rawQuery, { limit: PAGE_SIZE, offset });
+    query = result.query;
+    products = result.products;
+    total = result.total;
+    searchFailed = result.failed;
+  }
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  if (!searchFailed && page > Math.max(1, totalPages)) {
+    const lastPage = Math.max(1, totalPages);
+    return <meta httpEquiv="refresh" content={`0;url=${getPageHref(query, lastPage)}`} />;
+  }
+
+  if (searchFailed) {
     return (
       <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}>
         <h1>Search is temporarily unavailable</h1>
@@ -68,7 +109,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           <div style={{ color: 'var(--accent-purple)', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Search results</div>
           <h1 style={{ marginTop: '0.35rem' }}>Results for &quot;{query}&quot;</h1>
           <p style={{ color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
-            {products.length} {products.length === 1 ? 'product' : 'products'} found
+            {total} {total === 1 ? 'product' : 'products'} found
           </p>
         </div>
         <Link href="/products" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', color: 'var(--accent-purple)', fontWeight: 700 }}>
@@ -89,6 +130,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <div className="products-grid">
           {products.map((product) => <ProductCard key={product.id} product={product} />)}
         </div>
+      )}
+
+      {totalPages > 1 && (
+        <nav aria-label="Search results pages" className="search-pagination">
+          {page > 1 && <Link href={getPageHref(query, page - 1)} rel="prev">Previous</Link>}
+          <span>Page {page} of {totalPages}</span>
+          {page < totalPages && <Link href={getPageHref(query, page + 1)} rel="next">Next</Link>}
+        </nav>
       )}
     </div>
   );

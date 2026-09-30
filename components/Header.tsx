@@ -11,6 +11,14 @@ import BrandMegaMenu from '@/components/BrandMegaMenu';
 
 interface Brand { id: string; name: string; slug: string; logoUrl: string | null; }
 interface Category { id: string; name: string; slug: string; parentId: string | null; }
+interface ProductSuggestion {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  discountPrice: number | null;
+  image: string | null;
+}
 
 export default function Header() {
   const pathname = usePathname();
@@ -19,6 +27,13 @@ export default function Header() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchRegionRef = useRef<HTMLDivElement>(null);
+  const suggestionAbortRef = useRef<AbortController | null>(null);
+  const suggestionRequestIdRef = useRef(0);
+  const [suggestions, setSuggestions] = useState<ProductSuggestion[]>([]);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [suggestionsError, setSuggestionsError] = useState(false);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brandsOpen, setBrandsOpen] = useState(false);
@@ -37,6 +52,77 @@ export default function Header() {
   useEffect(() => {
     if (mobileSearchOpen) searchInputRef.current?.focus();
   }, [mobileSearchOpen]);
+
+  useEffect(() => {
+    const query = searchQuery.trim();
+    if (query.length < 2) {
+      suggestionAbortRef.current?.abort();
+      suggestionAbortRef.current = null;
+      suggestionRequestIdRef.current += 1;
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      suggestionAbortRef.current?.abort();
+      const controller = new AbortController();
+      const requestId = ++suggestionRequestIdRef.current;
+      suggestionAbortRef.current = controller;
+      setSuggestionsLoading(true);
+      setSuggestionsError(false);
+      setSuggestionsOpen(true);
+
+      fetch(`/api/search/suggest?q=${encodeURIComponent(query.slice(0, 60))}`, { signal: controller.signal })
+        .then(async (response) => {
+          if (!response.ok) throw new Error('Suggestions are unavailable');
+          return response.json();
+        })
+        .then((data: { products?: ProductSuggestion[]; error?: boolean }) => {
+          if (requestId !== suggestionRequestIdRef.current) return;
+          if (data.error) throw new Error('Suggestions are unavailable');
+          setSuggestions(data.products ?? []);
+          setSuggestionsOpen(true);
+          setSuggestionsLoading(false);
+        })
+        .catch((error: unknown) => {
+          if (controller.signal.aborted || requestId !== suggestionRequestIdRef.current) return;
+          console.error('Unable to load product suggestions:', error);
+          setSuggestions([]);
+          setSuggestionsError(true);
+          setSuggestionsOpen(true);
+          setSuggestionsLoading(false);
+        });
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      suggestionAbortRef.current?.abort();
+    };
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (!suggestionsOpen) return;
+
+    const handleOutsidePointerDown = (event: PointerEvent) => {
+      if (searchRegionRef.current?.contains(event.target as Node)) return;
+      suggestionAbortRef.current?.abort();
+      suggestionRequestIdRef.current += 1;
+      setSuggestionsOpen(false);
+      setSuggestionsLoading(false);
+    };
+
+    document.addEventListener('pointerdown', handleOutsidePointerDown);
+    return () => document.removeEventListener('pointerdown', handleOutsidePointerDown);
+  }, [suggestionsOpen]);
+
+  const clearSuggestions = () => {
+    suggestionAbortRef.current?.abort();
+    suggestionAbortRef.current = null;
+    suggestionRequestIdRef.current += 1;
+    setSuggestions([]);
+    setSuggestionsOpen(false);
+    setSuggestionsLoading(false);
+    setSuggestionsError(false);
+  };
 
   if (pathname.startsWith('/admin') || pathname.startsWith('/checkout')) return null;
 
@@ -70,6 +156,7 @@ export default function Header() {
 
   const closeMobileNavigation = () => {
     closeMenus();
+    clearSuggestions();
     setMobileMenuOpen(false);
   };
 
@@ -132,21 +219,61 @@ export default function Header() {
             </Link>
 
             {/* Global Search Bar */}
-            <form
-              id="header-search-form"
-              onSubmit={handleSearchSubmit}
-              className={`search-bar ${mobileSearchOpen ? 'mobile-search-open' : ''}`}
+            <div
+              ref={searchRegionRef}
+              className={`header-search-container ${mobileSearchOpen ? 'mobile-search-open' : ''}`}
             >
-              <Search className="search-icon" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search earbuds, chargers, smartwatches..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-            </form>
+              <form
+                id="header-search-form"
+                onSubmitCapture={clearSuggestions}
+                onSubmit={handleSearchSubmit}
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') clearSuggestions();
+                }}
+                className="search-bar"
+              >
+                <Search className="search-icon" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search earbuds, chargers, smartwatches..."
+                  value={searchQuery}
+                  onChange={(event) => {
+                    setSearchQuery(event.target.value);
+                    if (event.target.value.trim().length < 2) clearSuggestions();
+                  }}
+                  className="search-input"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-expanded={suggestionsOpen}
+                  aria-controls="header-search-suggestions"
+                />
+              </form>
+              {suggestionsOpen && (
+                <div id="header-search-suggestions" className="search-suggestions" role="listbox" aria-label="Product suggestions" aria-live="polite">
+                  {suggestionsLoading ? (
+                    <div className="search-suggestion-status">Searching products...</div>
+                  ) : suggestionsError ? (
+                    <div className="search-suggestion-status" role="status">Suggestions are temporarily unavailable.</div>
+                  ) : suggestions.length === 0 ? (
+                    <div className="search-suggestion-status" role="status">No suggestions found.</div>
+                  ) : (
+                    suggestions.map((suggestion) => (
+                      <Link
+                        key={suggestion.id}
+                        href={`/product/${suggestion.slug}`}
+                        className="search-suggestion-link"
+                        role="option"
+                        onClick={clearSuggestions}
+                      >
+                        <span>{suggestion.name}</span>
+                        <strong>LKR {(suggestion.discountPrice ?? suggestion.price).toLocaleString()}</strong>
+                      </Link>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Action Buttons */}
             <div className="nav-actions">
@@ -156,7 +283,10 @@ export default function Header() {
                 aria-label={mobileSearchOpen ? 'Close search' : 'Open search'}
                 aria-expanded={mobileSearchOpen}
                 aria-controls="header-search-form"
-                onClick={() => setMobileSearchOpen((open) => !open)}
+                onClick={() => {
+                  if (mobileSearchOpen) clearSuggestions();
+                  setMobileSearchOpen((open) => !open);
+                }}
               >
                 {mobileSearchOpen ? <X size={20} /> : <Search size={20} />}
               </button>
