@@ -114,10 +114,11 @@ export default async function HomePage() {
 
   return (
     <div style={{ background: "#FFFFFF" }}>
-      <div className="container">
-        {/* Hero Carousel Banner Section */}
+      {/* Hero Carousel Banner Section */}
+      
         <HeroCarousel slides={carouselSlides} />
 
+      <div className="container">
         {/* Product merchandising sections */}
         <ProductCarousel
           title="Explore Collections"

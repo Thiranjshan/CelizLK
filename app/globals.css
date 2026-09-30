@@ -2960,6 +2960,8 @@ h6 {
   width: 20px;
 }
 
+
+
 /* Mobile responsive carousel overrides */
 @media (max-width: 768px) {
   .hero-carousel-container {
@@ -2992,7 +2994,7 @@ h6 {
 
 /* Layout & Header Additions */
 .header-topbar-wrapper {
-  background: var(--accent-purple);
+  background: var(--brand-gradient);
   border-bottom: 5px solid rgba(254, 0, 0, 0.1);
   padding: 0.1rem 5;
   overflow:hidden;

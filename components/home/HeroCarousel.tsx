@@ -100,7 +100,8 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
             <Link href={slide.buttonLink} className="hero-carousel-cta">
               {slide.buttonLabel}
             </Link>
-          </div>
+            
+        </div>
         ))}
       </div>
 
