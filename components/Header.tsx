@@ -167,23 +167,13 @@ export default function Header() {
         <div className="container header-topbar-content">
           <div className="header-topbar-left">
             <span>Islandwide Express Delivery</span>
-            <span className="separator">|</span>
+            <span className="separatosr">|</span>
             <span>100% Authentic Products</span>
             <span className="separator">|</span>
             <span>Official Warranty</span>
+
           </div>
-          <div className="header-topbar-right">
-            <a
-              href="https://wa.me/94770000000"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="topbar-whatsapp-link"
-            >
-              <span>Need help? Chat on WhatsApp</span>
-              <MessageCircle size={13} className="whatsapp-icon" />
-            </a>
-          </div>
-        </div>
+       </div>
       </div>
 
       <header className="site-header">

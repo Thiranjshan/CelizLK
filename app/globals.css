@@ -2993,23 +2993,55 @@ h6 {
 /* Layout & Header Additions */
 .header-topbar-wrapper {
   background: var(--accent-purple);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 0.5rem 0;
+  border-bottom: 5px solid rgba(254, 0, 0, 0.1);
+  padding: 0.1rem 5;
+  overflow:hidden;
+  white-space: nowrap;
+  position: relative;
+}
+
+.header-topbar-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(170deg , transparent 30%, rgba(255, 255, 255, 0.25) 50%, transparent 60%);
+  background-size: 200% 100%;
+  animation: shine 8s linear infinite;
+  pointer-events: none;
+
+}
+
+@keyframes shine{
+  from{ background-position: 200% 0;}
+  to {background-position: -200% 0;}
 }
 
 .header-topbar-content {
-  display: flex;
+  display: inline-flex;
   justify-content: space-between;
+  width:max-content;
   align-items: center;
   font-size: 0.75rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
+  padding-left: 100%;
+  animation: scroll 30s linear infinite;
 }
+
+.header-topbar-content span{
+  white-space: nowrap;
+  font-size: 10px;
+}
+
+@keyframes scroll {
+  to {transform: translateX(-100%);}
+}
+
 
 .header-topbar-left {
   display: flex;
-  align-items: center;
   gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 .header-topbar-left .separator {
@@ -3376,7 +3408,6 @@ h6 {
 /* Responsive display helper */
 @media (max-width: 900px) {
   .header-topbar-wrapper {
-    display: none;
   }
 
   .desktop-only {
