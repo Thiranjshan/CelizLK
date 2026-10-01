@@ -35,7 +35,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
 
   useEffect(() => {
     if (isHovered) return;
-    const interval = setInterval(handleNext, 6000); // 6s autoplay
+    const interval = setInterval(handleNext, 3000); // 6s autoplay
     return () => clearInterval(interval);
   }, [isHovered, handleNext]);
 
