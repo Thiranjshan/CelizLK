@@ -22,7 +22,7 @@
   --bg-light: #FFFFFF;
   /* White-first background */
   --bg-white: #FFFFFF;
-  --bg-surface: #F7F7F8;
+  --bg-surface: #f7f7f7;
   /* Light gray surface */
   --bg-light-gray: #F7F7F8;
   --bg-dark: #111111;
@@ -273,9 +273,7 @@ h6 {
   position: sticky;
   top: 0;
   z-index: 100;
-  background:#FFFFFF;
-  border-bottom: 1px solid var(--border-color);
-  transition: var(--transition-fast);
+  background:#FFFFFF;  transition: var(--transition-fast);
 }
 
 .header-content {
@@ -2994,8 +2992,16 @@ h6 {
 
 /* Layout & Header Additions */
 .header-topbar-wrapper {
-  background: var(--brand-gradient);
-  border-bottom: 5px solid rgba(254, 0, 0, 0.1);
+background:
+
+  linear-gradient(
+    180deg,
+    #211a2d 0%,
+    #15121d 38%,
+    #0a0a10 72%,
+    #030306 100%
+  );
+  border-bottom: 5px solid #030306;
   padding: 0.1rem 5;
   overflow:hidden;
   white-space: nowrap;
@@ -3006,7 +3012,7 @@ h6 {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(170deg , transparent 30%, rgba(255, 255, 255, 0.25) 50%, transparent 60%);
+  background: linear-gradient(170deg , transparent 30%, rgba(255, 255, 255, 0.15) 50%, transparent 60%);
   background-size: 200% 100%;
   animation: shine 8s linear infinite;
   pointer-events: none;
