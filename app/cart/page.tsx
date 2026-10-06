@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useStore } from '@/lib/store';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
 
@@ -19,8 +20,17 @@ export default function CartPage() {
     return acc + price * item.quantity;
   }, 0);
 
+  const [deliveryFee, setDeliveryFee] = useState(350);
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(async (response) => response.ok ? response.json() : null)
+      .then((data) => data && setDeliveryFee(Number(data.delivery?.fee ?? 350)))
+      .catch(() => undefined);
+  }, []);
+
   const allSelected = cart.length > 0 && cart.every((item) => item.selected !== false);
-  const shippingFee = Number(process.env.NEXT_PUBLIC_DELIVERY_FEE_LKR ?? 350);
+  const shippingFee = deliveryFee;
   const grandTotal = getCartSubtotal + shippingFee;
 
   const handleCheckoutClick = (e: React.MouseEvent) => {

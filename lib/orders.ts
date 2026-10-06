@@ -1,7 +1,7 @@
 import { createHash, randomInt } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { getEnv } from '@/lib/env';
+import { getStoreSettings } from '@/lib/store-settings';
 
 export const paymentMethods = ['COD', 'BANK_TRANSFER', 'PAYHERE'] as const;
 export type PaymentMethod = typeof paymentMethods[number];
@@ -62,7 +62,8 @@ async function createOrderInTransaction(transaction: OrderTransaction, input: Cr
   if (pricedItems.some((item) => item.quantity > item.product.stockQty)) throw new Error('INSUFFICIENT_STOCK');
 
   const subtotal = pricedItems.reduce((sum, item) => sum + (item.product.discountPrice ?? item.product.price) * item.quantity, 0);
-  const deliveryFee = Number(getEnv('DELIVERY_FEE_LKR', '350'));
+  const settings = await getStoreSettings();
+  const deliveryFee = Number(settings.delivery.fee ?? 350);
   const total = subtotal + deliveryFee;
   const orderStatus: OrderStatus = selectedPaymentMethod === 'COD' ? 'CONFIRMED' : 'AWAITING_PAYMENT';
   const paymentStatus: PaymentStatus = selectedPaymentMethod === 'COD' ? 'UNPAID' : 'PENDING';

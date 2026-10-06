@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getEnv } from '@/lib/env';
+import { getStoreSettings } from '@/lib/store-settings';
 
 export async function GET(request: Request) {
   const district = new URL(request.url).searchParams.get('district')?.trim();
-  const fee = Number(getEnv('DELIVERY_FEE_LKR', '350'));
+  const settings = await getStoreSettings();
+  const fee = Number(settings.delivery.fee ?? 350);
 
   return NextResponse.json({
     fee,

@@ -4,6 +4,7 @@ import { test } from 'node:test';
 import { prisma } from '@/lib/prisma';
 import { confirmBankTransfer, confirmCodPayment, createOrder, transitionOrder } from '@/lib/orders';
 import { createAccessToken } from '@/lib/auth';
+import { getStoreSettings } from '@/lib/store-settings';
 import { GET as getCustomerOrder, PATCH as patchCustomerOrder } from '@/app/api/orders/[id]/route';
 import { POST as confirmCodRoute } from '@/app/api/admin/orders/[id]/payment/confirm-cod/route';
 import { POST as checkoutCustomer } from '@/app/api/checkout/customer/route';
@@ -197,5 +198,6 @@ test('returns the configured flat delivery fee without district validation', asy
   const response = await getDeliveryZone(new Request('http://localhost/api/delivery-zones?district=Colombo'));
   assert.equal(response.status, 200);
   const payload = await response.json();
-  assert.equal(payload.fee, Number(process.env.DELIVERY_FEE_LKR ?? 350));
+  const settings = await getStoreSettings();
+  assert.equal(payload.fee, Number(settings.delivery.fee ?? 350));
 });

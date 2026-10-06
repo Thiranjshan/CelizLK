@@ -72,8 +72,16 @@ function CheckoutContent() {
   const [step, setStep] = useState<1 | 2>(1);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deliveryFee, setDeliveryFee] = useState(350);
   const [idempotencyKey] = useState(() => crypto.randomUUID());
   const [showDiscardModal, setShowDiscardModal] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(async (response) => response.ok ? response.json() : null)
+      .then((data) => data && setDeliveryFee(Number(data.delivery?.fee ?? 350)))
+      .catch(() => undefined);
+  }, []);
 
   const [savedAddresses, setSavedAddresses] = useState<{ id: string; label: string; recipientName: string; phone: string; addressLine1: string; addressLine2?: string | null; city: string; district: string; postalCode?: string | null }[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
@@ -133,7 +141,6 @@ function CheckoutContent() {
       .catch(() => setShowNewAddressForm(true));
   }, [accessToken]);
 
-  const deliveryFee = Number(process.env.NEXT_PUBLIC_DELIVERY_FEE_LKR ?? 350);
   const shippingFee = deliveryFee;
   const totalPayable = subtotal + shippingFee;
 
