@@ -689,7 +689,7 @@ function CheckoutContent() {
                       <Building2 size={24} color="var(--primary-indigo)" />
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 800, fontSize: '1rem' }}>Bank Deposit / Online Transfer</div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Direct deposit to Commercial Bank / HNB Account</div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Direct deposit to the configured bank account shown after order placement</div>
                       </div>
                     </label>
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { bankTransferInstructions } from '@/lib/payment-config';
+import { getBankTransferInstructions } from '@/lib/payment-config';
 
 export async function GET() {
-  return NextResponse.json(bankTransferInstructions);
+  return NextResponse.json(await getBankTransferInstructions());
 }

@@ -55,8 +55,30 @@ function OrderSuccessContent() {
   const token = useStore((state) => state.accessToken);
 
   const [order, setOrder] = useState<OrderDetails | null>(null);
+  const [settings, setSettings] = useState({
+    contact: { whatsappNumber: '', whatsappMessage: 'Hello Celiz LK, I have completed a bank transfer for my order. Please verify my payment.' },
+    payments: { bankName: '', accountName: '', accountNumber: '', branch: '' },
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(async (response) => response.ok ? response.json() : null)
+      .then((data) => data && setSettings({
+        contact: {
+          whatsappNumber: data.contact?.whatsappNumber || '',
+          whatsappMessage: data.contact?.whatsappMessage || 'Hello Celiz LK, I have completed a bank transfer for my order. Please verify my payment.',
+        },
+        payments: {
+          bankName: data.payments?.bankName || '',
+          accountName: data.payments?.accountName || '',
+          accountNumber: data.payments?.accountNumber || '',
+          branch: data.payments?.branch || '',
+        },
+      }))
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     if (!orderNumber || !token) return;
@@ -80,6 +102,14 @@ function OrderSuccessContent() {
       });
   }, [orderNumber, token]);
 
+  const bankInfo = order?.bankTransferInstructions ?? {
+    bankName: settings.payments.bankName || 'Bank',
+    accountName: settings.payments.accountName || 'Account holder',
+    accountNumber: settings.payments.accountNumber || '',
+    branch: settings.payments.branch || '',
+    currency: 'LKR',
+  };
+  const whatsappNumber = settings.contact.whatsappNumber.replace(/\D/g, '');
   const requestError = !orderNumber ? 'No order specified.' : !token ? 'Please sign in to view your order details.' : error;
 
   if (requestError && !error) {
@@ -238,7 +268,7 @@ function OrderSuccessContent() {
               >
                 <span style={{ color: 'var(--text-secondary)' }}>Bank</span>
                 <strong style={{ textAlign: 'right' }}>
-                  Commercial Bank of Ceylon
+                  {bankInfo.bankName}
                 </strong>
               </div>
 
@@ -255,7 +285,7 @@ function OrderSuccessContent() {
                   Account Name
                 </span>
                 <strong style={{ textAlign: 'right' }}>
-                  Celiz LK (Pvt) Ltd
+                  {bankInfo.accountName}
                 </strong>
               </div>
 
@@ -286,13 +316,13 @@ function OrderSuccessContent() {
                       letterSpacing: '0.05em',
                     }}
                   >
-                    1234567890
+                    {bankInfo.accountNumber}
                   </strong>
 
                   <button
                     type="button"
                     onClick={() => {
-                      navigator.clipboard?.writeText('1234567890');
+                      if (bankInfo.accountNumber) navigator.clipboard?.writeText(bankInfo.accountNumber);
                     }}
                     style={{
                       border: '1px solid var(--border-color)',
@@ -320,7 +350,7 @@ function OrderSuccessContent() {
                 }}
               >
                 <span style={{ color: 'var(--text-secondary)' }}>Branch</span>
-                <strong style={{ textAlign: 'right' }}>Colombo 03</strong>
+                <strong style={{ textAlign: 'right' }}>{bankInfo.branch}</strong>
               </div>
 
               {/* Divider */}
@@ -387,9 +417,7 @@ function OrderSuccessContent() {
 
               {/* WhatsApp Button */}
               <a
-                href={`https://wa.me/94751205996?text=${encodeURIComponent(
-                  `Hi Celiz LK, I have completed a bank transfer for Order #${order.id}. Please verify my payment.`
-                )}`}
+                href={whatsappNumber ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(settings.contact.whatsappMessage || `Hi Celiz LK, I have completed a bank transfer for Order #${order.id}. Please verify my payment.`)}` : undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{

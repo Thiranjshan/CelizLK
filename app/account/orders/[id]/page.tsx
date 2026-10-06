@@ -20,8 +20,29 @@ export default function CustomerOrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const token = useStore((state) => state.accessToken);
   const [order, setOrder] = useState<Order | null>(null);
+  const [settings, setSettings] = useState({
+    contact: { whatsappNumber: '', whatsappMessage: 'Hello Celiz LK, I have completed a bank transfer for my order. Please verify my payment.' },
+    payments: { bankName: '', accountName: '', accountNumber: '', branch: '' },
+  });
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(async (response) => response.ok ? response.json() : null)
+      .then((data) => data && setSettings({
+        contact: {
+          whatsappNumber: data.contact?.whatsappNumber || '',
+          whatsappMessage: data.contact?.whatsappMessage || 'Hello Celiz LK, I have completed a bank transfer for my order. Please verify my payment.',
+        },
+        payments: {
+          bankName: data.payments?.bankName || '',
+          accountName: data.payments?.accountName || '',
+          accountNumber: data.payments?.accountNumber || '',
+          branch: data.payments?.branch || '',
+        },
+      }))
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     if (!token) return;
@@ -38,6 +59,14 @@ export default function CustomerOrderDetailPage() {
   if (!order) return <div className="container" style={{ padding: '5rem 1.25rem' }}>Loading order...</div>;
 
   const address = order.shippingAddress;
+  const paymentDetails = order.bankTransferInstructions ?? {
+    bankName: settings.payments.bankName || 'Bank',
+    accountName: settings.payments.accountName || 'Account holder',
+    accountNumber: settings.payments.accountNumber || '',
+    branch: settings.payments.branch || '',
+    currency: 'LKR',
+  };
+  const whatsappNumber = settings.contact.whatsappNumber.replace(/\D/g, '');
   const eventByStatus = new Map(order.timeline.map((event) => [event.status, event]));
   const cancelled = order.status === 'CANCELLED';
   const steps = cancelled ? [...statusSteps.filter((step) => eventByStatus.has(step)), 'CANCELLED'] : statusSteps;
@@ -256,7 +285,7 @@ export default function CustomerOrderDetailPage() {
           >
             <span style={{ color: 'var(--text-secondary)' }}>Bank</span>
             <strong style={{ textAlign: 'right' }}>
-              Commercial Bank of Ceylon
+              {paymentDetails.bankName}
             </strong>
           </div>
 
@@ -273,7 +302,7 @@ export default function CustomerOrderDetailPage() {
               Account Name
             </span>
             <strong style={{ textAlign: 'right' }}>
-              Celiz LK (Pvt) Ltd
+              {paymentDetails.accountName}
             </strong>
           </div>
 
@@ -304,13 +333,13 @@ export default function CustomerOrderDetailPage() {
                   letterSpacing: '0.05em',
                 }}
               >
-                1234567890
+                {paymentDetails.accountNumber}
               </strong>
 
               <button
                 type="button"
                 onClick={() => {
-                  navigator.clipboard?.writeText('1234567890');
+                  if (paymentDetails.accountNumber) navigator.clipboard?.writeText(paymentDetails.accountNumber);
                 }}
                 style={{
                   border: '1px solid var(--border-color)',
@@ -338,7 +367,7 @@ export default function CustomerOrderDetailPage() {
             }}
           >
             <span style={{ color: 'var(--text-secondary)' }}>Branch</span>
-            <strong style={{ textAlign: 'right' }}>Colombo 03</strong>
+            <strong style={{ textAlign: 'right' }}>{paymentDetails.branch}</strong>
           </div>
 
           {/* Divider */}
@@ -405,11 +434,9 @@ export default function CustomerOrderDetailPage() {
 
           {/* WhatsApp Button */}
           <a
-            href={`https://wa.me/94751205996?text=${encodeURIComponent(
-              `Hi Celiz LK, I have completed a bank transfer for Order #${order.id}. Please verify my payment.`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={whatsappNumber ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(settings.contact.whatsappMessage || `Hi Celiz LK, I have completed a bank transfer for Order #${order.id}. Please verify my payment.`)}` : '#'}
+            target={whatsappNumber ? '_blank' : undefined}
+            rel={whatsappNumber ? 'noopener noreferrer' : undefined}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -423,6 +450,8 @@ export default function CustomerOrderDetailPage() {
               borderRadius: 'var(--radius-md)',
               textDecoration: 'none',
               alignSelf: 'flex-start',
+              opacity: whatsappNumber ? 1 : 0.6,
+              pointerEvents: whatsappNumber ? 'auto' : 'none',
             }}
           >
             <svg
