@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { FormEvent, ReactNode, useEffect, useState } from 'react';
-import { BarChart3, Boxes, ClipboardList, LayoutGrid, LogOut, Package, ShieldCheck, Tag, Users } from 'lucide-react';
+import { BarChart3, Boxes, ClipboardList, LayoutGrid, LogOut, Package, Settings2, ShieldCheck, Tag, Users } from 'lucide-react';
 
 export interface AdminSession { id: string; email: string; name: string; role: string; }
 
@@ -42,6 +42,7 @@ export default function AdminAuthGate({ children, active }: { children: (session
     { href: '/admin/hero-banners', label: 'Hero Banners', icon: LayoutGrid },
     { href: '/admin/inventory', label: 'Inventory', icon: Boxes },
     { href: '/admin/customers', label: 'Customers', icon: Users },
+    { href: '/admin/settings', label: 'Store Settings', icon: Settings2 },
   ];
   return <main className="admin-shell"><div className="admin-layout"><aside className="admin-sidebar"><Link href="/admin" className="admin-brand"><ShieldCheck size={21} /> CELIZ LK <span>ADMIN</span></Link><nav>{links.map(({ href, label, icon: Icon }) => <Link key={href} className={active === label.toLowerCase() ? 'active' : ''} href={href}><Icon size={18} /> {label}</Link>)}</nav><button className="admin-logout" onClick={logout}><LogOut size={17} /> Sign out</button></aside><section className="admin-content">{children(session.admin, session.token)}</section></div></main>;
 }

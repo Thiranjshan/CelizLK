@@ -148,7 +148,7 @@ function Dashboard({ token }: { token: string }) {
 
               <div style={{ marginTop: '1.5rem', padding: '1rem 1.25rem', background: 'var(--bg-main)', borderRadius: 'var(--radius-md)', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
                 <strong style={{ color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}><Clock size={13} /> Verification Process</strong>
-                When a customer selects Bank Transfer and places an order, they are instructed to send their payment receipt via WhatsApp (0751205996). Once you confirm receipt, go to the order and click <em>&quot;Confirm Payment&quot;</em> to verify and proceed with fulfilment.
+                When a customer selects Bank Transfer and places an order, they are instructed to send their payment receipt via WhatsApp. Once you confirm receipt, go to the order and click <em>&quot;Confirm Payment&quot;</em> to verify and proceed with fulfilment.
               </div>
             </section>
           )}

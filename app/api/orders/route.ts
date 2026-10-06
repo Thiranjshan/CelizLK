@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getUserFromRequest } from '@/lib/auth';
 import { createOrder } from '@/lib/orders';
-import { bankTransferInstructions } from '@/lib/payment-config';
+import { getBankTransferInstructions } from '@/lib/payment-config';
 
 export async function GET(request: Request) {
   try {
@@ -65,6 +65,7 @@ export async function POST(request: Request) {
     if (requestedItems.some((item) => !item.productId || !Number.isInteger(item.quantity) || item.quantity <= 0 || item.quantity > 99)) return NextResponse.json({ error: 'Invalid cart items.' }, { status: 400 });
 
     const newOrder = await createOrder({ userId: user.id, customerPhone, shippingAddress, paymentMethod, items: requestedItems, idempotencyKey: request.headers.get('idempotency-key') });
+    const bankTransferInfo = await getBankTransferInstructions();
 
     return NextResponse.json(
       {
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
         shippingAddress: JSON.parse(newOrder.shippingAddress),
         items: newOrder.items.map((item) => ({ id: item.id, productId: item.productId, productName: item.productName, quantity: item.quantity, unitPrice: item.unitPrice, lineTotal: item.lineSubtotal || item.unitPrice * item.quantity })),
         payment: newOrder.payment[0] ? { method: newOrder.payment[0].method, status: newOrder.payment[0].status, amount: newOrder.payment[0].amount, currency: newOrder.payment[0].currency } : null,
-        bankTransferInstructions: paymentMethod === 'BANK_TRANSFER' ? bankTransferInstructions : null,
+        bankTransferInstructions: paymentMethod === 'BANK_TRANSFER' ? bankTransferInfo : null,
       },
       { status: 201 }
     );

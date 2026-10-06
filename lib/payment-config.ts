@@ -1,9 +1,20 @@
-import { getEnv } from '@/lib/env';
+import { getStoreSettings } from '@/lib/store-settings';
+
+export async function getBankTransferInstructions() {
+  const settings = await getStoreSettings();
+  return {
+    bankName: settings.payments.bankName || 'Commercial Bank',
+    accountName: settings.payments.accountName || 'Celiz LK (Pvt) Ltd',
+    accountNumber: settings.payments.accountNumber || '1000-2345-6789',
+    branch: settings.payments.branch || 'Colombo Main',
+    currency: 'LKR',
+  };
+}
 
 export const bankTransferInstructions = {
-  bankName: getEnv('BANK_TRANSFER_BANK_NAME', 'Commercial Bank'),
-  accountName: getEnv('BANK_TRANSFER_ACCOUNT_NAME', 'Celiz LK (Pvt) Ltd'),
-  accountNumber: getEnv('BANK_TRANSFER_ACCOUNT_NUMBER', '1000-2345-6789'),
-  branch: getEnv('BANK_TRANSFER_BRANCH', 'Colombo Main'),
+  bankName: 'Commercial Bank',
+  accountName: 'Celiz LK (Pvt) Ltd',
+  accountNumber: '1000-2345-6789',
+  branch: 'Colombo Main',
   currency: 'LKR',
 };

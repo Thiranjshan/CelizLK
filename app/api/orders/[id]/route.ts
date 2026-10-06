@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { getUserFromRequest } from '@/lib/auth';
-import { bankTransferInstructions } from '@/lib/payment-config';
+import { getBankTransferInstructions } from '@/lib/payment-config';
 
 const timelineLabels: Record<string, string> = {
   AWAITING_PAYMENT: 'Payment pending',
@@ -19,7 +19,9 @@ type CustomerOrder = Prisma.OrderGetPayload<{
   include: { items: { include: { product: true } }; payment: true; events: true };
 }>;
 
-function customerOrder(order: CustomerOrder) {
+async function customerOrder(order: CustomerOrder) {
+  const bankTransferInfo = await getBankTransferInstructions();
+
   return {
     id: order.id,
     orderNumber: order.orderNumber,
@@ -59,7 +61,7 @@ function customerOrder(order: CustomerOrder) {
     timeline: order.events
       .filter((event) => event.newOrderStatus && timelineLabels[event.newOrderStatus])
       .map((event) => ({ status: event.newOrderStatus, label: timelineLabels[event.newOrderStatus!], createdAt: event.createdAt })),
-    bankTransferInstructions: order.paymentMethod === 'BANK_TRANSFER' ? bankTransferInstructions : null,
+    bankTransferInstructions: order.paymentMethod === 'BANK_TRANSFER' ? bankTransferInfo : null,
   };
 }
 
@@ -89,7 +91,7 @@ export async function GET(
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
-    return NextResponse.json(customerOrder(order));
+    return NextResponse.json(await customerOrder(order));
   } catch (error) {
     console.error('Error fetching order:', error);
     return NextResponse.json({ error: 'Failed to fetch order' }, { status: 500 });

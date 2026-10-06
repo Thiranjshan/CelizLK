@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { FaFacebookF, FaInstagram, FaTiktok, FaCcVisa, FaCcMastercard } from 'react-icons/fa';
+import { defaultStoreSettings, type StoreSettings } from '@/lib/store-settings-data';
 
 type CategoryItem = {
   id: string;
@@ -27,6 +28,7 @@ const FALLBACK_SHOP_CATEGORIES = [
 export default function Footer() {
   const pathname = usePathname();
   const [shopCategories, setShopCategories] = useState<CategoryItem[]>(FALLBACK_SHOP_CATEGORIES);
+  const [settings, setSettings] = useState<StoreSettings>(defaultStoreSettings);
 
   useEffect(() => {
     let isMounted = true;
@@ -60,7 +62,19 @@ export default function Footer() {
       }
     }
 
+    async function loadSettings() {
+      try {
+        const response = await fetch('/api/settings');
+        if (!response.ok) return;
+        const data = await response.json();
+        if (isMounted) setSettings({ ...defaultStoreSettings, ...data });
+      } catch (error) {
+        console.error('Failed to fetch store settings:', error);
+      }
+    }
+
     loadCategories();
+    loadSettings();
 
     return () => {
       isMounted = false;
@@ -77,7 +91,7 @@ export default function Footer() {
             <Link href="/" style={{ display: 'inline-block', marginBottom: '1rem' }}>
               <Image
                 src="/logo.png"
-                alt="Celiz LK"
+                alt={settings.business.storeName}
                 width={140}
                 height={42}
                 priority
@@ -86,38 +100,26 @@ export default function Footer() {
               />
             </Link>
             <p>
-              Your trusted gadget partner in Sri Lanka. Providing genuine branded tech accessories, audio devices, chargers, and wearables with official local warranty.
+              {settings.website.metaDescription || 'Your trusted gadget partner in Sri Lanka. Providing genuine branded tech accessories, audio devices, chargers, and wearables with official local warranty.'}
             </p>
             <div className="footer-social-links" style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem' }}>
-              <a
-                href="https://www.facebook.com/share/1LXMTdG8jr/?mibextid=wwXIfr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="social-icon-btn"
-                aria-label="Facebook"
-              >
-                <FaFacebookF />
-              </a>
+              {settings.social.facebook && (
+                <a href={settings.social.facebook} target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="Facebook">
+                  <FaFacebookF />
+                </a>
+              )}
 
-              <a
-                href="https://www.instagram.com/celizlk/?utm_source=ig_web_button_share_sheet"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="social-icon-btn"
-                aria-label="Instagram"
-              >
-                <FaInstagram />
-              </a>
+              {settings.social.instagram && (
+                <a href={settings.social.instagram} target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="Instagram">
+                  <FaInstagram />
+                </a>
+              )}
 
-              <a
-                href="https://www.tiktok.com/@celizlk"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="social-icon-btn"
-                aria-label="TikTok"
-              >
-                <FaTiktok />
-              </a>
+              {settings.social.tiktok && (
+                <a href={settings.social.tiktok} target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="TikTok">
+                  <FaTiktok />
+                </a>
+              )}
             </div>
           </div>
 
@@ -156,7 +158,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <div>© {new Date().getFullYear()} Celiz LK. All rights reserved.</div>
+          <div>{settings.headerFooter.copyrightText || `© ${new Date().getFullYear()} ${settings.business.storeName}. All rights reserved.`}</div>
 
           <div className="footer-payment-methods">
             <span>We accept:</span>
