@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminFromRequest, hasAdminPermission, writeAudit } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
-import { deleteUploadFileIfExists, getRemovedUploadUrls } from '@/lib/security';
+import { deleteUploadFileIfExists, getRemovedUploadUrls } from '@/lib/upload-storage';
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const admin = await getAdminFromRequest(request);

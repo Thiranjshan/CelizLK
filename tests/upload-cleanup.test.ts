@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { test } from 'node:test';
-import { deleteUploadFileIfExists, getRemovedUploadUrls } from '@/lib/security';
+import { deleteUploadFileIfExists, getRemovedUploadUrls } from '@/lib/upload-storage';
 
 test('removes replaced or cleared upload files and ignores unchanged URLs', async () => {
   const uploadsDir = path.join(process.cwd(), 'public', 'uploads');

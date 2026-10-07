@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAdminFromRequest, hasAdminPermission, writeAudit } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
 import { resolveHeroBannerOrderList } from '@/lib/hero-banners';
-import { deleteUploadFileIfExists, getRemovedUploadUrls } from '@/lib/security';
+import { deleteUploadFileIfExists, getRemovedUploadUrls } from '@/lib/upload-storage';
 
 function normalizeLink(value: unknown) {
   if (typeof value !== 'string') return '';

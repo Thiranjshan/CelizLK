@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { getAdminFromRequest, hasAdminPermission, writeAudit } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
-import { deleteUploadFileIfExists, getRemovedUploadUrls } from '@/lib/security';
+import { deleteUploadFileIfExists, getRemovedUploadUrls } from '@/lib/upload-storage';
 import { isValidProductSlug, normalizeProductImages, normalizeProductSlug, PRODUCT_DESCRIPTION_MAX_LENGTH, PRODUCT_NAME_MAX_LENGTH, PRODUCT_SPECS_MAX_LENGTH } from '@/lib/product-validation';
 
 export async function GET(request: Request) {
