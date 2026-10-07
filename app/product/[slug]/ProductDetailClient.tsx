@@ -292,7 +292,16 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
       )}
 
       {/* Related Products Section */}
-      {relatedProducts.length > 0 && <ProductCarousel title="You May Also Like" viewAllHref="/products" products={relatedProducts} />}
+      {relatedProducts.length > 0 && (
+        <ProductCarousel
+          title="You May Also Like"
+          eyebrow="Related Gadgets"
+          subtitle="Explore matching accessories and complementary tech gear"
+          viewAllHref="/products"
+          products={relatedProducts}
+          ctaLabel="More Products?"
+        />
+      )}
     </div>
   );
 }

@@ -8,6 +8,8 @@ import { Product } from '@/lib/types';
 
 interface ProductCarouselProps {
   title: string;
+  subtitle?: string;
+  eyebrow?: string;
   viewAllHref?: string;
   ctaHref?: string;
   ctaLabel?: string;
@@ -25,7 +27,22 @@ export interface CarouselTile {
   isShopAll?: boolean;
 }
 
-export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel, products = [], tiles = [] }: ProductCarouselProps) {
+function renderDualTitle(title: string) {
+  const words = title.trim().split(/\s+/);
+  if (words.length <= 1) {
+    return <span className="title-lead">{title}</span>;
+  }
+  const firstPart = words.slice(0, words.length - 1).join(' ');
+  const lastWord = words[words.length - 1];
+  return (
+    <>
+      <span className="title-lead">{firstPart}</span>{' '}
+      <span className="title-accent">{lastWord}</span>
+    </>
+  );
+}
+
+export default function ProductCarousel({ title, subtitle, eyebrow, viewAllHref, ctaHref, ctaLabel, products = [], tiles = [] }: ProductCarouselProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const visibleRef = useRef(false);
@@ -169,8 +186,18 @@ export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel,
     };
   }, [checkScrollability]);
 
+  let defaultActionLabel = 'View All';
+  const lower = title.toLowerCase();
+  if (lower.includes('collection') || lower.includes('categor')) {
+    defaultActionLabel = 'More Categories?';
+  } else if (lower.includes('just in') || lower.includes('arrival')) {
+    defaultActionLabel = 'More New Arrivals?';
+  } else if (lower.includes('feature') || lower.includes('product')) {
+    defaultActionLabel = 'More Products?';
+  }
+
   const actionHref = ctaHref ?? viewAllHref;
-  const actionLabel = ctaLabel ?? (viewAllHref ? 'View all' : '');
+  const actionLabel = ctaLabel ?? (actionHref ? defaultActionLabel : '');
 
   return (
     <section
@@ -184,16 +211,11 @@ export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel,
       onKeyDown={markInteraction}
     >
       <div className="homepage-product-carousel-heading">
-        <h2 id={`${title.toLowerCase().replace(/\s+/g, '-')}-heading`}>{title}</h2>
-        <div className="homepage-product-carousel-actions">
-          {actionHref && actionLabel ? (
-            <Link href={actionHref} className="homepage-product-carousel-view-all">
-              <span>{actionLabel}</span>
-              <ArrowRight size={16} />
-            </Link>
-          ) : null}
-          
-        </div>
+        {eyebrow && <span className="homepage-carousel-eyebrow">{eyebrow}</span>}
+        <h2 id={`${title.toLowerCase().replace(/\s+/g, '-')}-heading`} className="homepage-carousel-title">
+          {renderDualTitle(title)}
+        </h2>
+        {subtitle && <p className="homepage-carousel-subheading">{subtitle}</p>}
       </div>
       <div
         className="homepage-product-carousel-viewport"
@@ -241,6 +263,15 @@ export default function ProductCarousel({ title, viewAllHref, ctaHref, ctaLabel,
             })}
         </div>
       </div>
+
+      {actionHref && actionLabel ? (
+        <div className="homepage-carousel-bottom-action">
+          <Link href={actionHref} className="homepage-carousel-cta-btn">
+            <span>{actionLabel}</span>
+            <ArrowRight className="cta-arrow-icon" size={16} />
+          </Link>
+        </div>
+      ) : null}
     </section>
   );
 }

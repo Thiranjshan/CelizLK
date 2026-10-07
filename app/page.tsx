@@ -19,16 +19,12 @@ export default async function HomePage() {
     select: {
       id: true,
       imageUrl: true,
-      buttonLabel: true,
-      buttonLink: true,
     },
   });
 
   const carouselSlides = banners.map((banner) => ({
     id: banner.id,
     image: banner.imageUrl,
-    buttonLabel: banner.buttonLabel,
-    buttonLink: banner.buttonLink,
   }));
 
   // 2. Fetch Categories from DB
@@ -113,7 +109,7 @@ export default async function HomePage() {
   });
 
   return (
-    <div style={{ background: "#FFFFFF" }}>
+    <div style={{ background: "#000000" }}>
       {/* Hero Carousel Banner Section */}
       
         <HeroCarousel slides={carouselSlides} />
@@ -122,6 +118,8 @@ export default async function HomePage() {
         {/* Product merchandising sections */}
         <ProductCarousel
           title="Explore Collections"
+          eyebrow="Curated Catalog"
+          subtitle="Discover premium wireless audio, fast GaN chargers, and smart lifestyle gear"
           ctaHref="/categories"
           tiles={[
             {
@@ -142,10 +140,17 @@ export default async function HomePage() {
               showName: true,
             })),
           ]}
-          ctaLabel="Browse all categories"
+          ctaLabel="More Categories?"
         />
 
-        <ProductCarousel title="Just In" viewAllHref="/products?newArrivals=true" products={newArrivals} />
+        <ProductCarousel
+          title="Just In"
+          eyebrow="Fresh Drops"
+          subtitle="The latest technology releases and fresh arrivals in Sri Lanka"
+          viewAllHref="/products?newArrivals=true"
+          products={newArrivals}
+          ctaLabel="More New Arrivals?"
+        />
 
         {/* Genuine products. Trusted brands. Section */}
         <section
@@ -154,6 +159,8 @@ export default async function HomePage() {
             borderRadius: "var(--radius-lg)",
             padding: "2.5rem",
             marginBottom: "4rem",
+            background: "var(--bg-white)",
+            boxShadow: "var(--shadow-md)",
           }}
         >
           <div
@@ -259,7 +266,14 @@ export default async function HomePage() {
         </section>
         
 
-        <ProductCarousel title="Featured Products" viewAllHref="/products?featured=true" products={featuredProducts} />
+        <ProductCarousel
+          title="Featured Products"
+          eyebrow="Handpicked Essentials"
+          subtitle="Top rated gadgets chosen by tech enthusiasts across Sri Lanka"
+          viewAllHref="/products?featured=true"
+          products={featuredProducts}
+          ctaLabel="More Products?"
+        />
 
 
         

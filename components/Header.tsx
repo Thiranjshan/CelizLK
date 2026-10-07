@@ -38,6 +38,7 @@ export default function Header() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [brandsOpen, setBrandsOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [desktopSearchOpen, setDesktopSearchOpen] = useState(false);
   const hasHydrated = useSyncExternalStore(() => () => undefined, () => true, () => false);
   const cart = useStore((state) => state.cart);
   const cartCount = hasHydrated ? cart.filter((item) => item.selected !== false).reduce((sum, item) => sum + item.quantity, 0) : 0;
@@ -100,19 +101,19 @@ export default function Header() {
   }, [searchQuery]);
 
   useEffect(() => {
-    if (!suggestionsOpen) return;
-
     const handleOutsidePointerDown = (event: PointerEvent) => {
       if (searchRegionRef.current?.contains(event.target as Node)) return;
       suggestionAbortRef.current?.abort();
       suggestionRequestIdRef.current += 1;
       setSuggestionsOpen(false);
       setSuggestionsLoading(false);
+      setDesktopSearchOpen(false);
+      setMobileSearchOpen(false);
     };
 
     document.addEventListener('pointerdown', handleOutsidePointerDown);
     return () => document.removeEventListener('pointerdown', handleOutsidePointerDown);
-  }, [suggestionsOpen]);
+  }, []);
 
   const clearSuggestions = () => {
     suggestionAbortRef.current?.abort();
@@ -122,6 +123,7 @@ export default function Header() {
     setSuggestionsOpen(false);
     setSuggestionsLoading(false);
     setSuggestionsError(false);
+    setDesktopSearchOpen(false);
   };
 
   if (pathname.startsWith('/admin') || pathname.startsWith('/checkout')) return null;
@@ -132,6 +134,7 @@ export default function Header() {
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setMobileMenuOpen(false);
       setMobileSearchOpen(false);
+      setDesktopSearchOpen(false);
     }
   };
 
@@ -162,20 +165,6 @@ export default function Header() {
 
   return (
     <>
-      {/* Layer 1 — Announcement bar */}
-      <div className="header-topbar-wrapper">
-        <div className="container header-topbar-content">
-          <div className="header-topbar-left">
-            <span>Islandwide Express Delivery</span>
-            <span className="separatosr">|</span>
-            <span>100% Authentic Products</span>
-            <span className="separator">|</span>
-            <span>Official Warranty</span>
-
-          </div>
-       </div>
-      </div>
-
       <header className="site-header">
         <div className="container">
           <div className="header-content">
@@ -208,65 +197,83 @@ export default function Header() {
               />
             </Link>
 
-            {/* Global Search Bar */}
-            <div
-              ref={searchRegionRef}
-              className={`header-search-container ${mobileSearchOpen ? 'mobile-search-open' : ''}`}
-            >
-              <form
-                id="header-search-form"
-                onSubmitCapture={clearSuggestions}
-                onSubmit={handleSearchSubmit}
-                onKeyDown={(event) => {
-                  if (event.key === 'Escape') clearSuggestions();
-                }}
-                className="search-bar"
-              >
-                <Search className="search-icon" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Search earbuds, chargers, smartwatches..."
-                  value={searchQuery}
-                  onChange={(event) => {
-                    setSearchQuery(event.target.value);
-                    if (event.target.value.trim().length < 2) clearSuggestions();
-                  }}
-                  className="search-input"
-                  role="combobox"
-                  aria-autocomplete="list"
-                  aria-expanded={suggestionsOpen}
-                  aria-controls="header-search-suggestions"
-                />
-              </form>
-              {suggestionsOpen && (
-                <div id="header-search-suggestions" className="search-suggestions" role="listbox" aria-label="Product suggestions" aria-live="polite">
-                  {suggestionsLoading ? (
-                    <div className="search-suggestion-status">Searching products...</div>
-                  ) : suggestionsError ? (
-                    <div className="search-suggestion-status" role="status">Suggestions are temporarily unavailable.</div>
-                  ) : suggestions.length === 0 ? (
-                    <div className="search-suggestion-status" role="status">No suggestions found.</div>
-                  ) : (
-                    suggestions.map((suggestion) => (
-                      <Link
-                        key={suggestion.id}
-                        href={`/product/${suggestion.slug}`}
-                        className="search-suggestion-link"
-                        role="option"
-                        onClick={clearSuggestions}
-                      >
-                        <span>{suggestion.name}</span>
-                        <strong>LKR {(suggestion.discountPrice ?? suggestion.price).toLocaleString()}</strong>
-                      </Link>
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
-
             {/* Action Buttons */}
             <div className="nav-actions">
+              <div
+                ref={searchRegionRef}
+                className={`header-search-container ${mobileSearchOpen ? 'mobile-search-open' : ''} ${desktopSearchOpen ? 'header-search-open' : ''}`}
+              >
+                <button
+                  type="button"
+                  className="desktop-search-trigger nav-link-btn"
+                  aria-label={desktopSearchOpen ? 'Close search' : 'Open search'}
+                  onClick={() => {
+                    if (desktopSearchOpen) {
+                      setDesktopSearchOpen(false);
+                      clearSuggestions();
+                      return;
+                    }
+                    setMobileSearchOpen(false);
+                    setDesktopSearchOpen(true);
+                    setSuggestionsOpen(true);
+                    setTimeout(() => searchInputRef.current?.focus(), 0);
+                  }}
+                >
+                  <Search size={20} />
+                </button>
+
+                <form
+                  id="header-search-form"
+                  onSubmitCapture={clearSuggestions}
+                  onSubmit={handleSearchSubmit}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Escape') clearSuggestions();
+                  }}
+                  className="search-bar"
+                >
+                  <Search className="search-icon" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search earbuds, chargers, smartwatches..."
+                    value={searchQuery}
+                    onChange={(event) => {
+                      setSearchQuery(event.target.value);
+                      if (event.target.value.trim().length < 2) clearSuggestions();
+                    }}
+                    className="search-input"
+                    role="combobox"
+                    aria-autocomplete="list"
+                    aria-expanded={suggestionsOpen}
+                    aria-controls="header-search-suggestions"
+                    onFocus={() => setDesktopSearchOpen(true)}
+                  />
+                </form>
+                {suggestionsOpen && (
+                  <div id="header-search-suggestions" className="search-suggestions" role="listbox" aria-label="Product suggestions" aria-live="polite">
+                    {suggestionsLoading ? (
+                      <div className="search-suggestion-status">Searching products...</div>
+                    ) : suggestionsError ? (
+                      <div className="search-suggestion-status" role="status">Suggestions are temporarily unavailable.</div>
+                    ) : suggestions.length === 0 ? (
+                      <div className="search-suggestion-status" role="status">No suggestions found.</div>
+                    ) : (
+                      suggestions.map((suggestion) => (
+                        <Link
+                          key={suggestion.id}
+                          href={`/product/${suggestion.slug}`}
+                          className="search-suggestion-link"
+                          role="option"
+                          onClick={clearSuggestions}
+                        >
+                          <span>{suggestion.name}</span>
+                          <strong>LKR {(suggestion.discountPrice ?? suggestion.price).toLocaleString()}</strong>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
               <button
                 type="button"
                 className="mobile-search-toggle"
@@ -302,33 +309,6 @@ export default function Header() {
             </div>
           </div>
         </div>
-
-        <nav className="cat-nav-bar desktop-only" onKeyDown={(event) => { if (event.key === 'Escape') closeMenus(); }}>
-          <div className="container cat-nav-container">
-            <ul className="cat-nav-list left-nav">
-              <li className="cat-nav-item">
-                <Link href="/products" className={pathname === '/products' ? 'active' : ''}>
-                  Shop <span className="nav-accent">All</span>
-                </Link>
-              </li>
-              <li className={`cat-nav-item mega-nav-item ${categoriesOpen ? 'open' : ''}`} onMouseEnter={() => { setCategoriesOpen(true); setBrandsOpen(false); }} onMouseLeave={() => setCategoriesOpen(false)}>
-                <button type="button" aria-expanded={categoriesOpen} onClick={() => { setCategoriesOpen((open) => !open); setBrandsOpen(false); }} onFocus={() => { setCategoriesOpen(true); setBrandsOpen(false); }}>
-                  Shop by <span className="nav-accent">Category</span> <span className="nav-chevron" aria-hidden="true">▾</span>
-                </button>
-                {categoriesOpen && <CategoryMegaMenu categories={navCategories} onNavigate={closeMenus} />}
-              </li>
-              {brands.length > 0 && <li className={`cat-nav-item mega-nav-item ${brandsOpen ? 'open' : ''}`} onMouseEnter={() => { setBrandsOpen(true); setCategoriesOpen(false); }} onMouseLeave={() => setBrandsOpen(false)}>
-                <button type="button" aria-expanded={brandsOpen} onClick={() => { setBrandsOpen((open) => !open); setCategoriesOpen(false); }} onFocus={() => { setBrandsOpen(true); setCategoriesOpen(false); }}>
-                  Shop by <span className="nav-accent">Brand</span> <span className="nav-chevron" aria-hidden="true">▾</span>
-                </button>
-                {brandsOpen && <BrandMegaMenu brands={brands} onNavigate={closeMenus} />}
-              </li>}
-            </ul>
-            <ul className="cat-nav-list right-nav">
-              {infoLinks.map((link) => <li key={link.href} className="cat-nav-item"><Link href={link.href} className={pathname === link.href ? 'active' : ''}>{link.name}</Link></li>)}
-            </ul>
-          </div>
-        </nav>
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (

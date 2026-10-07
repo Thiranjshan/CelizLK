@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Oxygen } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -8,10 +8,10 @@ import AuthBootstrap from '@/components/AuthBootstrap';
 import WhatsAppButton from '@/components/WhaatsAppBtton';
 import { getStoreSettings } from '@/lib/store-settings';
 
-const oxygen = Oxygen({
+const inter = Inter({
   subsets: ['latin'],
-  weight: ['300', '400', '700'],
-  variable: '--font-oxygen',
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-inter',
   display: 'swap',
 });
 
@@ -42,11 +42,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={oxygen.variable}>
-      <body>
+    <html lang="en" className={inter.variable} style={{ backgroundColor: '#000000', colorScheme: 'dark' }}>
+      <body style={{ backgroundColor: '#000000', color: '#FFFFFF' }}>
         <AuthBootstrap />
         <Header />
-        <main style={{ flex: 1 }}>
+        <main style={{ flex: 1, backgroundColor: '#000000' }}>
           {children}
         </main>
         <WhatsAppButton />

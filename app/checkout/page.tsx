@@ -338,7 +338,7 @@ function CheckoutContent() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F8FAFC', paddingBottom: '5rem' }}>
+    <div style={{ minHeight: '100vh', background: '#000000', paddingBottom: '5rem' }}>
       {/* Focused Top Header Bar (No main header/footer) */}
       <header className="checkout-topbar" style={{ background: 'var(--bg-white)', borderBottom: '1px solid var(--border-color)', position: 'sticky', top: 0, zIndex: 100, boxShadow: 'var(--shadow-sm)' }}>
         <div className="container checkout-topbar-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', padding: '1rem 1.25rem', minWidth: 0 }}>

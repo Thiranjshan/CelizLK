@@ -29,8 +29,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const body = await request.json();
 
     const nextImageUrl = typeof body.imageUrl === 'string' ? body.imageUrl.trim() : existing.imageUrl;
-    const nextButtonLabel =
-      typeof body.buttonLabel === 'string' ? body.buttonLabel.trim() : existing.buttonLabel;
+    const nextButtonLabel = typeof body.buttonLabel === 'string' ? body.buttonLabel.trim() : existing.buttonLabel;
     const nextButtonLink = typeof body.buttonLink === 'string' ? normalizeLink(body.buttonLink) : existing.buttonLink;
     const nextIsActive = typeof body.isActive === 'boolean' ? body.isActive : existing.isActive;
 
@@ -42,20 +41,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     // Validate image URL
     if (!nextImageUrl || !/^\/?(?:\/|\.?\.\/|uploads\/|\/uploads\/).*\.(png|jpe?g|webp)(?:\?.*)?$/i.test(nextImageUrl)) {
       return NextResponse.json(
-        { error: 'A valid image URL is required. Recommended banner ratio: 8:3 (1920×720 px).' },
-        { status: 400 },
-      );
-    }
-
-    // Validate button label
-    if (nextButtonLabel.length < 2 || nextButtonLabel.length > 80) {
-      return NextResponse.json({ error: 'Button label must be between 2 and 80 characters.' }, { status: 400 });
-    }
-
-    // Validate button link
-    if (!nextButtonLink) {
-      return NextResponse.json(
-        { error: 'Button link is required and must be a valid internal or external URL.' },
+        { error: 'A valid image URL is required. Recommended banner ratio: 16:9 (1920×1080 px) for a full-screen hero.' },
         { status: 400 },
       );
     }
@@ -93,8 +79,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         where: { id },
         data: {
           imageUrl: nextImageUrl,
-          buttonLabel: nextButtonLabel,
-          buttonLink: nextButtonLink,
+          buttonLabel: nextButtonLabel || '',
+          buttonLink: nextButtonLink || '',
           isActive: nextIsActive,
           order: reordered.find((entry) => entry.id === id)?.order ?? existing.order,
         },

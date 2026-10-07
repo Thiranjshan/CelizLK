@@ -8,8 +8,6 @@ import AdminAuthGate from '@/components/AdminAuthGate';
 interface HeroBanner {
   id: string;
   imageUrl: string;
-  buttonLabel: string;
-  buttonLink: string;
   order: number;
   isActive: boolean;
   createdAt: string;
@@ -28,7 +26,7 @@ function HeroBannersManager({ token }: { token: string }) {
   const [banners, setBanners] = useState<HeroBanner[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ imageUrl: '', buttonLabel: '', buttonLink: '', order: '', isActive: true });
+  const [formData, setFormData] = useState({ imageUrl: '', order: '', isActive: true });
   const [preview, setPreview] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -108,8 +106,6 @@ function HeroBannersManager({ token }: { token: string }) {
     setEditingId(banner.id);
     setFormData({
       imageUrl: banner.imageUrl,
-      buttonLabel: banner.buttonLabel,
-      buttonLink: banner.buttonLink,
       order: String(banner.order),
       isActive: banner.isActive,
     });
@@ -118,7 +114,7 @@ function HeroBannersManager({ token }: { token: string }) {
 
   function resetForm() {
     setEditingId(null);
-    setFormData({ imageUrl: '', buttonLabel: '', buttonLink: '', order: '', isActive: true });
+    setFormData({ imageUrl: '', order: '', isActive: true });
     setPreview('');
     setError('');
   }
@@ -155,7 +151,7 @@ function HeroBannersManager({ token }: { token: string }) {
   }
 
   async function deleteBanner(banner: HeroBanner) {
-    if (!confirm(`Delete banner "${banner.buttonLabel}"?`)) return;
+    if (!confirm(`Delete this banner image?`)) return;
 
     try {
       const response = await fetch(`/api/admin/hero-banners/${banner.id}`, {
@@ -224,7 +220,7 @@ function HeroBannersManager({ token }: { token: string }) {
               }}
             />
             <p style={{ fontSize: '0.8rem', color: '#71717A', marginBottom: '1rem' }}>
-              Recommended: <strong>1920 × 720 px</strong> (8:3 ratio) | Max: <strong>5MB</strong>
+              Recommended: <strong>1920 × 1080 px</strong> (16:9 ratio, full-screen hero) | Max: <strong>5MB</strong>
               <br />
               Supported: JPEG, PNG, WebP
             </p>
@@ -253,44 +249,6 @@ function HeroBannersManager({ token }: { token: string }) {
             <p style={{ fontSize: '0.8rem', color: '#71717A', marginBottom: '1rem' }}>
               Or paste an image URL manually
             </p>
-          </div>
-
-          <div style={{ marginTop: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-              Button Label
-            </label>
-            <input
-              type="text"
-              placeholder="Shop Now"
-              value={formData.buttonLabel}
-              onChange={(e) => setFormData({ ...formData, buttonLabel: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #EAEAEA',
-                borderRadius: '4px',
-                marginBottom: '1rem',
-              }}
-            />
-          </div>
-
-          <div style={{ marginTop: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-              Button Link
-            </label>
-            <input
-              type="text"
-              placeholder="/products or /category/audio"
-              value={formData.buttonLink}
-              onChange={(e) => setFormData({ ...formData, buttonLink: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #EAEAEA',
-                borderRadius: '4px',
-                marginBottom: '1rem',
-              }}
-            />
           </div>
 
           <div style={{ marginTop: '1rem' }}>
@@ -360,26 +318,8 @@ function HeroBannersManager({ token }: { token: string }) {
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 borderRadius: '4px',
-                display: 'flex',
-                alignItems: 'flex-end',
-                justifyContent: 'center',
-                padding: '1rem',
               }}
-            >
-              <button
-                style={{
-                  backgroundColor: '#6D28D9',
-                  color: '#FFF',
-                  padding: '0.75rem 1.5rem',
-                  border: 'none',
-                  borderRadius: '4px',
-                  fontWeight: 600,
-                  marginBottom: '1rem',
-                }}
-              >
-                {formData.buttonLabel || 'Button Label'}
-              </button>
-            </div>
+            />
           )}
         </div>
       </div>
@@ -396,7 +336,6 @@ function HeroBannersManager({ token }: { token: string }) {
                 <tr style={{ borderBottom: '2px solid #EAEAEA' }}>
                   <th style={{ textAlign: 'left', padding: '1rem' }}>Order</th>
                   <th style={{ textAlign: 'left', padding: '1rem' }}>Preview</th>
-                  <th style={{ textAlign: 'left', padding: '1rem' }}>Button Label</th>
                   <th style={{ textAlign: 'left', padding: '1rem' }}>Status</th>
                   <th style={{ textAlign: 'left', padding: '1rem' }}>Actions</th>
                 </tr>
@@ -418,7 +357,6 @@ function HeroBannersManager({ token }: { token: string }) {
                         unoptimized
                       />
                     </td>
-                    <td style={{ padding: '1rem' }}>{banner.buttonLabel}</td>
                     <td style={{ padding: '1rem' }}>
                       {banner.isActive ? (
                         <span style={{ color: '#10B981', fontWeight: 600 }}>Active</span>

@@ -42,27 +42,14 @@ export async function POST(request: Request) {
     const body = await request.json();
     const imageUrl = typeof body.imageUrl === 'string' ? body.imageUrl.trim() : '';
     const buttonLabel = typeof body.buttonLabel === 'string' ? body.buttonLabel.trim() : '';
-    const buttonLink = normalizeLink(body.buttonLink);
+    const buttonLink = typeof body.buttonLink === 'string' ? normalizeLink(body.buttonLink) : '';
     const orderInput = body.order;
     const isActive = body.isActive !== false;
 
     // Validate image URL (must be a local path or valid image URL)
     if (!imageUrl || !/^\/?(?:\/|\.?\.\/|uploads\/|\/uploads\/).*\.(png|jpe?g|webp)(?:\?.*)?$/i.test(imageUrl)) {
       return NextResponse.json(
-        { error: 'A valid image URL is required. Recommended banner ratio: 8:3 (1920×720 px).' },
-        { status: 400 },
-      );
-    }
-
-    // Validate button label
-    if (buttonLabel.length < 2 || buttonLabel.length > 80) {
-      return NextResponse.json({ error: 'Button label must be between 2 and 80 characters.' }, { status: 400 });
-    }
-
-    // Validate button link
-    if (!buttonLink) {
-      return NextResponse.json(
-        { error: 'Button link is required and must be a valid internal or external URL.' },
+        { error: 'A valid image URL is required. Recommended banner ratio: 16:9 (1920×1080 px) for a full-screen hero.' },
         { status: 400 },
       );
     }
@@ -88,8 +75,8 @@ export async function POST(request: Request) {
       const banner = await transaction.heroBanner.create({
         data: {
           imageUrl,
-          buttonLabel,
-          buttonLink,
+          buttonLabel: buttonLabel || '',
+          buttonLink: buttonLink || '',
           order: resolved.find((entry) => entry.id === 'new')?.order ?? 1,
           isActive,
         },

@@ -98,7 +98,7 @@ export default function CartPage() {
                     style={{ width: 18, height: 18, accentColor: 'var(--accent-purple)', cursor: 'pointer', flexShrink: 0 }}
                   />
 
-                  <img src={mainImg} alt={item.product.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 'var(--radius-md)', background: '#F9FAFB', border: '1px solid var(--border-color)', flexShrink: 0 }} />
+                  <img src={mainImg} alt={item.product.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', flexShrink: 0 }} />
 
                   <div className="cart-item-content" style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-purple)', textTransform: 'uppercase' }}>

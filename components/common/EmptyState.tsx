@@ -18,7 +18,7 @@ export default function EmptyState({
   actionLink,
 }: EmptyStateProps) {
   return (
-    <div style={{ background: '#FFFFFF', padding: '4rem 1.5rem', textAlign: 'center', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ background: 'var(--bg-white)', padding: '4rem 1.5rem', textAlign: 'center', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
       {Icon && <Icon size={40} color="var(--text-muted)" style={{ marginBottom: '1.25rem' }} />}
       <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-headline)', marginBottom: '0.5rem' }}>{title}</h2>
       <p style={{ color: 'var(--text-secondary)', maxWidth: '420px', fontSize: '0.95rem', margin: '0 auto 1.5rem', lineHeight: 1.6 }}>{description}</p>

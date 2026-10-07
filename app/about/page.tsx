@@ -28,19 +28,19 @@ export default function AboutPage() {
       </h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', marginBottom: '4rem' }}>
-        <div style={{ textAlign: 'center', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', background: '#FFFFFF' }}>
+        <div style={{ textAlign: 'center', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', background: 'var(--bg-white)' }}>
           <div style={{ color: 'var(--accent-purple)', marginBottom: '0.75rem', display: 'inline-flex' }}><ShieldCheck size={32} /></div>
           <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-headline)' }}>100% Genuine</h3>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>Every product is sourced directly from official manufacturers or authorized brand distributors.</p>
         </div>
 
-        <div style={{ textAlign: 'center', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', background: '#FFFFFF' }}>
+        <div style={{ textAlign: 'center', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', background: 'var(--bg-white)' }}>
           <div style={{ color: 'var(--accent-purple)', marginBottom: '0.75rem', display: 'inline-flex' }}><Award size={32} /></div>
           <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-headline)' }}>Official Warranty</h3>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>Shop with absolute peace of mind. Every gadget carries an official local replacement warranty.</p>
         </div>
 
-        <div style={{ textAlign: 'center', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', background: '#FFFFFF' }}>
+        <div style={{ textAlign: 'center', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', background: 'var(--bg-white)' }}>
           <div style={{ color: 'var(--accent-purple)', marginBottom: '0.75rem', display: 'inline-flex' }}><Heart size={32} /></div>
           <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-headline)' }}>Customer First</h3>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>Fast communication, direct WhatsApp support assistance, and a transparent refund process.</p>

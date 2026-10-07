@@ -108,7 +108,7 @@ export default function ContactPage() {
         </div>
 
         {/* Contact Form */}
-        <div style={{ background: '#FFFFFF', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '2rem', boxShadow: 'var(--shadow-sm)' }}>
+        <div style={{ background: 'var(--bg-white)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '2rem', boxShadow: 'var(--shadow-sm)' }}>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-headline)', marginBottom: '1.5rem' }}>
             Send a message
           </h2>
