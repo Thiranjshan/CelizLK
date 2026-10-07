@@ -198,7 +198,7 @@ export default function Header() {
             {/* Logo */}
             <Link href="/" className="brand-logo">
               <Image
-                src="/logo.png"
+                src="/logo.webp"
                 alt="Celiz LK"
                 width={160}
                 height={48}

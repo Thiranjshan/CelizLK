@@ -90,7 +90,7 @@ export default function Footer() {
           <div className="footer-brand">
             <Link href="/" style={{ display: 'inline-block', marginBottom: '1rem' }}>
               <Image
-                src="/logo.png"
+                src="/logo.webp"
                 alt={settings.business.storeName}
                 width={140}
                 height={42}
@@ -173,7 +173,7 @@ export default function Footer() {
 
             <span className="payment-logo payment-logo-koko" aria-label="Koko">
               <Image
-                src="/koko-logo.png"
+                src="/koko-logo.webp"
                 alt="Koko"
                 width={48}
                 height={24}

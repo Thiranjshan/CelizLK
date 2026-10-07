@@ -64,7 +64,7 @@ function SignupContent() {
         <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 2rem' }}>Save your details and track every order.</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
           <a href={googleAuthHref} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', background: '#fff', color: '#1f2937', border: '1px solid #d1d5db', borderRadius: 999, padding: '0.8rem 1rem', fontWeight: 600, textDecoration: 'none' }}>
-            <Image src="/google-logo.png" alt="Google" width={18} height={18} style={{ display: 'block' }} />
+            <Image src="/google-logo.webp" alt="Google" width={18} height={18} style={{ display: 'block' }} />
             Continue with Google
           </a>
         </div>

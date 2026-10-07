@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAdminFromRequest, hasAdminPermission, writeAudit } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
 import { resolveHeroBannerOrderList } from '@/lib/hero-banners';
+import { deleteUploadFileIfExists, getRemovedUploadUrls } from '@/lib/security';
 
 function normalizeLink(value: unknown) {
   if (typeof value !== 'string') return '';
@@ -32,6 +33,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       typeof body.buttonLabel === 'string' ? body.buttonLabel.trim() : existing.buttonLabel;
     const nextButtonLink = typeof body.buttonLink === 'string' ? normalizeLink(body.buttonLink) : existing.buttonLink;
     const nextIsActive = typeof body.isActive === 'boolean' ? body.isActive : existing.isActive;
+
+    const removedImageUrls = getRemovedUploadUrls([existing.imageUrl], [nextImageUrl]);
+    for (const imageUrl of removedImageUrls) {
+      await deleteUploadFileIfExists(imageUrl);
+    }
 
     // Validate image URL
     if (!nextImageUrl || !/^\/?(?:\/|\.?\.\/|uploads\/|\/uploads\/).*\.(png|jpe?g|webp)(?:\?.*)?$/i.test(nextImageUrl)) {
@@ -143,6 +149,10 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       // Delete the banner
       await transaction.heroBanner.delete({ where: { id } });
     });
+
+    if (banner.imageUrl) {
+      await deleteUploadFileIfExists(banner.imageUrl);
+    }
 
     await writeAudit(admin.id, 'DELETE', 'HERO_BANNER', id, { deletedOrder: banner.order });
 

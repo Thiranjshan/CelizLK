@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { getAdminFromRequest, hasAdminPermission, writeAudit } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
+import { deleteUploadFileIfExists, getRemovedUploadUrls } from '@/lib/security';
 import { isValidProductSlug, normalizeProductImages, normalizeProductSlug, PRODUCT_DESCRIPTION_MAX_LENGTH, PRODUCT_NAME_MAX_LENGTH, PRODUCT_SPECS_MAX_LENGTH } from '@/lib/product-validation';
 
 export async function GET(request: Request) {
@@ -102,7 +103,28 @@ export async function PATCH(request: Request) {
     }
   }
   if (Array.isArray(body.images)) {
-    data.images = JSON.stringify(normalizeProductImages(body.images));
+    const currentProduct = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { images: true },
+    });
+
+    const previousImages = (() => {
+      if (!currentProduct?.images) return [];
+      try {
+        return JSON.parse(currentProduct.images) as string[];
+      } catch {
+        return [];
+      }
+    })();
+
+    const nextImages = normalizeProductImages(body.images);
+    const removedUrls = getRemovedUploadUrls(previousImages, nextImages);
+
+    for (const imageUrl of removedUrls) {
+      await deleteUploadFileIfExists(imageUrl);
+    }
+
+    data.images = JSON.stringify(nextImages);
   } else if (body.images !== undefined) {
     return NextResponse.json({ error: 'Images must be an array of valid image URLs.' }, { status: 400 });
   }
