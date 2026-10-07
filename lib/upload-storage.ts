@@ -28,6 +28,10 @@ export async function deleteUploadFileIfExists(url: string | null | undefined) {
   } catch (error: unknown) {
     const code = typeof error === 'object' && error && 'code' in error ? String((error as { code?: string }).code) : '';
     if (code === 'ENOENT' || code === 'ENOTDIR') return false;
+    if (code === 'EACCES' || code === 'EPERM') {
+      console.warn(`Skipping upload cleanup because file is not deletable: ${filePath}`);
+      return false;
+    }
     throw error;
   }
 }
