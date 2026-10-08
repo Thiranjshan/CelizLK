@@ -50,12 +50,17 @@
   --border-focus: rgba(124, 58, 237, 0.6);
 
   /* Plain Black Background & Surface Hierarchy */
-  --bg-light: #000000;        /* Plain black main site background matching hero carousel */
-  --bg-white: #0a0a0f;        /* Elevated card background */
-  --bg-surface: #111118;      /* Second-level elevated surface */
-  --bg-surface-elevated: #181824; /* Dropdowns, popovers, tooltips, modals */
+  --bg-light: #000000;
+  /* Plain black main site background matching hero carousel */
+  --bg-white: #0a0a0f;
+  /* Elevated card background */
+  --bg-surface: #111118;
+  /* Second-level elevated surface */
+  --bg-surface-elevated: #181824;
+  /* Dropdowns, popovers, tooltips, modals */
   --bg-light-gray: #111118;
-  --bg-dark: #000000;         /* Deep plain black */
+  --bg-dark: #000000;
+  /* Deep plain black */
   --bg-glass: rgba(0, 0, 0, 0.85);
   --bg-glass-card: rgba(10, 10, 15, 0.7);
 
@@ -88,6 +93,7 @@
   --font-heading: var(--font-family-base);
   --font-body: var(--font-family-base);
 }
+
 
 * {
   box-sizing: border-box;
@@ -1247,7 +1253,7 @@ h6 {
   border-color: var(--color-champagne);
   background: var(--color-champagne);
   color: #11110f;
-  box-shadow: 0 0 20px rgba(215, 194, 154, 0.4);
+  box-shadow: 0 0 20px rgba(217, 154, 240, 0.4);
 }
 
 /* "More to Discover" / Complete Edit Banner */
@@ -1370,12 +1376,10 @@ h6 {
   left: -120%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.22),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.22),
+      transparent);
   transition: left 0.65s ease;
 }
 
@@ -2679,10 +2683,48 @@ h6 {
 }
 
 /* Admin operations */
+/* ── Light-theme variable overrides scoped to .admin-shell ── */
 .admin-shell {
+  /* Force light color-scheme so browser renders native form controls
+     (input, select, textarea, file picker) with white backgrounds and
+     dark text — overriding the html-level colorScheme:'dark' in layout.tsx */
+  color-scheme: light;
+
+  /* Typography */
+  --text-headline: #111827;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --text-main: #111827;
+
+  /* Backgrounds */
+  --bg-main: #f3f4f6;
+  --bg-light: #f3f4f6;
+  --bg-white: #ffffff;
+  --bg-surface: #ffffff;
+
+  /* Borders */
+  --border-color: #e5e7eb;
+  --border-light: #f0f0f3;
+  --border-dark: #d1d5db;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.10);
+
+  /* Status */
+  --success: #16a34a;
+  --error: #dc2626;
+
+  /* Accent (keep brand purple) */
+  --accent-purple: #7C3AED;
+  --accent-glow: rgba(124, 58, 237, 0.15);
+  --primary-indigo: #4f46e5;
+
   min-height: calc(100vh - 150px);
-  background: #f2f3f7;
-  color: var(--text-headline);
+  background: #f3f4f6;
+  color: #111827;
+  font-family: var(--font-sans, system-ui, sans-serif);
 }
 
 .admin-layout {
@@ -3615,7 +3657,17 @@ h6 {
 
 .hero-carousel-slide.active {
   opacity: 1;
-  transform: scale(1);
+  animation: heroKenBurns 7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes heroKenBurns {
+  0% {
+    transform: scale(1.00);
+  }
+
+  100% {
+    transform: scale(1.025);
+  }
 }
 
 .hero-carousel-frame {
@@ -3647,17 +3699,371 @@ h6 {
   left: 0;
   right: 0;
   height: 320px;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.06) 20%,
-    rgba(0, 0, 0, 0.28) 45%,
-    rgba(0, 0, 0, 0.65) 68%,
-    rgba(0, 0, 0, 0.9) 85%,
-    #000000 100%
-  );
+  background: linear-gradient(180deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.06) 20%,
+      rgba(0, 0, 0, 0.28) 45%,
+      rgba(0, 0, 0, 0.65) 68%,
+      rgba(0, 0, 0, 0.9) 85%,
+      #000000 100%);
   z-index: 4;
   pointer-events: none;
+}
+
+/* ==========================================================================
+   CINEMATIC HERO TYPOGRAPHY LAYER (Independent Brand Experience Layer)
+   ========================================================================== */
+
+.hero-typography-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  padding: 5rem 1.5rem 7.5rem;
+  box-sizing: border-box;
+  overflow: hidden;
+  user-select: none;
+}
+
+.hero-typography-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  will-change: transform, opacity;
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-typography-stage.phase-exit {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.99);
+}
+
+/* Minimal Editorial Sequence Counter */
+.hero-seq-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 1.25rem;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: heroSeqFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+}
+
+.hero-seq-counter-num {
+  color: rgba(255, 255, 255, 0.85);
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-seq-counter-divider {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.hero-seq-counter-total {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+@keyframes heroSeqFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Small Intro / Eyebrow Text */
+.hero-intro-text {
+  font-family: var(--font-sans);
+  font-size: clamp(0.75rem, 1.3vw, 0.95rem);
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+  margin-bottom: 0.75rem;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-intro-text.enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero-intro-text.exit-active {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition-duration: 0.6s;
+  transition-delay: 0s !important;
+}
+
+/* Typography Title Container */
+.hero-title-group {
+  display: flex;
+  width: 100%;
+}
+
+.hero-title-group.layout-horizontal-settle {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: clamp(0.75rem, 2.5vw, 2rem);
+}
+
+.hero-title-group.layout-three-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.2rem, 0.9vw, 0.6rem);
+}
+
+.hero-title-group.layout-stacked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.15rem, 0.7vw, 0.5rem);
+}
+
+/* Base Text Unit (Word Group) */
+.hero-text-unit {
+  display: inline-block;
+  will-change: transform, opacity;
+  transition-property: opacity, transform, letter-spacing, clip-path;
+  transition-duration: 0.9s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Typography Variants */
+.hero-text-unit.variant-outline {
+  -webkit-text-stroke: 1.6px rgba(255, 255, 255, 0.95);
+  color: transparent;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  font-family: var(--font-sans);
+  font-size: clamp(3.2rem, 9.5vw, 8rem);
+  line-height: 0.95;
+  text-shadow: 0 0 50px rgba(255, 255, 255, 0.08);
+}
+
+.hero-text-unit.variant-solid {
+  color: #FFFFFF;
+  font-weight: 700;
+  font-family: var(--font-sans);
+  font-size: clamp(2.8rem, 8vw, 6.8rem);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  text-shadow: 0 4px 25px rgba(0, 0, 0, 0.65);
+}
+
+.hero-text-unit.variant-serif-italic {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--color-champagne-light, #F3F0E9);
+  font-size: clamp(2.8rem, 8vw, 6.8rem);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.55);
+}
+
+.hero-text-unit.variant-thin-spaced {
+  font-weight: 300;
+  font-family: var(--font-sans);
+  font-size: clamp(1.2rem, 3.2vw, 2.5rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.2;
+}
+
+/* Specific Unit Refinements */
+.hero-text-unit.unit-celiz {
+  font-size: clamp(3.8rem, 11vw, 9.2rem);
+  -webkit-text-stroke: 1.8px rgba(255, 255, 255, 0.95);
+}
+
+.hero-text-unit.unit-lk {
+  font-size: clamp(3.8rem, 11vw, 9.2rem);
+  -webkit-text-stroke: 1.8px rgba(255, 255, 255, 0.95);
+}
+
+.hero-text-unit.unit-gadgets {
+  font-size: clamp(3.2rem, 8.8vw, 7.5rem);
+  -webkit-text-stroke: 1.6px rgba(255, 255, 255, 0.92);
+}
+
+.hero-text-unit.unit-tech-partner-tech {
+  font-size: clamp(3.5rem, 9.5vw, 8rem);
+  line-height: 0.92;
+}
+
+.hero-text-unit.unit-tech-partner-partner {
+  font-size: clamp(3.5rem, 9.5vw, 8rem);
+  line-height: 0.92;
+}
+
+.hero-text-unit.unit-highlight {
+  position: relative;
+}
+
+/* Animations: Entrance Group Types */
+
+/* 1. Scale Down (Sequence 01 CELIZ) */
+.hero-text-unit.anim-scale-down {
+  opacity: 0;
+  transform: scale(1.08);
+}
+
+.hero-text-unit.anim-scale-down.enter-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* 2. Slide Left (Sequence 01 LK, Sequence 02 that fits, Sequence 06 PARTNER) */
+.hero-text-unit.anim-slide-left {
+  opacity: 0;
+  transform: translateX(36px);
+}
+
+.hero-text-unit.anim-slide-left.enter-active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 3. Slide Right (Sequence 02 Find the tech) */
+.hero-text-unit.anim-slide-right {
+  opacity: 0;
+  transform: translateX(-36px);
+}
+
+.hero-text-unit.anim-slide-right.enter-active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 4. Slide Up / Vertical Entrance (Sequence 03 MADE, Sequence 05 WHAT'S, Sequence 06 TECH) */
+.hero-text-unit.anim-slide-up {
+  opacity: 0;
+  transform: translateY(32px);
+}
+
+.hero-text-unit.anim-slide-up.enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 5. Scale Up (Sequence 02 you, Sequence 03 SIMPLE., Sequence 04 JUST, Sequence 05 NEXT.) */
+.hero-text-unit.anim-scale-up {
+  opacity: 0;
+  transform: scale(0.90);
+}
+
+.hero-text-unit.anim-scale-up.enter-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* 6. Mask Reveal (Sequence 04 GADGETS.) */
+.hero-text-unit.anim-mask-reveal {
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+  transform: translateX(-16px);
+}
+
+.hero-text-unit.anim-mask-reveal.enter-active {
+  opacity: 1;
+  clip-path: inset(0 0 0 0);
+  transform: translateX(0);
+}
+
+/* 7. Fade / Letter-Spacing transition (Sequence 03 TECH, Sequence 04 MORE THAN, Sequence 05 DISCOVER) */
+.hero-text-unit.anim-fade {
+  opacity: 0;
+  letter-spacing: 0.12em;
+}
+
+.hero-text-unit.anim-fade.enter-active {
+  opacity: 1;
+  letter-spacing: 0.22em;
+}
+
+/* Exit Transition for all units */
+.hero-text-unit.exit-active {
+  opacity: 0 !important;
+  transform: translateY(-10px) scale(0.99) !important;
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition-delay: 0s !important;
+}
+
+/* Responsive Overrides for Hero Typography */
+@media (max-width: 768px) {
+  .hero-typography-layer {
+    padding: 4.5rem 1.25rem 6.5rem;
+  }
+
+  .hero-text-unit.variant-outline {
+    -webkit-text-stroke: 1.2px rgba(255, 255, 255, 0.95);
+  }
+
+  .hero-text-unit.unit-celiz,
+  .hero-text-unit.unit-lk {
+    -webkit-text-stroke: 1.3px rgba(255, 255, 255, 0.95);
+  }
+
+  .hero-title-group.layout-horizontal-settle {
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-typography-layer {
+    padding: 4rem 1rem 5.5rem;
+  }
+
+  .hero-text-unit.variant-outline {
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.92);
+  }
+
+  .hero-seq-counter {
+    margin-bottom: 0.85rem;
+  }
+
+  .hero-intro-text {
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.25em;
+  }
+}
+
+/* Accessibility / Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .hero-carousel-slide.active {
+    animation: none !important;
+  }
+
+  .hero-text-unit,
+  .hero-intro-text,
+  .hero-seq-counter,
+  .hero-typography-stage {
+    transition: opacity 0.4s ease !important;
+    transform: none !important;
+    clip-path: none !important;
+    letter-spacing: inherit !important;
+    animation: none !important;
+  }
 }
 
 .hero-carousel-cta {
@@ -3777,9 +4183,12 @@ h6 {
 }
 
 @keyframes heroScrollFloat {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(5px);
   }
@@ -3790,13 +4199,16 @@ h6 {
     opacity: 0;
     transform: translateY(0);
   }
+
   25% {
     opacity: 1;
   }
+
   60% {
     opacity: 1;
     transform: translateY(8px);
   }
+
   100% {
     opacity: 0;
     transform: translateY(11px);
@@ -3807,28 +4219,34 @@ h6 {
   .hero-scroll-hint {
     bottom: 2.75rem;
   }
+
   .hero-scroll-content {
     gap: 0.35rem;
   }
+
   .hero-scroll-mouse {
     width: 16px;
     height: 25px;
     padding-top: 4px;
   }
+
   .hero-scroll-wheel {
     width: 2px;
     height: 4.5px;
   }
+
   .hero-scroll-text {
     font-size: 0.62rem;
     letter-spacing: 0.22em;
   }
+
   .hero-scroll-subtext {
     font-size: 0.68rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .hero-scroll-content,
   .hero-scroll-wheel {
     animation: none !important;

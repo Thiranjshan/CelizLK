@@ -88,8 +88,6 @@ export default function CategoryBentoGrid({ categories }: CategoryBentoGridProps
 
             {/* Top Row: Eyebrow + Serif Number */}
             <div className="bento-category-top-row">
-              <span className="bento-category-eyebrow">Collection</span>
-              <span className="bento-category-number">{String(index + 1).padStart(2, '0')}</span>
             </div>
 
             {/* Bottom Row: Title + Description + Round Arrow Button */}

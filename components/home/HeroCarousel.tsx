@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import HeroTypography from './HeroTypography';
 
 interface CarouselSlide {
   id: string;
@@ -114,6 +115,9 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
 
       {/* Seamless cinematic black fade between hero image and next section */}
       <div className="hero-carousel-bottom-fade" aria-hidden="true" />
+
+      {/* Cinematic Typography Layer (Independent Layer) */}
+      <HeroTypography />
 
       <div
         className="hero-scroll-hint"
