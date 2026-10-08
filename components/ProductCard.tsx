@@ -9,6 +9,19 @@ interface ProductCardProps {
   product: Product;
 }
 
+function PlusIcon() {
+  return (
+    <svg aria-hidden="true" width="16" height="16" fill="none" viewBox="0 0 16 16">
+      <path
+        d="M8 3v10M3 8h10"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.6"
+      />
+    </svg>
+  );
+}
+
 export default function ProductCard({ product }: ProductCardProps) {
   const addToCart = useStore((state) => state.addToCart);
 
@@ -35,59 +48,62 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className={`product-card ${isOutOfStock ? 'out-of-stock' : ''}`}>
-      {/* Badges */}
-      <div className="product-card-badges">
-        {isOutOfStock ? (
-          <span className="product-badge badge-out-of-stock">Sold Out</span>
-        ) : (
-          <>
-            {/* {((product as any).isNewArrival) && (
-              <span className="product-badge badge-new">New</span>
-            )} */}
-            {discountPercent > 0 && (
-              <span className="badge badge-cancelled" style={{ background: '#EF4444', color: 'white' }}>
-                  Save {discountPercent}%
-                </span>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Product Image */}
+    <article className={`product-card ${isOutOfStock ? 'out-of-stock' : ''}`}>
+      {/* Product Image & Floating Action */}
       <Link href={`/product/${product.slug}`} className="product-image-wrap">
         <img src={mainImage} alt={product.name} loading="lazy" />
+
+        {/* Badges */}
+        <div className="product-card-badges">
+          {isOutOfStock ? (
+            <span className="product-badge badge-out-of-stock">Sold Out</span>
+          ) : (
+            <>
+              {discountPercent > 0 ? (
+                <span className="product-badge badge-sale">
+                  Save {discountPercent}%
+                </span>
+              ) : (product as { isNewArrival?: boolean }).isNewArrival ? (
+                <span className="product-badge">New</span>
+              ) : null}
+            </>
+          )}
+        </div>
+
+        {/* Floating Add-to-Cart Action Button */}
+        <button
+          onClick={handleAddToCart}
+          className="product-floating-action-btn"
+          disabled={isOutOfStock}
+          aria-label={isOutOfStock ? 'Out of stock' : `Add ${product.name} to cart`}
+          title={isOutOfStock ? 'Out of stock' : 'Add to cart'}
+        >
+          <PlusIcon />
+        </button>
       </Link>
 
       {/* Product Info */}
       <div className="product-info">
-        <span className="product-brand">{product.brand?.name || 'Gadget'}</span>
-        <Link href={`/product/${product.slug}`} className="product-title" title={product.name}>
-          {product.name}
-        </Link>
-
-        {/* Price Row */}
-        <div className="product-price-row">
-          <span className="price-current">
-            Rs. {(product.discountPrice ?? product.price).toLocaleString()}
+        <div className="product-info-left">
+          <span className="product-brand">
+            {product.brand?.name || product.category?.name || 'Curated'}
           </span>
-          {product.discountPrice && (
-            <span className="price-original">
-              Rs. {product.price.toLocaleString()}
-            </span>
-          )}
+          <Link href={`/product/${product.slug}`} className="product-title" title={product.name}>
+            {product.name}
+          </Link>
         </div>
 
-        {/* Add to Cart CTA */}
-        <button
-          onClick={handleAddToCart}
-          className="btn-add-cart"
-          disabled={isOutOfStock}
-        >
-          <ShoppingBag size={15} />
-          <span>{isOutOfStock ? 'Out of Stock' : 'Add to Cart'}</span>
-        </button>
+        <div className="product-price-col">
+          <p className="product-price-current">
+            Rs. {(product.discountPrice ?? product.price).toLocaleString()}
+          </p>
+          {product.discountPrice && (
+            <p className="product-price-original">
+              Rs. {product.price.toLocaleString()}
+            </p>
+          )}
+        </div>
       </div>
-    </div>
+    </article>
   );
 }

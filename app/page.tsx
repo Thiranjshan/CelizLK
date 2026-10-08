@@ -2,11 +2,10 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import HeroCarousel from "@/components/home/HeroCarousel";
 import ProductCarousel from "@/components/home/ProductCarousel";
-import {
-  Award,
-  Truck,
-  Headphones,
-} from "lucide-react";
+import CategoryBentoGrid from "@/components/home/CategoryBentoGrid";
+import FeaturedEditorialSection from "@/components/home/FeaturedEditorialSection";
+import AssurancesSection from "@/components/home/AssurancesSection";
+import { parseProductImages } from "@/lib/product-images";
 import Image from "next/image";
 
 export const revalidate = 60; // ISR revalidate every 60 seconds
@@ -29,6 +28,8 @@ export default async function HomePage() {
 
   // 2. Fetch Categories from DB
   const dbCategories = await prisma.category.findMany({
+    where: { parentId: null },
+    orderBy: { name: "asc" },
     include: {
       products: {
         where: { isActive: true },
@@ -39,38 +40,15 @@ export default async function HomePage() {
     },
   });
 
-  // Keep the existing category descriptions while product images come from the catalog.
-  const categoryLabels: Record<string, string> = {
-    earbuds: "Earbuds & Headphones",
-    chargers: "Fast charging essentials",
-    "power-banks": "Power for everyday",
-    smartwatches: "Stay smart, stay connected",
-    accessories: "Cases, holders & more",
-  };
-
-  const categories = dbCategories
-    .map((cat) => {
-      const productImages = cat.products[0]?.images;
-      let image = "";
-      try {
-        const parsedImages = productImages ? JSON.parse(productImages) : [];
-        image =
-          Array.isArray(parsedImages) && typeof parsedImages[0] === "string"
-            ? parsedImages[0]
-            : "";
-      } catch {
-        image = "";
-      }
-
-      return {
-        id: cat.id,
-        name: cat.name,
-        slug: cat.slug,
-        image,
-        desc: categoryLabels[cat.slug] || "Explore Catalog",
-      };
-    })
-    .filter((category) => category.image);
+  const categories = dbCategories.map((cat) => {
+    return {
+      id: cat.id,
+      name: cat.name,
+      slug: cat.slug,
+      image: cat.imageUrl || parseProductImages(cat.products[0]?.images ?? "")[0],
+      description: cat.description,
+    };
+  });
 
   // 3. Fetch New Arrivals (marked isNewArrival: true)
   const rawNewArrivals = await prisma.product.findMany({
@@ -78,7 +56,6 @@ export default async function HomePage() {
     take: 10,
     include: { category: true, brandRecord: true },
   });
-
 
   const newArrivals = rawNewArrivals.map((p) => ({
     ...p,
@@ -91,7 +68,7 @@ export default async function HomePage() {
   // 4. Fetch Featured Products (marked isFeatured: true)
   const rawFeaturedProducts = await prisma.product.findMany({
     where: { isFeatured: true, isActive: true },
-    take: 10,
+    take: 6,
     include: { category: true, brandRecord: true },
   });
 
@@ -109,58 +86,36 @@ export default async function HomePage() {
   });
 
   return (
-    <div style={{ background: "#000000" }}>
+    <div style={{ background: "#000000", position: "relative" }}>
       {/* Hero Carousel Banner Section */}
-      
-        <HeroCarousel slides={carouselSlides} />
+      <HeroCarousel slides={carouselSlides} />
 
-      <div className="container">
-        {/* Product merchandising sections */}
-        <ProductCarousel
-          title="Explore Collections"
-          eyebrow="Curated Catalog"
-          subtitle="Discover premium wireless audio, fast GaN chargers, and smart lifestyle gear"
-          ctaHref="/categories"
-          tiles={[
-            {
-              id: 'shop-all',
-              name: 'Shop All',
-              image: '/images/shop-all-feature.png',
-              href: '/products',
-              kind: 'category',
-              showName: true,
-              isShopAll: true,
-            },
-            ...categories.map((category) => ({
-              id: category.id,
-              name: category.name,
-              image: category.image,
-              href: `/category/${category.slug}`,
-              kind: 'category' as const,
-              showName: true,
-            })),
-          ]}
-          ctaLabel="More Categories?"
-        />
+      <div className="container" style={{ position: "relative" }}>
+        {/* Ambient Glow */}
+        <div className="ambient-glow" aria-hidden="true" />
 
+        {/* 1. Explore Collections Bento Grid Section */}
+        <CategoryBentoGrid categories={categories} />
+
+        {/* 2. New Arrivals Product Carousel Section */}
         <ProductCarousel
-          title="Just In"
-          eyebrow="Fresh Drops"
-          subtitle="The latest technology releases and fresh arrivals in Sri Lanka"
+          title="New Arrivals"
+          eyebrow="Freshly Curated"
+          subtitle="The latest pieces to join our edit, selected for better performance and considered design."
           viewAllHref="/products?newArrivals=true"
           products={newArrivals}
           ctaLabel="More New Arrivals?"
         />
 
-        {/* Genuine products. Trusted brands. Section */}
+        {/* 3. Genuine products. Trusted brands. Section */}
         <section
           style={{
-            border: "1px solid var(--border-color)",
-            borderRadius: "var(--radius-lg)",
-            padding: "2.5rem",
-            marginBottom: "4rem",
-            background: "var(--bg-white)",
-            boxShadow: "var(--shadow-md)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            borderRadius: "1.75rem",
+            padding: "2.5rem 3rem",
+            margin: "4.5rem 0",
+            background: "#141416",
+            boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5)",
           }}
         >
           <div
@@ -172,31 +127,46 @@ export default async function HomePage() {
             }}
             className="brands-trust-layout"
           >
-            {/* Left side - KEEP AS IT IS */}
             <div>
+              <p
+                style={{
+                  fontSize: "0.68rem",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.2em",
+                  color: "var(--color-champagne)",
+                  fontWeight: 600,
+                  marginBottom: "0.5rem",
+                }}
+              >
+                Authentic Partners
+              </p>
               <h3
                 style={{
-                  fontSize: "1.35rem",
-                  fontWeight: 800,
-                  color: "var(--text-headline)",
-                  lineHeight: 1.3,
+                  fontFamily: "var(--font-serif)",
+                  fontSize: "clamp(1.75rem, 2.5vw, 2.2rem)",
+                  fontWeight: 400,
+                  color: "#FFFFFF",
+                  lineHeight: 1.15,
+                  letterSpacing: "-0.02em",
                 }}
               >
                 Genuine products.
                 <br />
-                Trusted brands.
+                <span style={{ fontStyle: "italic", color: "var(--color-champagne)" }}>
+                  Trusted brands.
+                </span>
               </h3>
 
               <p
                 style={{
-                  fontSize: "0.85rem",
-                  color: "var(--text-secondary)",
-                  marginTop: "0.75rem",
-                  lineHeight: 1.5,
+                  fontSize: "0.875rem",
+                  color: "rgba(255, 255, 255, 0.55)",
+                  marginTop: "0.85rem",
+                  lineHeight: 1.6,
                 }}
               >
-                We carefully source genuine products from trusted brands, giving
-                you the confidence to shop with Celiz LK.
+                We carefully source genuine products directly from authorized brands,
+                giving you complete confidence to shop with Celiz LK.
               </p>
             </div>
 
@@ -223,6 +193,7 @@ export default async function HomePage() {
                             width: 90,
                             textAlign: "center",
                             fontWeight: 700,
+                            color: "#FFFFFF",
                           }}
                         >
                           {brand.name}
@@ -252,6 +223,7 @@ export default async function HomePage() {
                             width: 90,
                             textAlign: "center",
                             fontWeight: 700,
+                            color: "#FFFFFF",
                           }}
                         >
                           {brand.name}
@@ -264,154 +236,12 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
-        
 
-        <ProductCarousel
-          title="Featured Products"
-          eyebrow="Handpicked Essentials"
-          subtitle="Top rated gadgets chosen by tech enthusiasts across Sri Lanka"
-          viewAllHref="/products?featured=true"
-          products={featuredProducts}
-          ctaLabel="More Products?"
-        />
+        {/* 4. Featured Products Editorial 2-Column Showcase */}
+        <FeaturedEditorialSection products={featuredProducts} />
 
-
-        
-
-        {/* Why Celiz LK Promos grid */}
-        <section
-          style={{
-            borderTop: "1px solid var(--border-color)",
-            borderBottom: "1px solid var(--border-color)",
-            padding: "3rem 0",
-            marginBottom: "4rem",
-          }}
-        >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: "2.5rem",
-            }}
-            className="homepage-promos-grid"
-          >
-            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-              <div style={{ color: "var(--accent-purple)", flexShrink: 0 }}>
-                <Award size={24} />
-              </div>
-              <div>
-                <h4
-                  style={{
-                    fontSize: "0.95rem",
-                    fontWeight: 700,
-                    color: "var(--text-headline)",
-                  }}
-                >
-                  100% Genuine
-                </h4>
-                <p
-                  style={{
-                    fontSize: "0.8rem",
-                    color: "var(--text-secondary)",
-                    marginTop: "0.25rem",
-                  }}
-                >
-                  Original products with warranty
-                </p>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-              <div style={{ color: "var(--accent-purple)", flexShrink: 0 }}>
-                <Truck size={24} />
-              </div>
-              <div>
-                <h4
-                  style={{
-                    fontSize: "0.95rem",
-                    fontWeight: 700,
-                    color: "var(--text-headline)",
-                  }}
-                >
-                  Islandwide Delivery
-                </h4>
-                <p
-                  style={{
-                    fontSize: "0.8rem",
-                    color: "var(--text-secondary)",
-                    marginTop: "0.25rem",
-                  }}
-                >
-                  Fast and secure courier service
-                </p>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-              <div style={{ color: "var(--accent-purple)", flexShrink: 0 }}>
-                <Headphones size={24} />
-              </div>
-              <div>
-                <h4
-                  style={{
-                    fontSize: "0.95rem",
-                    fontWeight: 700,
-                    color: "var(--text-headline)",
-                  }}
-                >
-                  Trusted Support
-                </h4>
-                <p
-                  style={{
-                    fontSize: "0.8rem",
-                    color: "var(--text-secondary)",
-                    marginTop: "0.25rem",
-                  }}
-                >
-                  WhatsApp & phone assistance
-                </p>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-              <div style={{ color: "var(--accent-purple)", flexShrink: 0 }}>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-              </div>
-              <div>
-                <h4
-                  style={{
-                    fontSize: "0.95rem",
-                    fontWeight: 700,
-                    color: "var(--text-headline)",
-                  }}
-                >
-                  Secure Payments
-                </h4>
-                <p
-                  style={{
-                    fontSize: "0.8rem",
-                    color: "var(--text-secondary)",
-                    marginTop: "0.25rem",
-                  }}
-                >
-                  Multiple safe payment options
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* 5. Assurances Section (100% Genuine, Islandwide Delivery, Trusted Support, Secure Payments) */}
+        <AssurancesSection />
       </div>
     </div>
   );

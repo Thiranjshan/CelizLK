@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
 import BackButton from '@/components/common/BackButton';
+import { parseProductImages } from '@/lib/product-images';
 
 export const revalidate = 30;
 
@@ -18,23 +20,10 @@ export default async function CategoriesPage() {
   });
 
   const normalizedCategories = categories
-    .map((category) => {
-      const firstImage = category.products[0]?.images;
-      let image = '';
-
-      try {
-        const parsed = firstImage ? JSON.parse(firstImage) : [];
-        image = Array.isArray(parsed) && typeof parsed[0] === 'string' ? parsed[0] : '';
-      } catch {
-        image = '';
-      }
-
-      return {
-        ...category,
-        image,
-      };
-    })
-    .filter((category) => category.image);
+    .map((category) => ({
+      ...category,
+      image: category.imageUrl || parseProductImages(category.products[0]?.images ?? '')[0] || '',
+    }));
 
   const shopAllCard = {
     id: 'shop-all',
@@ -72,7 +61,15 @@ export default async function CategoriesPage() {
               className={`browse-card browse-category-card ${isShopAll ? 'browse-special-card' : ''}`}
             >
               <span className="browse-card-media">
-                {category.image ? <img src={category.image} alt={category.name} loading="lazy" /> : null}
+                {category.image && (
+                  <Image
+                    src={category.image}
+                    alt={category.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    unoptimized
+                  />
+                )}
               </span>
               <span className="browse-card-overlay">
                 <strong className="browse-card-title">{category.name}</strong>

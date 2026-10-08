@@ -1,4 +1,7 @@
 import { Prisma } from '@prisma/client';
+import { parseProductImages } from '@/lib/product-images';
+
+export { parseProductImages } from '@/lib/product-images';
 import { prisma } from '@/lib/prisma';
 import type { Brand, Product } from '@/lib/types';
 
@@ -35,16 +38,6 @@ export function normalizeProductSearchQuery(value: string | null): string {
 
 export function escapeLikeWildcards(value: string): string {
   return value.replace(/[\\%_]/g, '\\$&');
-}
-
-export function parseProductImages(images: string): string[] {
-  try {
-    const parsed: unknown = JSON.parse(images);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((image): image is string => typeof image === 'string');
-  } catch {
-    return [];
-  }
 }
 
 export function buildProductSearchQueries(

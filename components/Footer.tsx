@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { FaFacebookF, FaInstagram, FaTiktok, FaCcVisa, FaCcMastercard } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp, FaCcVisa, FaCcMastercard } from 'react-icons/fa';
 import { defaultStoreSettings, type StoreSettings } from '@/lib/store-settings-data';
 
 type CategoryItem = {
@@ -12,22 +12,11 @@ type CategoryItem = {
   name: string;
   slug: string;
   parentId?: string | null;
-  _count?: {
-    products: number;
-  };
 };
-
-const FALLBACK_SHOP_CATEGORIES = [
-  { id: 'audio', name: 'Audio', slug: 'earbuds' },
-  { id: 'chargers', name: 'Chargers & Cables', slug: 'chargers' },
-  { id: 'power-banks', name: 'Power Banks', slug: 'power-banks' },
-  { id: 'smartwatches', name: 'Smartwatches', slug: 'smartwatches' },
-  { id: 'accessories', name: 'Accessories', slug: 'accessories' },
-];
 
 export default function Footer() {
   const pathname = usePathname();
-  const [shopCategories, setShopCategories] = useState<CategoryItem[]>(FALLBACK_SHOP_CATEGORIES);
+  const [shopCategories, setShopCategories] = useState<CategoryItem[]>([]);
   const [settings, setSettings] = useState<StoreSettings>(defaultStoreSettings);
 
   useEffect(() => {
@@ -41,20 +30,9 @@ export default function Footer() {
         const data = await response.json();
         if (!Array.isArray(data)) return;
 
-        const topLevelCategories = data
-          .filter((category: CategoryItem) => !category.parentId)
-          .map((category: CategoryItem) => ({
-            ...category,
-            _count: category._count ?? { products: 0 },
-          }))
-          .sort((a: CategoryItem, b: CategoryItem) => {
-            const productDiff = (b._count?.products ?? 0) - (a._count?.products ?? 0);
-            if (productDiff !== 0) return productDiff;
-            return (a.name || '').localeCompare(b.name || '');
-          })
-          .slice(0, 6);
+        const topLevelCategories = data.filter((category: CategoryItem) => !category.parentId);
 
-        if (isMounted && topLevelCategories.length > 0) {
+        if (isMounted) {
           setShopCategories(topLevelCategories);
         }
       } catch (error) {
@@ -82,6 +60,8 @@ export default function Footer() {
   }, []);
 
   if (pathname.startsWith('/admin') || pathname.startsWith('/checkout')) return null;
+
+  const whatsappNumber = settings.contact.whatsappNumber.replace(/\D/g, '');
 
   return (
     <footer className="site-footer">
@@ -118,6 +98,18 @@ export default function Footer() {
               {settings.social.tiktok && (
                 <a href={settings.social.tiktok} target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="TikTok">
                   <FaTiktok />
+                </a>
+              )}
+
+              {whatsappNumber && (
+                <a
+                  href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(settings.contact.whatsappMessage || 'Hello Celiz LK, I have a question about a product.')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-icon-btn"
+                  aria-label={`Chat with ${settings.business.storeName} on WhatsApp`}
+                >
+                  <FaWhatsapp />
                 </a>
               )}
             </div>

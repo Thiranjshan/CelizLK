@@ -37,7 +37,7 @@ function renderDualTitle(title: string) {
   return (
     <>
       <span className="title-lead">{firstPart}</span>{' '}
-      <span className="title-accent">{lastWord}</span>
+      <span className="title-serif-accent">{lastWord}</span>
     </>
   );
 }
@@ -211,7 +211,13 @@ export default function ProductCarousel({ title, subtitle, eyebrow, viewAllHref,
       onKeyDown={markInteraction}
     >
       <div className="homepage-product-carousel-heading">
-        {eyebrow && <span className="homepage-carousel-eyebrow">{eyebrow}</span>}
+        {eyebrow && (
+          <span className="homepage-carousel-eyebrow">
+            <span className="eyebrow-accent-line" />
+            {eyebrow}
+            <span className="eyebrow-accent-line" />
+          </span>
+        )}
         <h2 id={`${title.toLowerCase().replace(/\s+/g, '-')}-heading`} className="homepage-carousel-title">
           {renderDualTitle(title)}
         </h2>

@@ -5,7 +5,6 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ToastContainer from '@/components/ToastContainer';
 import AuthBootstrap from '@/components/AuthBootstrap';
-import WhatsAppButton from '@/components/WhaatsAppBtton';
 import { getStoreSettings } from '@/lib/store-settings';
 
 const inter = Inter({
@@ -49,7 +48,6 @@ export default function RootLayout({
         <main style={{ flex: 1, backgroundColor: '#000000' }}>
           {children}
         </main>
-        <WhatsAppButton />
         <Footer />
         <ToastContainer />
       </body>

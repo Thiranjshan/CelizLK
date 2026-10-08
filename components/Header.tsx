@@ -183,6 +183,8 @@ export default function Header() {
                   <X className={`mobile-menu-icon ${mobileMenuOpen ? '' : 'mobile-menu-icon-hidden'}`} size={20} />
                 </span>
               </button>
+        
+        <div className="ambient-glow" aria-hidden="true" />
 
             {/* Logo */}
             <Link href="/" className="brand-logo">
@@ -235,7 +237,7 @@ export default function Header() {
                   <input
                     ref={searchInputRef}
                     type="text"
-                    placeholder="Search earbuds, chargers, smartwatches..."
+                    placeholder="Search products, brands, or categories..."
                     value={searchQuery}
                     onChange={(event) => {
                       setSearchQuery(event.target.value);
