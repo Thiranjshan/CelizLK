@@ -4958,17 +4958,13 @@ h6 {
 
 /* Mobile Nav Drawer */
 .mobile-nav-drawer {
-  position: absolute;
   top: 100%;
   left: 10;
   width: min(360px, calc(100vw - 2rem));
   max-height: calc(100vh - 90px);
-  backdrop-filter: blur(27px);
-  z-index: 99;
+  backdrop-filter: blur(27px) !important;
   border-top: 1px solid var(--border-color);
-  border: 1px solid var(--border-color);
   border-radius: 0 0 var(--radius-md) var(--radius-md);
-  overflow-y: auto;
   padding: 1.5rem 0;
   box-shadow: var(--shadow-lg);
   animation: slideDownMobile 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -6496,4 +6492,81 @@ h6 {
   color: #d7c29a;
   white-space: nowrap;
   margin: 0;
+}
+
+/* Storefront-only editorial theme; preserve the refreshed homepage and admin UI. */
+body:not(:has(.hero-carousel-container)):not(:has([class*="admin-"])) main {
+  --accent-purple: var(--color-champagne);
+  --accent-purple-hover: var(--color-champagne-light);
+  --primary-purple: var(--color-champagne);
+  --primary-purple-hover: var(--color-champagne-light);
+  --accent-glow: rgba(215, 194, 154, 0.24);
+  --border-focus: rgba(215, 194, 154, 0.6);
+  --brand-gradient: linear-gradient(135deg, #D7C29A 0%, #B89B67 100%);
+}
+
+body:not(:has(.hero-carousel-container)):not(:has([class*="admin-"])) main :is(h1, h2, h3) {
+  color: var(--color-champagne-light);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+body:not(:has(.hero-carousel-container)):not(:has([class*="admin-"])) main .btn-primary {
+  background: var(--brand-gradient);
+  color: #12110E;
+  box-shadow: 0 6px 20px rgba(215, 194, 154, 0.18);
+}
+
+body:not(:has(.hero-carousel-container)):not(:has([class*="admin-"])) main .btn-primary:hover,
+body:not(:has(.hero-carousel-container)):not(:has([class*="admin-"])) main .btn-primary:focus-visible {
+  background: linear-gradient(135deg, #F3F0E9 0%, #D7C29A 100%);
+  color: #12110E;
+  box-shadow: 0 8px 26px rgba(215, 194, 154, 0.28);
+}
+
+body:not(:has(.hero-carousel-container)):not(:has([class*="admin-"])) main .btn-secondary {
+  border-color: rgba(215, 194, 154, 0.35);
+  color: var(--color-champagne-light);
+}
+
+body:not(:has(.hero-carousel-container)):not(:has([class*="admin-"])) main .btn-secondary:hover,
+body:not(:has(.hero-carousel-container)):not(:has([class*="admin-"])) main .btn-secondary:focus-visible {
+  border-color: var(--color-champagne);
+  color: var(--color-champagne);
+}
+
+body:not(:has(.hero-carousel-container)):not(:has([class*="admin-"])) main :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  border-color: var(--border-color);
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+body:not(:has(.hero-carousel-container)):not(:has([class*="admin-"])) main :is(input, select, textarea):focus {
+  border-color: var(--color-champagne);
+  outline-color: rgba(215, 194, 154, 0.35);
+}
+
+body:not(:has(.hero-carousel-container)):not(:has([class*="admin-"])) main :is(.shop-all-filter-panel, .shop-all-sort-bar, .auth-card, .collection-empty, .cart-summary-card, .checkout-summary-card, .account-hero, .admin-form-panel) {
+  border-color: var(--border-color);
+  background-color: rgba(20, 20, 22, 0.88);
+  color: var(--text-primary);
+}
+
+body:not(:has(.hero-carousel-container)):not(:has([class*="admin-"])) main .container > div[style*="var(--brand-gradient)"],
+body:not(:has(.hero-carousel-container)):not(:has([class*="admin-"])) main .account-hero {
+  border: 1px solid var(--border-color);
+  background: linear-gradient(145deg, rgba(20, 20, 22, 0.96), rgba(11, 11, 13, 0.96)) !important;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+}
+
+body:not(:has(.hero-carousel-container)):not(:has([class*="admin-"])) main .account-hero :is(h1, h2, h3) {
+  color: var(--color-champagne-light) !important;
+}
+
+body:not(:has(.hero-carousel-container)):not(:has([class*="admin-"])) main .account-hero button {
+  border: 1px solid rgba(215, 194, 154, 0.35);
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--color-champagne-light) !important;
+  box-shadow: none;
 }
