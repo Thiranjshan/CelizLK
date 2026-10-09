@@ -31,7 +31,7 @@ function ArrowIcon() {
 }
 
 export default function FeaturedEditorialSection({ products = [] }: FeaturedEditorialSectionProps) {
-  const displayItems = products.slice(0, 2).map((p) => {
+  const displayItems = products.slice(0, 8).map((p) => {
     const images = Array.isArray(p.images)
       ? p.images
       : typeof p.images === 'string'
@@ -69,8 +69,7 @@ export default function FeaturedEditorialSection({ products = [] }: FeaturedEdit
         </p>
       </div>
 
-      {/* 2-Column Editorial Grid */}
-      <div className="homepage-featured-grid">
+      <div className="homepage-featured-grid" role="region" aria-label="Featured products">
         {displayItems.map((item) => (
           <article className="featured-product-card" key={item.id}>
             <Link

@@ -17,10 +17,6 @@ interface BrandMegaMenuProps {
 export default function BrandMegaMenu({ brands, onNavigate }: BrandMegaMenuProps) {
   return (
     <div className="mega-menu brand-mega-menu">
-      <div className="mega-menu-heading">
-        <span className="mega-menu-eyebrow">Shop by Brand</span>
-        <p>Shop authentic products from trusted brands</p>
-      </div>
       <div className="brand-mega-grid">
         {brands.map((brand) => (
           <Link key={brand.id} href={`/products?brand=${brand.slug}`} className="brand-mega-item" onClick={onNavigate}>
@@ -29,11 +25,6 @@ export default function BrandMegaMenu({ brands, onNavigate }: BrandMegaMenuProps
             </span>
           </Link>
         ))}
-      </div>
-      <div className="mega-menu-footer">
-        <Link href="/products" className="mega-menu-view-all" onClick={onNavigate}>
-          View All Brands <ArrowRight size={15} />
-        </Link>
       </div>
     </div>
   );

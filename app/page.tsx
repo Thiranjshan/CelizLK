@@ -68,7 +68,7 @@ export default async function HomePage() {
   // 4. Fetch Featured Products (marked isFeatured: true)
   const rawFeaturedProducts = await prisma.product.findMany({
     where: { isFeatured: true, isActive: true },
-    take: 6,
+    take: 8,
     include: { category: true, brandRecord: true },
   });
 
@@ -94,7 +94,7 @@ export default async function HomePage() {
         {/* Ambient Glow */}
         <div className="ambient-glow" aria-hidden="true" />
 
-        {/* 1. Explore Collections Bento Grid Section */}
+        {/* 1. ections Bento Grid Section */}
         <CategoryBentoGrid categories={categories} />
 
         {/* 2. New Arrivals Product Carousel Section */}

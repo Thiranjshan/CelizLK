@@ -19,10 +19,6 @@ export default function CategoryMegaMenu({ categories, onNavigate }: CategoryMeg
 
   return (
     <div className="mega-menu category-mega-menu">
-      <div className="mega-menu-heading">
-        <span className="mega-menu-eyebrow">Shop by Category</span>
-        <p>Explore our collections</p>
-      </div>
       <div className="category-mega-grid">
         {groups.map((group) => (
           <section className="category-group" key={group.title}>
@@ -36,11 +32,6 @@ export default function CategoryMegaMenu({ categories, onNavigate }: CategoryMeg
             </ul>
           </section>
         ))}
-      </div>
-      <div className="mega-menu-footer">
-        <Link href="/products" className="mega-menu-view-all" onClick={onNavigate}>
-          View All Categories <ArrowRight size={15} />
-        </Link>
       </div>
     </div>
   );
