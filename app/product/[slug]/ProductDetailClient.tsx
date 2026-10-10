@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
+import useAutoAdvanceScroll from '@/components/common/useAutoAdvanceScroll';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -270,6 +271,9 @@ function formatTitle(name: string) {
 const thumbLabels = ['Front profile', 'Charging case', 'In the box', 'Side profile', 'Detailed view'];
 
 export default function ProductDetailClient({ product, relatedProducts }: ProductDetailClientProps) {
+  const relatedProductsRef = useRef<HTMLDivElement>(null);
+  useAutoAdvanceScroll(relatedProductsRef, '.pdp-related-card');
+
   const router = useRouter();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -591,13 +595,18 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
             </Link>
           </div>
 
-          <div className="pdp-related-grid">
+          <div
+            className="pdp-related-grid"
+            ref={relatedProductsRef}
+            tabIndex={0}
+            aria-label="Scrollable recommended products"
+          >
             {relatedProducts.map((relProduct) => {
               const relImages = Array.isArray(relProduct.images) ? relProduct.images : [];
               const relImage = relImages[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop';
 
               return (
-                <article className="group" key={relProduct.id}>
+                <article className="group pdp-related-card" key={relProduct.id}>
                   <Link
                     href={`/product/${relProduct.slug}`}
                     className="pdp-related-card-media"

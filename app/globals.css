@@ -6433,33 +6433,48 @@ h6 {
 }
 
 .pdp-related-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.25rem;
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pdp-related-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.pdp-related-card {
+  flex: 0 0 calc((100% - 0.75rem) / 2);
+  min-width: 0;
+  scroll-snap-align: start;
+  text-decoration: none;
+  color: inherit;
+  display: block;
 }
 
 @media (min-width: 640px) {
   .pdp-related-grid {
-    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  .pdp-related-card {
+    flex-basis: calc((100% - 1.25rem) / 2);
   }
 }
 
 @media (min-width: 1024px) {
-  .pdp-related-grid {
-    grid-template-columns: repeat(3, 1fr);
+  .pdp-related-card {
+    flex-basis: calc((100% - 2.5rem) / 3);
   }
 }
 
 @media (min-width: 1280px) {
-  .pdp-related-grid {
-    grid-template-columns: repeat(4, 1fr);
+  .pdp-related-card {
+    flex-basis: calc((100% - 3.75rem) / 4);
   }
-}
-
-.pdp-related-card {
-  text-decoration: none;
-  color: inherit;
-  display: block;
 }
 
 .pdp-related-card-media {
@@ -6522,15 +6537,15 @@ h6 {
 .pdp-related-card-name {
   margin-top: 0.375rem;
   font-family: var(--font-serif);
-  font-size: 1.35rem;
+  font-size: clamp(0.9rem, 1.2vw, 1.35rem);
   line-height: 1.2;
   color: #F3F4F6;
   font-weight: 400;
 }
 
 .pdp-related-card-price {
-  padding-top: 1.25rem;
-  font-size: 0.875rem;
+  padding-top: 0.9rem;
+  font-size: 0.75rem;
   color: #7C3AED;
   white-space: nowrap;
   margin: 0;
