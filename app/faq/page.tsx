@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 
 export default function FaqPage() {
   const faqs = [
@@ -26,6 +27,8 @@ export default function FaqPage() {
 
   return (
     <div className="container" style={{ padding: '4rem 1.25rem 6rem', maxWidth: '800px' }}>
+      <div className="site-header-spacer" aria-hidden="true" />
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Frequently Asked Questions' }]} />
       <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-headline)', marginBottom: '1rem', textAlign: 'center' }}>
         Frequently Asked Questions
       </h1>

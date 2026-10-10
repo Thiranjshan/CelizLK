@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -351,16 +352,17 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
       <div className="product-glow" aria-hidden="true" />
 
       <div className="pdp-container">
-        {/* Breadcrumb Navigation */}
-        <nav aria-label="Breadcrumb" className="pdp-breadcrumb">
-          <Link href="/">Home</Link>
-          <span className="pdp-breadcrumb-sep"><Icon name="chevron" size={12} /></span>
-          <Link href={`/products?category=${encodeURIComponent(product.category?.slug || product.category?.name || '')}`}>
-            {product.category?.name || 'Accessories'}
-          </Link>
-          <span className="pdp-breadcrumb-sep"><Icon name="chevron" size={12} /></span>
-          <span className="pdp-breadcrumb-current">{product.name}</span>
-        </nav>
+        <Breadcrumbs
+          className="pdp-breadcrumb"
+          items={[
+            { label: 'Home', href: '/' },
+            {
+              label: product.category?.name || 'Accessories',
+              href: `/products?category=${encodeURIComponent(product.category?.slug || product.category?.name || '')}`,
+            },
+            { label: product.name },
+          ]}
+        />
 
         {/* Main Product Layout Grid */}
         <div className="pdp-main-grid">

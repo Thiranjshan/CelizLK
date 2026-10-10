@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import ProductCard from '@/components/ProductCard';
 import { notFound } from 'next/navigation';
-import BackButton from '@/components/common/BackButton';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 
 export const revalidate = 30;
 
@@ -31,7 +31,12 @@ export default async function BrandPage({ params }: BrandPageProps) {
 
   return (
     <div className="container collection-page">
-      <BackButton label="Back" />
+      <div className="site-header-spacer" aria-hidden="true" />
+      <Breadcrumbs items={[
+        { label: 'Home', href: '/' },
+        { label: 'Brands', href: '/brands' },
+        { label: brand.name },
+      ]} />
       <div className="collection-heading">
         <h1>{brand.name}</h1>
         <p>Showing <strong>{products.length}</strong> products from {brand.name}</p>

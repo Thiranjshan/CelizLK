@@ -4,6 +4,7 @@ import type { Prisma } from '@prisma/client';
 import ProductCard from '@/components/ProductCard';
 import { prisma } from '@/lib/prisma';
 import { ProductSearchResult, searchProducts } from '@/lib/product-search';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 
 interface SearchPageProps {
   searchParams: Promise<{ q?: string | string[]; page?: string | string[] }>;
@@ -26,6 +27,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   if (!rawQuery) {
     return (
       <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}>
+        <div className="site-header-spacer" aria-hidden="true" />
+        <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Search' }]} />
         <Search size={42} color="var(--accent-purple)" style={{ margin: '0 auto 1rem' }} />
         <h1>Search Celiz gadgets</h1>
         <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
@@ -93,6 +96,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   if (searchFailed) {
     return (
       <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}>
+        <div className="site-header-spacer" aria-hidden="true" />
+        <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Search' }]} />
         <h1>Search is temporarily unavailable</h1>
         <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 1.5rem' }}>
           Please try again in a moment.
@@ -104,6 +109,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <div className="container" style={{ padding: '3rem 1.25rem 5rem' }}>
+      <div className="site-header-spacer" aria-hidden="true" />
+      <Breadcrumbs items={[
+        { label: 'Home', href: '/' },
+        { label: 'Search' },
+        { label: `Results for "${query}"` },
+      ]} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
         <div>
           <div style={{ color: 'var(--accent-purple)', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Search results</div>

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useStore } from '@/lib/store';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 
 export default function CartPage() {
   const cart = useStore((state) => state.cart);
@@ -44,6 +45,8 @@ export default function CartPage() {
   if (cart.length === 0) {
     return (
       <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}>
+        <div className="site-header-spacer" aria-hidden="true" />
+        <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Shopping Cart' }]} />
         <div style={{ background: 'var(--bg-white)', maxWidth: 500, margin: '0 auto', padding: '4rem 2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
           <div style={{ width: 72, height: 72, background: 'rgba(109, 40, 217, 0.1)', color: 'var(--accent-purple)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
             <ShoppingBag size={32} />
@@ -62,6 +65,8 @@ export default function CartPage() {
 
   return (
     <div className="container" style={{ padding: '3rem 1.25rem 5rem 1.25rem' }}>
+      <div className="site-header-spacer" aria-hidden="true" />
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Shopping Cart' }]} />
       <h1 style={{ fontSize: '2.25rem', fontWeight: 800, marginBottom: '2rem' }}>Shopping Cart</h1>
 
       <div className="cart-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '2.5rem', alignItems: 'start' }}>

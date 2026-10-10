@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useStore } from '@/lib/store';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 import {
   Lock,
   ArrowRight,
@@ -29,7 +30,7 @@ import {
 
 export default function CheckoutPage() {
   return (
-    <Suspense fallback={<div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center', fontSize: '1.1rem', color: 'var(--text-secondary)' }}>Loading checkout details...</div>}>
+    <Suspense fallback={<div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center', fontSize: '1.1rem', color: 'var(--text-secondary)' }}><div className="site-header-spacer" aria-hidden="true" /><Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Shopping Cart', href: '/cart' }, { label: 'Checkout' }]} />Loading checkout details...</div>}>
       <CheckoutContent />
     </Suspense>
   );
@@ -316,6 +317,14 @@ function CheckoutContent() {
   if (checkoutItems.length === 0) {
     return (
       <div style={{ minHeight: '80vh', background: 'var(--bg-main)', padding: '4rem 1.25rem' }}>
+        <div className="site-header-spacer" aria-hidden="true" />
+        <div className="container" style={{ maxWidth: 540, margin: '0 auto' }}>
+          <Breadcrumbs items={[
+            { label: 'Home', href: '/' },
+            { label: 'Shopping Cart', href: '/cart' },
+            { label: 'Checkout' },
+          ]} />
+        </div>
         <div className="container" style={{ maxWidth: 540, margin: '0 auto', textAlign: 'center', background: 'var(--bg-white)', padding: '3.5rem 2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
           <div style={{ width: 64, height: 64, background: 'rgba(109, 40, 217, 0.08)', color: 'var(--accent-purple)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
             <Lock size={28} />
@@ -339,6 +348,7 @@ function CheckoutContent() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#000000', paddingBottom: '5rem' }}>
+      <div className="site-header-spacer" aria-hidden="true" />
       {/* Focused Top Header Bar (No main header/footer) */}
       <header className="checkout-topbar" style={{ background: 'var(--bg-white)', borderBottom: '1px solid var(--border-color)', position: 'sticky', top: 0, zIndex: 100, boxShadow: 'var(--shadow-sm)' }}>
         <div className="container checkout-topbar-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', padding: '1rem 1.25rem', minWidth: 0 }}>
@@ -363,6 +373,11 @@ function CheckoutContent() {
       </header>
 
       <div className="container" style={{ maxWidth: 1100, padding: '2.5rem 1.25rem' }}>
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'Shopping Cart', href: '/cart' },
+          { label: 'Checkout' },
+        ]} />
         {/* Stepper Header */}
         <div className="checkout-stepper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '2.5rem', background: 'var(--bg-white)', padding: '1.25rem 2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
           <div

@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma';
 import ProductCard from '@/components/ProductCard';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import BackButton from '@/components/common/BackButton';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 
 export const revalidate = 30;
 
@@ -37,14 +37,19 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <div className="container" style={{ padding: '3rem 1.25rem 5rem 1.25rem' }}>
-      <BackButton label="Back" />
+     <div className="site-header-spacer" aria-hidden="true" />
+      <Breadcrumbs items={[
+        { label: 'Home', href: '/' },
+        { label: 'Categories', href: '/categories' },
+        { label: category.name },
+      ]} />
 
       <div style={{ background: 'var(--brand-gradient)', color: 'white', padding: '2.5rem 2rem', borderRadius: 'var(--radius-lg)', marginBottom: '2.5rem', boxShadow: 'var(--shadow-md)' }}>
         <h1 style={{ fontSize: '2.25rem', color: 'white', marginBottom: '0.5rem' }}>{category.name}</h1>
         <p style={{ color: '#D1D5DB', maxWidth: 650 }}>{category.description}</p>
       </div>
 
-      <div style={{ marginBottom: '1.5rem', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
+      <div style={{ marginBottom: '1.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
         Showing <strong>{products.length}</strong> items in <strong>{category.name}</strong>
       </div>
 

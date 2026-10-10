@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useStore } from '@/lib/store';
 import { Plus, Pencil, Trash2, Star } from 'lucide-react';
-import BackButton from '@/components/common/BackButton';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 
 
 interface Address { id: string; label: string; recipientName: string; phone: string; addressLine1: string; addressLine2?: string | null; city: string; district: string; postalCode?: string | null; isDefault: boolean; }
@@ -32,14 +32,15 @@ export default function AddressesPage() {
     }
     void loadInitialAddresses();
   }, [token]);
-  if (!token) return <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}><h2>Sign in to manage addresses</h2><Link href="/login" className="btn-primary">Sign in</Link></div>;
+  if (!token) return <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}><div className="site-header-spacer" aria-hidden="true" /><Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'My Account', href: '/account' }, { label: 'Saved Addresses' }]} /><h2>Sign in to manage addresses</h2><Link href="/login" className="btn-primary">Sign in</Link></div>;
   async function save(event: React.FormEvent) { event.preventDefault(); setError(''); const response = await fetch(editing ? `/api/addresses/${editing}` : '/api/addresses', { method: editing ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(form) }); const result = await response.json(); if (!response.ok) { setError(result.error); return; } setForm(empty); setEditing(null); await load(); }
   async function remove(id: string) { const response = await fetch(`/api/addresses/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (!response.ok) setError('Unable to delete address.'); else await load(); }
   async function makeDefault(id: string) { await fetch(`/api/addresses/${id}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }); await load(); }
 
   return (
     <div className="container" style={{ maxWidth: 900, padding: '3rem 1.25rem 5rem' }}>
-      <BackButton fallbackHref="/account" />
+          <div className="site-header-spacer" aria-hidden="true" />
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'My Account', href: '/account' }, { label: 'Saved Addresses' }]} />
 
       <h1 style={{ margin: '1.5rem 0 1.25rem' }}>Saved addresses</h1>
 

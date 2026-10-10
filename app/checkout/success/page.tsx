@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import { CheckCircle2, Truck, CreditCard, Banknote, Building2, Package, ArrowRight } from 'lucide-react';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 
 interface OrderItem {
   id: string;
@@ -43,7 +44,7 @@ interface OrderDetails {
 
 export default function OrderSuccessPage() {
   return (
-    <Suspense fallback={<div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}>Loading order confirmation...</div>}>
+    <Suspense fallback={<div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}><div className="site-header-spacer" aria-hidden="true" /><Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Shopping Cart', href: '/cart' }, { label: 'Checkout', href: '/checkout' }, { label: 'Order Confirmation' }]} />Loading order confirmation...</div>}>
       <OrderSuccessContent />
     </Suspense>
   );
@@ -115,6 +116,13 @@ function OrderSuccessContent() {
   if (requestError && !error) {
     return (
       <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center', maxWidth: 600 }}>
+        <div className="site-header-spacer" aria-hidden="true" />
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'Shopping Cart', href: '/cart' },
+          { label: 'Checkout', href: '/checkout' },
+          { label: 'Order Confirmation' },
+        ]} />
         <div style={{ background: 'var(--bg-white)', padding: '2.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--accent-purple)' }}>Order Confirmation Notice</h2>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{requestError}</p>
@@ -127,6 +135,13 @@ function OrderSuccessContent() {
   if (loading) {
     return (
       <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}>
+        <div className="site-header-spacer" aria-hidden="true" />
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'Shopping Cart', href: '/cart' },
+          { label: 'Checkout', href: '/checkout' },
+          { label: 'Order Confirmation' },
+        ]} />
         <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)' }}>Verifying your order details...</p>
       </div>
     );
@@ -135,6 +150,13 @@ function OrderSuccessContent() {
   if (requestError || !order) {
     return (
       <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center', maxWidth: 600 }}>
+        <div className="site-header-spacer" aria-hidden="true" />
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'Shopping Cart', href: '/cart' },
+          { label: 'Checkout', href: '/checkout' },
+          { label: 'Order Confirmation' },
+        ]} />
         <div style={{ background: 'var(--bg-white)', padding: '2.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--accent-purple)' }}>Order Confirmation Notice</h2>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{requestError || 'Unable to display order details.'}</p>
@@ -153,6 +175,13 @@ function OrderSuccessContent() {
 
   return (
     <div className="container" style={{ maxWidth: 850, padding: '3rem 1.25rem 5rem 1.25rem' }}>
+      <div className="site-header-spacer" aria-hidden="true" />
+      <Breadcrumbs items={[
+        { label: 'Home', href: '/' },
+        { label: 'Shopping Cart', href: '/cart' },
+        { label: 'Checkout', href: '/checkout' },
+        { label: 'Order Confirmation' },
+      ]} />
       {/* Header Banner */}
       <div style={{ background: 'var(--bg-white)', padding: '2.5rem 2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', textAlign: 'center', marginBottom: '2rem' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: '50%', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', marginBottom: '1rem' }}>

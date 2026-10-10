@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import BackButton from '@/components/common/BackButton';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 
 export const revalidate = 30;
 
@@ -12,7 +12,8 @@ export default async function BrandsPage() {
 
   return (
     <div className="container shop-all-page">
-      <BackButton label="Back" />
+      <div className="site-header-spacer" aria-hidden="true" />
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Brands' }]} />
 
       <div className="collection-heading">
         <h1>All Brands</h1>

@@ -1,9 +1,12 @@
 import Link from 'next/link';
 import { Award, ShieldCheck, Heart } from 'lucide-react';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 
 export default function AboutPage() {
   return (
     <div className="container" style={{ padding: '4rem 1.25rem 6rem', maxWidth: '800px' }}>
+      <div className="site-header-spacer" aria-hidden="true" />
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'About Celiz LK' }]} />
       <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-headline)', marginBottom: '1.5rem', textAlign: 'center' }}>
         About Celiz LK
       </h1>

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
-import BackButton from '@/components/common/BackButton';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 import { parseProductImages } from '@/lib/product-images';
 
 export const revalidate = 30;
@@ -43,8 +43,9 @@ export default async function CategoriesPage() {
 
   return (
     <div className="container shop-all-page">
-      <BackButton label="Back" />
 
+      <div className="site-header-spacer" aria-hidden="true" />
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Categories' }]} />
       <div className="collection-heading">
         <h1>All Categories</h1>
         <p>Browse the latest tech categories across Celiz LK.</p>

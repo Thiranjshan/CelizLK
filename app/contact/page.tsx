@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, MessageCircle, Send } from 'lucide-react';
 import { useStore } from '@/lib/store';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 
 export default function ContactPage() {
   const addToast = useStore((state) => state.addToast);
@@ -44,6 +45,8 @@ export default function ContactPage() {
 
   return (
     <div className="container" style={{ padding: '4rem 1.25rem 6rem' }}>
+      <div className="site-header-spacer" aria-hidden="true" />
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Contact Us' }]} />
       <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
         <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-headline)' }}>Contact Us</h1>
         <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', fontSize: '1.05rem' }}>

@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useStore } from '@/lib/store';
 import { Building2 } from 'lucide-react';
-import BackButton from '@/components/common/BackButton';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 
 interface Payment { method: string; status: string; amount: number; currency: string; transferReference?: string | null; transferAmount?: number | null; transferDate?: string | null; transferSubmittedAt?: string | null; failureReason?: string | null; }
 interface TimelineEvent { status: string; label: string; createdAt: string; }
@@ -54,9 +54,9 @@ export default function CustomerOrderDetailPage() {
 
 
 
-  if (!token) return <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}><h2>Sign in to view this order</h2><Link className="btn-primary" href="/login">Sign in</Link></div>;
-  if (error) return <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}><p role="alert">{error}</p><Link href="/account/orders">Back to orders</Link></div>;
-  if (!order) return <div className="container" style={{ padding: '5rem 1.25rem' }}>Loading order...</div>;
+  if (!token) return <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}><div className="site-header-spacer" aria-hidden="true" /><Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'My Account', href: '/account' }, { label: 'Order History', href: '/account/orders' }, { label: 'Order Details' }]} /><h2>Sign in to view this order</h2><Link className="btn-primary" href="/login">Sign in</Link></div>;
+  if (error) return <div className="container" style={{ padding: '5rem 1.25rem', textAlign: 'center' }}><div className="site-header-spacer" aria-hidden="true" /><Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'My Account', href: '/account' }, { label: 'Order History', href: '/account/orders' }, { label: 'Order Details' }]} /><p role="alert">{error}</p><Link href="/account/orders">Back to orders</Link></div>;
+  if (!order) return <div className="container" style={{ padding: '5rem 1.25rem' }}><div className="site-header-spacer" aria-hidden="true" /><Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'My Account', href: '/account' }, { label: 'Order History', href: '/account/orders' }, { label: 'Order Details' }]} />Loading order...</div>;
 
   const address = order.shippingAddress;
   const paymentDetails = order.bankTransferInstructions ?? {
@@ -72,7 +72,8 @@ export default function CustomerOrderDetailPage() {
   const steps = cancelled ? [...statusSteps.filter((step) => eventByStatus.has(step)), 'CANCELLED'] : statusSteps;
 
   return <div className="container" style={{ maxWidth: 900, padding: '3rem 1.25rem 5rem' }}>
-    <BackButton fallbackHref="/account/orders" />
+    <div className="site-header-spacer" aria-hidden="true" />
+    <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'My Account', href: '/account' }, { label: 'Order History', href: '/account/orders' }, { label: `Order #${order.orderNumber}` }]} />
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', alignItems: 'end', margin: '1rem 0 1.5rem' }}><div><h1 style={{ margin: 0 }}>Order #{order.orderNumber}</h1><p style={{ color: 'var(--text-secondary)', margin: '.4rem 0 0' }}>Placed {new Date(order.createdAt).toLocaleString()}</p></div><strong style={{ fontSize: '1.2rem' }}>{statusLabel(order.status)}</strong></div>
     <section className="admin-form-panel" style={{ marginBottom: '1rem' }}><h2>Order timeline</h2><div style={{ display: 'grid', gap: '.9rem' }}>{steps.map((step) => { const event = eventByStatus.get(step); const complete = Boolean(event); const current = step === order.status; return <div key={step} style={{ display: 'flex', gap: '.75rem', alignItems: 'flex-start', opacity: complete || current ? 1 : .45 }}><span aria-hidden="true" style={{ width: 26, height: 26, borderRadius: '50%', display: 'grid', placeItems: 'center', background: current ? 'var(--primary-indigo)' : complete ? 'var(--success)' : 'var(--border-color)', color: 'white', fontWeight: 800 }}>{step === 'CANCELLED' ? 'x' : complete ? '✓' : '·'}</span><div><strong>{event?.label || statusLabel(step)}</strong>{event && <div style={{ color: 'var(--text-secondary)', fontSize: '.85rem' }}>{new Date(event.createdAt).toLocaleString()}</div>}</div></div>; })}</div></section>
     <div

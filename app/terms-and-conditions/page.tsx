@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 
 export const metadata = {
   title: 'Terms & Conditions — Celiz LK',
@@ -8,6 +9,8 @@ export const metadata = {
 export default function TermsAndConditionsPage() {
   return (
     <div className="container" style={{ maxWidth: 840, padding: '4rem 1.25rem 6rem 1.25rem' }}>
+      <div className="site-header-spacer" aria-hidden="true" />
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Terms & Conditions' }]} />
       <div style={{ background: 'var(--bg-white)', padding: '3rem 2.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
         <h1 style={{ fontSize: '2.25rem', fontWeight: 900, marginBottom: '0.5rem', color: 'var(--primary-indigo)' }}>
           Terms & Conditions

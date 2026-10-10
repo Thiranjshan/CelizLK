@@ -1,6 +1,10 @@
+import Breadcrumbs from '@/components/common/Breadcrumbs';
+
 export default function WarrantyPage() {
   return (
     <div className="container" style={{ padding: '4rem 1.25rem 6rem', maxWidth: '800px', lineHeight: 1.7 }}>
+      <div className="site-header-spacer" aria-hidden="true" />
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Warranty Information' }]} />
       <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-headline)', marginBottom: '2rem' }}>
         Warranty Information
       </h1>

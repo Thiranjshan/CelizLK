@@ -5,10 +5,11 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useStore } from '@/lib/store';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div className="container" style={{ maxWidth: 520, padding: '5rem 1.25rem', textAlign: 'center' }}>Loading account setup...</div>}>
+    <Suspense fallback={<div className="container" style={{ maxWidth: 520, padding: '5rem 1.25rem', textAlign: 'center' }}><div className="site-header-spacer" aria-hidden="true" /><Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Create your account' }]} />Loading account setup...</div>}>
       <SignupContent />
     </Suspense>
   );
@@ -59,6 +60,8 @@ function SignupContent() {
 
   return (
     <div className="container" style={{ maxWidth: 520, padding: '4rem 1.25rem' }}>
+      <div className="site-header-spacer" aria-hidden="true" />
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Create your account' }]} />
       <div className="auth-card">
         <h1>Create your account</h1>
         <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 2rem' }}>Save your details and track every order.</p>

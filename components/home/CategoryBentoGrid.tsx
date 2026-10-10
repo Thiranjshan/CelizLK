@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRef } from 'react';
+import useAutoAdvanceScroll from '@/components/common/useAutoAdvanceScroll';
 
 export interface CategoryData {
   id: string;
@@ -44,6 +46,9 @@ function getCardLayoutClass(index: number, count: number) {
 }
 
 export default function CategoryBentoGrid({ categories }: CategoryBentoGridProps) {
+  const gridRef = useRef<HTMLDivElement>(null);
+  useAutoAdvanceScroll(gridRef, '.bento-category-card');
+
   if (!categories.length) return null;
 
   return (
@@ -65,7 +70,7 @@ export default function CategoryBentoGrid({ categories }: CategoryBentoGridProps
       </div>
 
       {/* Asymmetric Editorial Bento Grid */}
-      <div className="homepage-bento-grid">
+      <div className="homepage-bento-grid" ref={gridRef}>
         {categories.map((category, index) => (
           <Link
             key={category.id}

@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
+import { useRef } from 'react';
 import { Product } from '@/lib/types';
 import { parseProductImages } from '@/lib/product-images';
+import useAutoAdvanceScroll from '@/components/common/useAutoAdvanceScroll';
 
 interface FeaturedEditorialSectionProps {
   products: Product[];
@@ -31,6 +33,9 @@ function ArrowIcon() {
 }
 
 export default function FeaturedEditorialSection({ products = [] }: FeaturedEditorialSectionProps) {
+  const gridRef = useRef<HTMLDivElement>(null);
+  useAutoAdvanceScroll(gridRef, '.featured-product-card');
+
   const displayItems = products.slice(0, 8).map((p) => {
     const images = Array.isArray(p.images)
       ? p.images
@@ -69,7 +74,7 @@ export default function FeaturedEditorialSection({ products = [] }: FeaturedEdit
         </p>
       </div>
 
-      <div className="homepage-featured-grid" role="region" aria-label="Featured products">
+      <div className="homepage-featured-grid" ref={gridRef} role="region" aria-label="Featured products">
         {displayItems.map((item) => (
           <article className="featured-product-card" key={item.id}>
             <Link

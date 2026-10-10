@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
 import ProductCard from '@/components/ProductCard';
 import ProductFilterDropdowns from '@/components/ProductFilterDropdowns';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 import Link from 'next/link';
 
 export const revalidate = 30;
@@ -92,6 +93,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   return (
     <div className="container shop-all-page">
+      <div className="site-header-spacer" aria-hidden="true" />
+      <Breadcrumbs items={[
+        { label: 'Home', href: '/' },
+        { label: isFeaturedView ? 'Featured Products' : isNewArrivalView ? 'New Arrivals' : 'Product Catalog' },
+      ]} />
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2.25rem', fontWeight: 800 }}>
           {isFeaturedView ? 'Featured Products' : isNewArrivalView ? 'New Arrivals' : 'Product Catalog'}
