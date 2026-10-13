@@ -6,7 +6,7 @@
   --font-sans: "DM Sans", var(--font-inter), sans-serif;
 
   /* Celiz palette */
-  --bg-main: #0D0B12;
+  --bg-main: #000000;
   --bg-section: #14111C;
   --bg-card: #18151F;
   --primary-purple: #9865F5;
@@ -1156,6 +1156,10 @@ h6 {
 }
 
 /* Category Bento Grid Layout */
+.homepage-category-section {
+  background: linear-gradient(180deg, #000 0, var(--bg-main) 24rem);
+}
+
 .homepage-bento-grid {
   position: relative;
   display: grid;
