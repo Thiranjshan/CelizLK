@@ -1,12 +1,11 @@
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import HeroCarousel from "@/components/home/HeroCarousel";
 import ProductCarousel from "@/components/home/ProductCarousel";
 import CategoryBentoGrid from "@/components/home/CategoryBentoGrid";
 import FeaturedEditorialSection from "@/components/home/FeaturedEditorialSection";
 import AssurancesSection from "@/components/home/AssurancesSection";
+import TrustedBrandsSection from "@/components/home/TrustedBrandsSection";
 import { parseProductImages } from "@/lib/product-images";
-import Image from "next/image";
 
 export const revalidate = 60; // ISR revalidate every 60 seconds
 
@@ -108,134 +107,7 @@ export default async function HomePage() {
         />
 
         {/* 3. Genuine products. Trusted brands. Section */}
-        <section
-          style={{
-            border: "1px solid var(--border-color)",
-            borderRadius: "1.75rem",
-            padding: "2.5rem 3rem",
-            margin: "4.5rem 0",
-            background: "var(--bg-card)",
-            boxShadow: "var(--shadow-lg)",
-          }}
-        >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1.2fr 2.5fr",
-              gap: "3rem",
-              alignItems: "center",
-            }}
-            className="brands-trust-layout"
-          >
-            <div>
-              <p
-                style={{
-                  fontSize: "0.68rem",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.2em",
-                  color: "var(--color-champagne)",
-                  fontWeight: 600,
-                  marginBottom: "0.5rem",
-                }}
-              >
-                Authentic Partners
-              </p>
-              <h3
-                style={{
-                  fontFamily: "var(--font-serif)",
-                  fontSize: "clamp(1.75rem, 2.5vw, 2.2rem)",
-                  fontWeight: 400,
-                  color: "var(--text-primary)",
-                  lineHeight: 1.15,
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                Genuine products.
-                <br />
-                <span style={{ fontStyle: "italic", color: "var(--color-champagne)" }}>
-                  Trusted brands.
-                </span>
-              </h3>
-
-              <p
-                style={{
-                  fontSize: "0.875rem",
-                  color: "var(--text-secondary)",
-                  marginTop: "0.85rem",
-                  lineHeight: 1.6,
-                }}
-              >
-                We carefully source genuine products directly from authorized brands,
-                giving you complete confidence to shop with Celiz LK.
-              </p>
-            </div>
-
-            {/* Right side - Logo Reel */}
-            <div className="brands-logo-reel">
-              <div className="brands-logo-track">
-                <div className="brands-logo-group">
-                  {trustedBrands.map((brand) => (
-                    <Link
-                      key={brand.id}
-                      href={`/products?brand=${brand.slug}`}
-                      aria-label={`Shop ${brand.name}`}
-                    >
-                      {brand.logoUrl ? (
-                        <Image
-                          src={brand.logoUrl}
-                          alt={brand.name}
-                          width={90}
-                          height={50}
-                        />
-                      ) : (
-                        <span
-                          style={{
-                            width: 90,
-                            textAlign: "center",
-                            fontWeight: 700,
-                            color: "var(--text-primary)",
-                          }}
-                        >
-                          {brand.name}
-                        </span>
-                      )}
-                    </Link>
-                  ))}
-                </div>
-                <div className="brands-logo-group" aria-hidden="true">
-                  {trustedBrands.map((brand) => (
-                    <Link
-                      key={brand.id}
-                      href={`/products?brand=${brand.slug}`}
-                      tabIndex={-1}
-                      aria-hidden="true"
-                    >
-                      {brand.logoUrl ? (
-                        <Image
-                          src={brand.logoUrl}
-                          alt=""
-                          width={90}
-                          height={50}
-                        />
-                      ) : (
-                        <span
-                          style={{
-                            width: 90,
-                            textAlign: "center",
-                            fontWeight: 700,
-                            color: "var(--text-primary)",
-                          }}
-                        >
-                          {brand.name}
-                        </span>
-                      )}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <TrustedBrandsSection brands={trustedBrands} />
 
         {/* 4. Featured Products Editorial 2-Column Showcase */}
         <FeaturedEditorialSection products={featuredProducts} />

@@ -6,8 +6,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { ShoppingBag, Search, User, Menu, X } from 'lucide-react';
 import { useStore } from '@/lib/store';
-import CategoryMegaMenu from '@/components/CategoryMegaMenu';
-import BrandMegaMenu from '@/components/BrandMegaMenu';
 
 interface Brand { id: string; name: string; slug: string; logoUrl: string | null; }
 interface Category { id: string; name: string; slug: string; parentId: string | null; }
@@ -29,7 +27,8 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchRegionRef = useRef<HTMLDivElement>(null);
-  const desktopShopNavigationRef = useRef<HTMLDivElement>(null);
+  const menuToggleRef = useRef<HTMLButtonElement>(null);
+  const navigationDrawerRef = useRef<HTMLDivElement>(null);
   const suggestionAbortRef = useRef<AbortController | null>(null);
   const suggestionRequestIdRef = useRef(0);
   const [suggestions, setSuggestions] = useState<ProductSuggestion[]>([]);
@@ -125,22 +124,26 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    const handleShopNavigationDismiss = (event: PointerEvent | KeyboardEvent) => {
+    const handleNavigationDismiss = (event: PointerEvent | KeyboardEvent) => {
       if (event instanceof KeyboardEvent) {
         if (event.key !== 'Escape') return;
-      } else if (desktopShopNavigationRef.current?.contains(event.target as Node)) {
+      } else if (
+        menuToggleRef.current?.contains(event.target as Node) ||
+        navigationDrawerRef.current?.contains(event.target as Node)
+      ) {
         return;
       }
 
       setCategoriesOpen(false);
       setBrandsOpen(false);
+      setMobileMenuOpen(false);
     };
 
-    document.addEventListener('pointerdown', handleShopNavigationDismiss);
-    document.addEventListener('keydown', handleShopNavigationDismiss);
+    document.addEventListener('pointerdown', handleNavigationDismiss);
+    document.addEventListener('keydown', handleNavigationDismiss);
     return () => {
-      document.removeEventListener('pointerdown', handleShopNavigationDismiss);
-      document.removeEventListener('keydown', handleShopNavigationDismiss);
+      document.removeEventListener('pointerdown', handleNavigationDismiss);
+      document.removeEventListener('keydown', handleNavigationDismiss);
     };
   }, []);
 
@@ -194,13 +197,14 @@ export default function Header() {
 
   return (
     <>
-      <header className={`site-header ${pathname === '/' ? 'site-header-home' : ''} ${isScrolled ? 'site-header-scrolled' : ''}`}>
+      <header className={`site-header ${pathname === '/' ? 'site-header-home' : ''} ${isScrolled ? 'site-header-scrolled' : ''} ${mobileMenuOpen ? 'navigation-menu-open' : ''}`}>
         <div className="container">
           <div className="header-content">
 
-              {/* Mobile menu toggle */}
+              {/* Site navigation toggle */}
               <button
                 type="button"
+                ref={menuToggleRef}
                 className="mobile-menu-toggle"
                 onClick={() => mobileMenuOpen ? closeMobileNavigation() : setMobileMenuOpen(true)}
                 aria-label={mobileMenuOpen ? 'Close Menu' : 'Open Menu'}
@@ -213,67 +217,6 @@ export default function Header() {
                 </span>
               </button>
 
-              <div
-                ref={desktopShopNavigationRef}
-                className="header-shop-navigation desktop-only"
-                onMouseLeave={closeMenus}
-              >
-                <Link href="/products" className="header-shop-link" onClick={closeMenus}>
-                  <div className="header-shop-title">
-                    <span className="header-shop-prefix">Shop </span>
-                    <span className="header-shop-emphasis">All</span>
-                  </div>
-                </Link>
-                <button
-                  type="button"
-                  className={`header-shop-button ${categoriesOpen ? 'open' : ''}`}
-                  aria-expanded={categoriesOpen}
-                  aria-controls="desktop-categories-menu"
-                  onMouseEnter={() => {
-                    setCategoriesOpen(true);
-                    setBrandsOpen(false);
-                  }}
-                  onClick={() => {
-                    setCategoriesOpen(true);
-                    setBrandsOpen(false);
-                  }}
-                >
-                  <div className="header-shop-title">
-                    <span className="header-shop-prefix">Shop by</span>
-                    <span className="header-shop-emphasis">Category</span>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  className={`header-shop-button ${brandsOpen ? 'open' : ''}`}
-                  aria-expanded={brandsOpen}
-                  aria-controls="desktop-brands-menu"
-                  onMouseEnter={() => {
-                    setBrandsOpen(true);
-                    setCategoriesOpen(false);
-                  }}
-                  onClick={() => {
-                    setBrandsOpen(true);
-                    setCategoriesOpen(false);
-                  }}
-                >
-                  <div className="header-shop-title">
-                    <span className="header-shop-prefix">Shop by</span>
-                    <span className="header-shop-emphasis">Brand</span>
-                  </div>
-                </button>
-                {categoriesOpen && (
-                  <div id="desktop-categories-menu">
-                    <CategoryMegaMenu categories={navCategories} onNavigate={closeMenus} />
-                  </div>
-                )}
-                {brandsOpen && (
-                  <div id="desktop-brands-menu">
-                    <BrandMegaMenu brands={brands} onNavigate={closeMenus} />
-                  </div>
-                )}
-              </div>
-        
         <div className="ambient-glow" aria-hidden="true" />
 
             {/* Logo */}
@@ -402,9 +345,9 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile Navigation Drawer */}
+        {/* Shop navigation drawer */}
         {mobileMenuOpen && (
-          <div className="mobile-nav-drawer" id="mobile-nav-drawer">
+          <div className="mobile-nav-drawer" id="mobile-nav-drawer" ref={navigationDrawerRef}>
             <div className="container mobile-nav-content">
               <ul className="mobile-nav-list">
                 <li className="mobile-nav-section-title">Shop Categories</li>
