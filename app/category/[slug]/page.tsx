@@ -44,15 +44,6 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         { label: category.name },
       ]} />
 
-      <div style={{ background: 'var(--brand-gradient)', color: 'white', padding: '2.5rem 2rem', borderRadius: 'var(--radius-lg)', marginBottom: '2.5rem', boxShadow: 'var(--shadow-md)' }}>
-        <h1 style={{ fontSize: '2.25rem', color: 'white', marginBottom: '0.5rem' }}>{category.name}</h1>
-        <p style={{ color: 'var(--text-secondary)', maxWidth: 650 }}>{category.description}</p>
-      </div>
-
-      <div style={{ marginBottom: '1.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-        Showing <strong>{products.length}</strong> items in <strong>{category.name}</strong>
-      </div>
-
       {products.length === 0 ? (
         <div style={{ background: 'var(--bg-white)', padding: '4rem', textAlign: 'center', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
           <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>No products in this category yet</h3>
@@ -66,6 +57,10 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           ))}
         </div>
       )}
+
+      <div className="shop-all-result-count">
+        Showing <strong>{products.length}</strong> items in <strong>{category.name}</strong>
+      </div>
     </div>
   );
 }

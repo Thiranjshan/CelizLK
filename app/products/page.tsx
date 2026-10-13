@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
 import ProductCard from '@/components/ProductCard';
 import ProductFilterDropdowns from '@/components/ProductFilterDropdowns';
+import ProductSortSelect from '@/components/ProductSortSelect';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import Link from 'next/link';
 
@@ -54,6 +55,21 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const isFeaturedView = featured === 'true';
   const isNewArrivalView = newArrivals === 'true';
   const showSidebar = !isFeaturedView && !isNewArrivalView;
+  const hasActiveFilters = selectedCategories.length > 0 || selectedBrands.length > 0;
+
+  // Sort dropdown
+  const baseParams = {
+    category: selectedCategories,
+    brand: selectedBrands,
+    featured: isFeaturedView ? 'true' : undefined,
+    newArrivals: isNewArrivalView ? 'true' : undefined,
+  };
+  const sortOptions = [
+    { value: 'newest', label: 'Newest' },
+    { value: 'price-asc', label: 'Price: Low to High' },
+    { value: 'price-desc', label: 'Price: High to Low' },
+  ].map((o) => ({ ...o, href: buildProductsUrl({ ...baseParams, sort: o.value }) }));
+  const currentSort = sort === 'price-asc' || sort === 'price-desc' ? sort : 'newest';
 
   const [categories, brands] = await Promise.all([
     prisma.category.findMany({ orderBy: { name: 'asc' } }),
@@ -98,14 +114,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         { label: 'Home', href: '/' },
         { label: isFeaturedView ? 'Featured Products' : isNewArrivalView ? 'New Arrivals' : 'Product Catalog' },
       ]} />
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2.25rem', fontWeight: 800 }}>
-          {isFeaturedView ? 'Featured Products' : isNewArrivalView ? 'New Arrivals' : 'Product Catalog'}
-        </h1>
-        <p style={{ color: 'var(--text-secondary)' }}>
-          Browse our complete range of certified high-tech Sri Lanka gadgets
-        </p>
-      </div>
 
       <div className="shop-all-toolbar">
         {showSidebar ? (
@@ -119,42 +127,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               featured={featured}
               newArrivals={newArrivals}
             />
-            {(selectedCategories.length || selectedBrands.length) && (
+            {hasActiveFilters && (
               <Link href="/products" className="shop-all-clear-link">Reset</Link>
             )}
           </div>
         ) : null}
 
         <div className="shop-all-sort-bar">
-          <div className="shop-all-result-count">
-            Showing <strong>{products.length}</strong> items
-          </div>
-
-          <div className="shop-all-sort-links">
-            <span>Sort by:</span>
-            <div className="shop-all-sort-list">
-              <Link
-                href={buildProductsUrl({ category: selectedCategories, brand: selectedBrands, sort: 'newest', featured: isFeaturedView ? 'true' : undefined, newArrivals: isNewArrivalView ? 'true' : undefined })}
-                className={sort === 'newest' || !sort ? 'active' : ''}
-              >
-                Newest
-              </Link>
-              <span>| Price: </span>
-              <Link
-                href={buildProductsUrl({ category: selectedCategories, brand: selectedBrands, sort: 'price-asc', featured: isFeaturedView ? 'true' : undefined, newArrivals: isNewArrivalView ? 'true' : undefined })}
-                className={sort === 'price-asc' ? 'active' : ''}
-              >
-                Low to High
-              </Link>
-              <span>:</span>
-              <Link
-                href={buildProductsUrl({ category: selectedCategories, brand: selectedBrands, sort: 'price-desc', featured: isFeaturedView ? 'true' : undefined, newArrivals: isNewArrivalView ? 'true' : undefined })}
-                className={sort === 'price-desc' ? 'active' : ''}
-              >
-                High to Low
-              </Link>
-            </div>
-          </div>
+          <ProductSortSelect options={sortOptions} current={currentSort} />
         </div>
       </div>
 
@@ -171,6 +151,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           ))}
         </div>
       )}
+
+      <div className="shop-all-result-count">
+        Showing <strong>{products.length}</strong> items
+      </div>
     </div>
   );
 }
