@@ -72,7 +72,7 @@ function Dashboard({ token }: { token: string }) {
                 <Icon size={15} />
                 {label}
                 {badge != null && badge > 0 && (
-                  <span style={{ background: key === 'payments' ? '#b45309' : 'var(--error)', color: '#fff', borderRadius: 999, fontSize: '0.7rem', fontWeight: 800, padding: '0.1rem 0.5rem', minWidth: 18, textAlign: 'center' }}>
+                  <span style={{ background: key === 'payments' ? 'var(--warning)' : 'var(--error)', color: 'var(--bg-main)', borderRadius: 999, fontSize: '0.7rem', fontWeight: 800, padding: '0.1rem 0.5rem', minWidth: 18, textAlign: 'center' }}>
                     {badge}
                   </span>
                 )}
@@ -116,7 +116,7 @@ function Dashboard({ token }: { token: string }) {
                   <p>Bank transfers awaiting manual receipt verification</p>
                 </div>
                 {pendingBank > 0 ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(234,179,8,0.12)', border: '1px solid rgba(234,179,8,0.35)', borderRadius: 'var(--radius-md)', padding: '0.5rem 0.9rem', fontSize: '0.82rem', fontWeight: 700, color: '#b45309' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--warning-bg)', border: '1px solid var(--warning)', borderRadius: 'var(--radius-md)', padding: '0.5rem 0.9rem', fontSize: '0.82rem', fontWeight: 700, color: 'var(--warning)' }}>
                     <AlertCircle size={15} /> {pendingBank} awaiting review
                   </div>
                 ) : (
@@ -128,13 +128,13 @@ function Dashboard({ token }: { token: string }) {
 
               {pendingBank > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  <div style={{ background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.25)', borderRadius: 'var(--radius-md)', padding: '1.25rem 1.5rem', fontSize: '0.88rem', lineHeight: 1.6, color: 'var(--text-main)' }}>
+                  <div style={{ background: 'var(--warning-bg)', border: '1px solid var(--warning)', borderRadius: 'var(--radius-md)', padding: '1.25rem 1.5rem', fontSize: '0.88rem', lineHeight: 1.6, color: 'var(--text-main)' }}>
                     <strong>{pendingBank} order{pendingBank > 1 ? 's' : ''}</strong> ha{pendingBank > 1 ? 've' : 's'} a pending bank transfer that requires manual payment receipt verification before the order can be confirmed and fulfilled.
                   </div>
                   <Link
                     href="/admin/orders"
                     className="btn-primary"
-                    style={{ alignSelf: 'flex-start', background: 'var(--accent-purple)', padding: '0.7rem 1.5rem', textDecoration: 'none', justifyContent: 'center' }}
+                    style={{ alignSelf: 'flex-start', background: 'var(--button-purple)', padding: '0.7rem 1.5rem', textDecoration: 'none', justifyContent: 'center' }}
                   >
                     <Building2 size={16} /> Review Pending Payments →
                   </Link>

@@ -184,7 +184,7 @@ function OrderSuccessContent() {
       ]} />
       {/* Header Banner */}
       <div style={{ background: 'var(--bg-white)', padding: '2.5rem 2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', textAlign: 'center', marginBottom: '2rem' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: '50%', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', marginBottom: '1rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: '50%', background: 'var(--success-bg)', color: 'var(--success)', marginBottom: '1rem' }}>
           <CheckCircle2 size={36} />
         </div>
         <h1 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '0.5rem' }}>Order Placed Successfully!</h1>
@@ -199,7 +199,7 @@ function OrderSuccessContent() {
       {/* Payment Method Specific Instructions */}
       <div style={{ background: 'var(--bg-white)', padding: '1.75rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', marginBottom: '2rem' }}>
         <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {order.paymentMethod === 'COD' && <Banknote size={22} color="#22c55e" />}
+          {order.paymentMethod === 'COD' && <Banknote size={22} color="var(--success)" />}
           {order.paymentMethod === 'BANK_TRANSFER' && <Building2 size={22} color="var(--primary-indigo)" />}
           {order.paymentMethod === 'PAYHERE' && <CreditCard size={22} color="var(--accent-purple)" />}
           <span>Payment Instructions · {order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer' : 'PayHere Card Payment'}</span>
@@ -219,8 +219,8 @@ function OrderSuccessContent() {
           <div
             style={{
               background:
-                'linear-gradient(135deg, rgba(37,211,102,0.06) 0%, rgba(37,211,102,0.02) 100%)',
-              border: '1.5px solid rgba(37,211,102,0.3)',
+                'linear-gradient(135deg, var(--success-bg), transparent)',
+              border: '1.5px solid var(--success)',
               borderRadius: 'var(--radius-lg)',
               padding: '1.75rem',
               display: 'flex',
@@ -240,7 +240,7 @@ function OrderSuccessContent() {
                 style={{
                   width: 42,
                   height: 42,
-                  background: 'rgba(37,211,102,0.15)',
+                  background: 'var(--success-bg)',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
@@ -248,7 +248,7 @@ function OrderSuccessContent() {
                   flexShrink: 0,
                 }}
               >
-                <Building2 size={20} color="#25d366" />
+                <Building2 size={20} color="var(--success)" />
               </div>
 
               <div>
@@ -480,8 +480,8 @@ function OrderSuccessContent() {
               {/* Later Submission Notice */}
               <div
                 style={{
-                  background: 'rgba(99, 102, 241, 0.05)',
-                  border: '1px solid rgba(99, 102, 241, 0.12)',
+                  background: 'var(--accent-glow)',
+                  border: '1px solid var(--border-color)',
                   borderRadius: 'var(--radius-md)',
                   padding: '0.8rem 0.9rem',
                   fontSize: '0.82rem',

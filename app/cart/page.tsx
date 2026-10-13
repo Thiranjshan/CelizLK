@@ -48,7 +48,7 @@ export default function CartPage() {
         <div className="site-header-spacer" aria-hidden="true" />
         <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Shopping Cart' }]} />
         <div style={{ background: 'var(--bg-white)', maxWidth: 500, margin: '0 auto', padding: '4rem 2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
-          <div style={{ width: 72, height: 72, background: 'rgba(109, 40, 217, 0.1)', color: 'var(--accent-purple)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
+          <div style={{ width: 72, height: 72, background: 'var(--accent-glow)', color: 'var(--accent-purple)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
             <ShoppingBag size={32} />
           </div>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' }}>Your Cart is Empty</h2>

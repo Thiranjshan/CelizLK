@@ -11,14 +11,19 @@ const FINALIZED = new Set(['COMPLETED', 'CANCELLED', 'REFUNDED', 'DELIVERED']);
 const ACTIVE_STATUSES = ['ALL', 'AWAITING_PAYMENT', 'CONFIRMED', 'PROCESSING', 'PACKED', 'SHIPPED'];
 const FINALIZED_STATUSES = ['ALL', 'COMPLETED', 'CANCELLED', 'REFUNDED'];
 const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
-  AWAITING_PAYMENT: { bg: 'rgba(234,179,8,0.12)', color: '#b45309' }, CONFIRMED: { bg: 'rgba(59,130,246,0.12)', color: '#1d4ed8' },
-  PROCESSING: { bg: 'rgba(139,92,246,0.12)', color: '#6d28d9' }, PACKED: { bg: 'rgba(99,102,241,0.12)', color: '#4338ca' },
-  SHIPPED: { bg: 'rgba(14,165,233,0.12)', color: '#0369a1' }, DELIVERED: { bg: 'rgba(34,197,94,0.12)', color: '#15803d' },
-  COMPLETED: { bg: 'rgba(34,197,94,0.15)', color: '#15803d' }, CANCELLED: { bg: 'rgba(239,68,68,0.12)', color: '#dc2626' }, REFUNDED: { bg: 'rgba(107,114,128,0.12)', color: '#374151' },
+  AWAITING_PAYMENT: { bg: 'var(--warning-bg)', color: 'var(--warning)' },
+  CONFIRMED: { bg: 'var(--accent-glow)', color: 'var(--light-purple)' },
+  PROCESSING: { bg: 'var(--accent-glow)', color: 'var(--light-purple)' },
+  PACKED: { bg: 'var(--accent-glow)', color: 'var(--light-purple)' },
+  SHIPPED: { bg: 'var(--bg-section)', color: 'var(--text-secondary)' },
+  DELIVERED: { bg: 'var(--success-bg)', color: 'var(--success)' },
+  COMPLETED: { bg: 'var(--success-bg)', color: 'var(--success)' },
+  CANCELLED: { bg: 'var(--error-bg)', color: 'var(--error)' },
+  REFUNDED: { bg: 'var(--bg-section)', color: 'var(--text-secondary)' },
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const s = STATUS_COLORS[status] || { bg: 'rgba(107,114,128,0.1)', color: '#374151' };
+  const s = STATUS_COLORS[status] || { bg: 'var(--bg-section)', color: 'var(--text-secondary)' };
   return <span style={{ background: s.bg, color: s.color, padding: '0.2rem 0.65rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 700, whiteSpace: 'nowrap' }}>{status.replace(/_/g, ' ')}</span>;
 }
 
@@ -105,7 +110,7 @@ function OrdersManager({ token }: { token: string }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           {pendingBankCount > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(234,179,8,0.12)', border: '1px solid rgba(234,179,8,0.35)', borderRadius: 'var(--radius-md)', padding: '0.5rem 0.9rem', fontSize: '0.82rem', fontWeight: 700, color: '#b45309' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--warning-bg)', border: '1px solid var(--warning)', borderRadius: 'var(--radius-md)', padding: '0.5rem 0.9rem', fontSize: '0.82rem', fontWeight: 700, color: 'var(--warning)' }}>
               <AlertCircle size={15} /> {pendingBankCount} bank transfer{pendingBankCount > 1 ? 's' : ''} pending verification
             </div>
           )}
@@ -120,8 +125,8 @@ function OrdersManager({ token }: { token: string }) {
       {confirmingId && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <div style={{ background: 'var(--bg-white)', borderRadius: 'var(--radius-lg)', padding: '2.5rem 2rem', maxWidth: 440, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.25)', textAlign: 'center' }}>
-            <div style={{ width: 60, height: 60, background: 'rgba(234,179,8,0.12)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
-              <AlertCircle size={28} color="#b45309" />
+            <div style={{ width: 60, height: 60, background: 'var(--warning-bg)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
+              <AlertCircle size={28} color="var(--warning)" />
             </div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.75rem' }}>Confirm Bank Payment?</h3>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '2rem' }}>
@@ -129,7 +134,7 @@ function OrdersManager({ token }: { token: string }) {
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
               <button className="admin-outline-button" onClick={() => setConfirmingId(null)} disabled={confirmBusy}>Cancel</button>
-              <button className="btn-primary" style={{ background: '#16a34a', justifyContent: 'center', padding: '0.65rem 1.5rem' }} onClick={() => confirmBankPayment(confirmingId)} disabled={confirmBusy}>
+              <button className="btn-primary" style={{ background: 'var(--success)', color: 'var(--bg-main)', justifyContent: 'center', padding: '0.65rem 1.5rem' }} onClick={() => confirmBankPayment(confirmingId)} disabled={confirmBusy}>
                 <CheckCircle2 size={16} /> {confirmBusy ? 'Confirming…' : 'Yes, Confirm Payment'}
               </button>
             </div>
@@ -161,7 +166,7 @@ function OrdersManager({ token }: { token: string }) {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                           <PMIcon method={order.paymentMethod} />
                           <span style={{ fontSize: '0.82rem' }}>{order.paymentMethod.replace(/_/g, ' ')}</span>
-                          {isPendingBank && <span style={{ background: 'rgba(234,179,8,0.14)', color: '#b45309', fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: 999 }}>⏳ Verify</span>}
+                          {isPendingBank && <span style={{ background: 'var(--warning-bg)', color: 'var(--warning)', fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: 999 }}>⏳ Verify</span>}
                         </div>
                       </td>
                       <td><strong>LKR {order.total.toLocaleString()}</strong></td>
@@ -176,7 +181,7 @@ function OrdersManager({ token }: { token: string }) {
                             <button className="admin-inline-button" onClick={() => confirmCodPayment(order.id)}><Banknote size={12} /> Mark COD Paid</button>
                           )}
                           {isPendingBank && (
-                            <button className="admin-inline-button" style={{ background: 'rgba(34,197,94,0.12)', color: '#15803d', fontWeight: 700 }} onClick={() => setConfirmingId(order.id)}>
+                            <button className="admin-inline-button" style={{ background: 'var(--success-bg)', color: 'var(--success)', fontWeight: 700 }} onClick={() => setConfirmingId(order.id)}>
                               <CheckCircle2 size={12} /> Confirm Payment
                             </button>
                           )}
@@ -232,4 +237,3 @@ function OrdersManager({ token }: { token: string }) {
     </>
   );
 }
-

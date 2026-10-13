@@ -46,7 +46,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
       <div style={{ background: 'var(--brand-gradient)', color: 'white', padding: '2.5rem 2rem', borderRadius: 'var(--radius-lg)', marginBottom: '2.5rem', boxShadow: 'var(--shadow-md)' }}>
         <h1 style={{ fontSize: '2.25rem', color: 'white', marginBottom: '0.5rem' }}>{category.name}</h1>
-        <p style={{ color: '#D1D5DB', maxWidth: 650 }}>{category.description}</p>
+        <p style={{ color: 'var(--text-secondary)', maxWidth: 650 }}>{category.description}</p>
       </div>
 
       <div style={{ marginBottom: '1.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>

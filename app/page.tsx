@@ -86,7 +86,7 @@ export default async function HomePage() {
   });
 
   return (
-    <div style={{ background: "#000000", position: "relative" }}>
+    <div style={{ background: "var(--bg-main)", position: "relative" }}>
       {/* Hero Carousel Banner Section */}
       <HeroCarousel slides={carouselSlides} />
 
@@ -110,12 +110,12 @@ export default async function HomePage() {
         {/* 3. Genuine products. Trusted brands. Section */}
         <section
           style={{
-            border: "1px solid rgba(255, 255, 255, 0.1)",
+            border: "1px solid var(--border-color)",
             borderRadius: "1.75rem",
             padding: "2.5rem 3rem",
             margin: "4.5rem 0",
-            background: "#141416",
-            boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5)",
+            background: "var(--bg-card)",
+            boxShadow: "var(--shadow-lg)",
           }}
         >
           <div
@@ -145,7 +145,7 @@ export default async function HomePage() {
                   fontFamily: "var(--font-serif)",
                   fontSize: "clamp(1.75rem, 2.5vw, 2.2rem)",
                   fontWeight: 400,
-                  color: "#FFFFFF",
+                  color: "var(--text-primary)",
                   lineHeight: 1.15,
                   letterSpacing: "-0.02em",
                 }}
@@ -160,7 +160,7 @@ export default async function HomePage() {
               <p
                 style={{
                   fontSize: "0.875rem",
-                  color: "rgba(255, 255, 255, 0.55)",
+                  color: "var(--text-secondary)",
                   marginTop: "0.85rem",
                   lineHeight: 1.6,
                 }}
@@ -193,7 +193,7 @@ export default async function HomePage() {
                             width: 90,
                             textAlign: "center",
                             fontWeight: 700,
-                            color: "#FFFFFF",
+                            color: "var(--text-primary)",
                           }}
                         >
                           {brand.name}
@@ -223,7 +223,7 @@ export default async function HomePage() {
                             width: 90,
                             textAlign: "center",
                             fontWeight: 700,
-                            color: "#FFFFFF",
+                            color: "var(--text-primary)",
                           }}
                         >
                           {brand.name}

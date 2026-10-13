@@ -110,7 +110,7 @@ function SettingsEditor({ token }: { token: string }) {
                 style={{
                   display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 0.95rem', borderRadius: 'var(--radius-md)',
                   border: activeSection === key ? '1px solid var(--accent-purple)' : '1px solid var(--border-color)',
-                  background: activeSection === key ? 'rgba(109, 40, 217, 0.08)' : 'var(--bg-white)',
+                  background: activeSection === key ? 'var(--accent-glow)' : 'var(--bg-white)',
                   color: activeSection === key ? 'var(--accent-purple)' : 'var(--text-main)',
                   fontWeight: 700, cursor: 'pointer',
                 }}

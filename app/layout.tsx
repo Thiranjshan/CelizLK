@@ -42,11 +42,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable} style={{ backgroundColor: '#000000', colorScheme: 'dark' }}>
-      <body style={{ backgroundColor: '#000000', color: '#FFFFFF' }}>
+    <html lang="en" className={inter.variable} style={{ backgroundColor: 'var(--bg-main)', colorScheme: 'dark' }}>
+      <body style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}>
         <AuthBootstrap />
         <Header />
-        <main style={{ flex: 1, backgroundColor: '#000000' }}>
+        <main style={{ flex: 1, backgroundColor: 'var(--bg-main)' }}>
           {children}
         </main>
         <Footer />

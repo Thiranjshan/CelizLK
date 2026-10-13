@@ -208,8 +208,8 @@ export default function CustomerOrderDetailPage() {
       <div
         style={{
           background:
-            'linear-gradient(135deg, rgba(37,211,102,0.06) 0%, rgba(37,211,102,0.02) 100%)',
-          border: '1.5px solid rgba(37,211,102,0.3)',
+            'linear-gradient(135deg, var(--success-bg), transparent)',
+          border: '1.5px solid var(--success)',
           borderRadius: 'var(--radius-lg)',
           padding: '1.75rem',
           display: 'flex',
@@ -229,7 +229,7 @@ export default function CustomerOrderDetailPage() {
             style={{
               width: 42,
               height: 42,
-              background: 'rgba(37,211,102,0.15)',
+              background: 'var(--success-bg)',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
@@ -237,7 +237,7 @@ export default function CustomerOrderDetailPage() {
               flexShrink: 0,
             }}
           >
-            <Building2 size={20} color="#25d366" />
+            <Building2 size={20} color="var(--success)" />
           </div>
 
           <div>

@@ -87,7 +87,7 @@ export default function AddressesPage() {
                     fontSize: '.72rem',
                     fontWeight: 700,
                     color: 'var(--accent-purple)',
-                    background: 'rgba(124,58,237,0.08)',
+                    background: 'var(--accent-glow)',
                     padding: '.15rem .55rem',
                     borderRadius: 999,
                   }}

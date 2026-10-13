@@ -193,12 +193,12 @@ function HeroBannersManager({ token }: { token: string }) {
     <div style={{ padding: '2rem' }}>
       <h1>Hero Banners</h1>
 
-      {error && <div style={{ color: '#EF4444', marginBottom: '1rem' }}>{error}</div>}
-      {success && <div style={{ color: '#10B981', marginBottom: '1rem' }}>{success}</div>}
+      {error && <div style={{ color: 'var(--error)', marginBottom: '1rem' }}>{error}</div>}
+      {success && <div style={{ color: 'var(--success)', marginBottom: '1rem' }}>{success}</div>}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
         {/* Form */}
-        <div style={{ border: '1px solid #EAEAEA', padding: '1.5rem', borderRadius: '8px' }}>
+        <div style={{ border: '1px solid var(--border-color)', background: 'var(--bg-card)', padding: '1.5rem', borderRadius: '8px' }}>
           <h2>{editingId ? 'Edit Banner' : 'New Banner'}</h2>
 
           <div style={{ marginTop: '1rem' }}>
@@ -213,13 +213,13 @@ function HeroBannersManager({ token }: { token: string }) {
               style={{
                 width: '100%',
                 padding: '0.75rem',
-                border: '2px dashed #EAEAEA',
+                border: '2px dashed var(--border-color)',
                 borderRadius: '4px',
                 marginBottom: '0.5rem',
                 cursor: uploading ? 'not-allowed' : 'pointer',
               }}
             />
-            <p style={{ fontSize: '0.8rem', color: '#71717A', marginBottom: '1rem' }}>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
               Recommended: <strong>1920 × 1080 px</strong> (16:9 ratio, full-screen hero) | Max: <strong>5MB</strong>
               <br />
               Supported: JPEG, PNG, WebP
@@ -241,12 +241,12 @@ function HeroBannersManager({ token }: { token: string }) {
               style={{
                 width: '100%',
                 padding: '0.75rem',
-                border: '1px solid #EAEAEA',
+                border: '1px solid var(--border-color)',
                 borderRadius: '4px',
                 marginBottom: '0.5rem',
               }}
             />
-            <p style={{ fontSize: '0.8rem', color: '#71717A', marginBottom: '1rem' }}>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
               Or paste an image URL manually
             </p>
           </div>
@@ -264,7 +264,7 @@ function HeroBannersManager({ token }: { token: string }) {
               style={{
                 width: '100%',
                 padding: '0.75rem',
-                border: '1px solid #EAEAEA',
+                border: '1px solid var(--border-color)',
                 borderRadius: '4px',
                 marginBottom: '1rem',
               }}
@@ -277,8 +277,8 @@ function HeroBannersManager({ token }: { token: string }) {
               style={{
                 flex: 1,
                 padding: '0.75rem',
-                backgroundColor: '#6D28D9',
-                color: '#FFF',
+                backgroundColor: 'var(--button-purple)',
+                color: 'var(--text-primary)',
                 border: 'none',
                 borderRadius: '4px',
                 fontWeight: 600,
@@ -292,8 +292,8 @@ function HeroBannersManager({ token }: { token: string }) {
                 style={{
                   flex: 1,
                   padding: '0.75rem',
-                  backgroundColor: '#E5E7EB',
-                  color: '#111',
+                  backgroundColor: 'var(--bg-section)',
+                  color: 'var(--text-primary)',
                   border: 'none',
                   borderRadius: '4px',
                   fontWeight: 600,
@@ -306,7 +306,7 @@ function HeroBannersManager({ token }: { token: string }) {
         </div>
 
         {/* Preview */}
-        <div style={{ border: '1px solid #EAEAEA', padding: '1.5rem', borderRadius: '8px' }}>
+        <div style={{ border: '1px solid var(--border-color)', background: 'var(--bg-card)', padding: '1.5rem', borderRadius: '8px' }}>
           <h2>Preview</h2>
           {preview && (
             <div
@@ -333,7 +333,7 @@ function HeroBannersManager({ token }: { token: string }) {
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ borderBottom: '2px solid #EAEAEA' }}>
+                <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
                   <th style={{ textAlign: 'left', padding: '1rem' }}>Order</th>
                   <th style={{ textAlign: 'left', padding: '1rem' }}>Preview</th>
                   <th style={{ textAlign: 'left', padding: '1rem' }}>Status</th>
@@ -342,7 +342,7 @@ function HeroBannersManager({ token }: { token: string }) {
               </thead>
               <tbody>
                 {banners.map((banner) => (
-                  <tr key={banner.id} style={{ borderBottom: '1px solid #EAEAEA' }}>
+                  <tr key={banner.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '1rem' }}>#{banner.order}</td>
                     <td style={{ padding: '1rem' }}>
                       <Image
@@ -359,9 +359,9 @@ function HeroBannersManager({ token }: { token: string }) {
                     </td>
                     <td style={{ padding: '1rem' }}>
                       {banner.isActive ? (
-                        <span style={{ color: '#10B981', fontWeight: 600 }}>Active</span>
+                        <span style={{ color: 'var(--success)', fontWeight: 600 }}>Active</span>
                       ) : (
-                        <span style={{ color: '#71717A', fontWeight: 600 }}>Inactive</span>
+                        <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>Inactive</span>
                       )}
                     </td>
                     <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
@@ -371,7 +371,7 @@ function HeroBannersManager({ token }: { token: string }) {
                           backgroundColor: 'transparent',
                           border: 'none',
                           cursor: 'pointer',
-                          color: '#6D28D9',
+                          color: 'var(--button-purple)',
                         }}
                         title={banner.isActive ? 'Deactivate' : 'Activate'}
                       >
@@ -383,7 +383,7 @@ function HeroBannersManager({ token }: { token: string }) {
                           backgroundColor: 'transparent',
                           border: 'none',
                           cursor: 'pointer',
-                          color: '#6D28D9',
+                          color: 'var(--button-purple)',
                         }}
                       >
                         <Edit2 size={16} />
@@ -394,7 +394,7 @@ function HeroBannersManager({ token }: { token: string }) {
                           backgroundColor: 'transparent',
                           border: 'none',
                           cursor: 'pointer',
-                          color: '#EF4444',
+                          color: 'var(--error)',
                         }}
                       >
                         <Trash2 size={16} />

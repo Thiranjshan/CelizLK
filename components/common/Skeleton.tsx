@@ -5,7 +5,7 @@ export function Skeleton({ className = '', style = {} }: { className?: string; s
     <div
       className={`skeleton-pulse ${className}`}
       style={{
-        background: 'linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%)',
+        background: 'linear-gradient(90deg, var(--bg-section) 25%, var(--bg-card) 50%, var(--bg-section) 75%)',
         backgroundSize: '200% 100%',
         animation: 'skeleton-loading 1.5s infinite linear',
         borderRadius: '4px',
@@ -44,7 +44,7 @@ export function CategoryCardSkeleton() {
 
 export function CarouselSkeleton() {
   return (
-    <div style={{ background: '#F7F7F8', height: '480px', borderRadius: '12px', display: 'flex', alignItems: 'center', padding: '3rem', gap: '2rem', margin: '2rem 0' }}>
+    <div style={{ background: 'var(--bg-section)', height: '480px', borderRadius: '12px', display: 'flex', alignItems: 'center', padding: '3rem', gap: '2rem', margin: '2rem 0' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <Skeleton style={{ width: '20%', height: '14px' }} />
         <Skeleton style={{ width: '80%', height: '48px' }} />

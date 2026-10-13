@@ -326,7 +326,7 @@ function CheckoutContent() {
           ]} />
         </div>
         <div className="container" style={{ maxWidth: 540, margin: '0 auto', textAlign: 'center', background: 'var(--bg-white)', padding: '3.5rem 2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
-          <div style={{ width: 64, height: 64, background: 'rgba(109, 40, 217, 0.08)', color: 'var(--accent-purple)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
+          <div style={{ width: 64, height: 64, background: 'var(--accent-glow)', color: 'var(--accent-purple)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
             <Lock size={28} />
           </div>
           <h2 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '0.75rem' }}>No Items Selected for Checkout</h2>
@@ -347,7 +347,7 @@ function CheckoutContent() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#000000', paddingBottom: '5rem' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-main)', paddingBottom: '5rem' }}>
       <div className="site-header-spacer" aria-hidden="true" />
       {/* Focused Top Header Bar (No main header/footer) */}
       <header className="checkout-topbar" style={{ background: 'var(--bg-white)', borderBottom: '1px solid var(--border-color)', position: 'sticky', top: 0, zIndex: 100, boxShadow: 'var(--shadow-sm)' }}>
@@ -459,7 +459,7 @@ function CheckoutContent() {
                           setShowNewAddressForm(true);
                           setSelectedAddressId(null);
                         }}
-                        style={{ color: 'var(--accent-purple)', fontSize: '0.88rem', fontWeight: 700, background: 'rgba(109, 40, 217, 0.08)', padding: '0.4rem 0.85rem', borderRadius: 'var(--radius-md)' }}
+                        style={{ color: 'var(--accent-purple)', fontSize: '0.88rem', fontWeight: 700, background: 'var(--accent-glow)', padding: '0.4rem 0.85rem', borderRadius: 'var(--radius-md)' }}
                       >
                         + Add New Billing Address
                       </button>
@@ -480,7 +480,7 @@ function CheckoutContent() {
                               padding: '1.25rem',
                               borderRadius: 'var(--radius-md)',
                               border: isSelected ? '2px solid var(--accent-purple)' : '1px solid var(--border-color)',
-                              background: isSelected ? 'rgba(109, 40, 217, 0.04)' : 'var(--bg-white)',
+                              background: isSelected ? 'var(--accent-glow)' : 'var(--bg-white)',
                               cursor: 'pointer',
                               display: 'flex',
                               alignItems: 'flex-start',
@@ -675,7 +675,7 @@ function CheckoutContent() {
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {/* COD */}
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: formData.paymentMethod === 'COD' ? '2px solid var(--accent-purple)' : '1px solid var(--border-color)', background: formData.paymentMethod === 'COD' ? 'rgba(109, 40, 217, 0.04)' : 'var(--bg-white)', cursor: 'pointer' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: formData.paymentMethod === 'COD' ? '2px solid var(--accent-purple)' : '1px solid var(--border-color)', background: formData.paymentMethod === 'COD' ? 'var(--accent-glow)' : 'var(--bg-white)', cursor: 'pointer' }}>
                       <input
                         type="radio"
                         name="paymentMethod"
@@ -692,7 +692,7 @@ function CheckoutContent() {
                     </label>
 
                     {/* Bank Transfer */}
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: formData.paymentMethod === 'BANK_TRANSFER' ? '2px solid var(--accent-purple)' : '1px solid var(--border-color)', background: formData.paymentMethod === 'BANK_TRANSFER' ? 'rgba(109, 40, 217, 0.04)' : 'var(--bg-white)', cursor: 'pointer' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: formData.paymentMethod === 'BANK_TRANSFER' ? '2px solid var(--accent-purple)' : '1px solid var(--border-color)', background: formData.paymentMethod === 'BANK_TRANSFER' ? 'var(--accent-glow)' : 'var(--bg-white)', cursor: 'pointer' }}>
                       <input
                         type="radio"
                         name="paymentMethod"
@@ -709,7 +709,7 @@ function CheckoutContent() {
                     </label>
 
                     {/* PayHere */}
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: formData.paymentMethod === 'PAYHERE' ? '2px solid var(--accent-purple)' : '1px solid var(--border-color)', background: formData.paymentMethod === 'PAYHERE' ? 'rgba(109, 40, 217, 0.04)' : 'var(--bg-white)', cursor: 'pointer' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: formData.paymentMethod === 'PAYHERE' ? '2px solid var(--accent-purple)' : '1px solid var(--border-color)', background: formData.paymentMethod === 'PAYHERE' ? 'var(--accent-glow)' : 'var(--bg-white)', cursor: 'pointer' }}>
                       <input
                         type="radio"
                         name="paymentMethod"
@@ -866,7 +866,7 @@ function CheckoutContent() {
       {showDiscardModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.25rem' }}>
           <div style={{ background: 'var(--bg-white)', maxWidth: 440, width: '100%', padding: '2rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-md)', textAlign: 'center' }}>
-            <div style={{ width: 56, height: 56, background: '#FEE2E2', color: '#EF4444', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem auto' }}>
+            <div style={{ width: 56, height: 56, background: 'var(--error-bg)', color: 'var(--error)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem auto' }}>
               <AlertTriangle size={28} />
             </div>
 
@@ -890,7 +890,7 @@ function CheckoutContent() {
                 type="button"
                 onClick={handleConfirmDiscard}
                 className="btn-primary"
-                style={{ flex: 1, background: '#EF4444', justifyContent: 'center' }}
+                style={{ flex: 1, background: 'var(--error)', color: 'var(--bg-main)', justifyContent: 'center' }}
               >
                 Discard Checkout
               </button>
