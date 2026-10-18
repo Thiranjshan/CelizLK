@@ -69,6 +69,7 @@ The app already sets basic headers in next.config.ts:
 - Do not copy .env files into image layers.
 - Run with runtime env variables only.
 - Keep container data volumes separate from app source.
+- Apply Prisma migrations before starting the updated app image. The CI/CD deployment runs the `migrator` image with `docker compose --profile tools run --rm migrate`; do not deploy an app image without its matching migration image.
 
 ### Railway
 

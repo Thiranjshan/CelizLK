@@ -4524,28 +4524,28 @@ h6 {
   width: 18px;
   height: 28px;
   border-radius: 9999px;
-  border: 1.5px solid var(--border-color);
+  border: 1.5px solid #000;
   display: flex;
   justify-content: center;
   padding-top: 5px;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .hero-scroll-hint:hover .hero-scroll-mouse {
-  border-color: var(--border-color);
-  box-shadow: 0 4px 20px var(--accent-glow);
+  border-color: #000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.16);
 }
 
 .hero-scroll-wheel {
   width: 2.5px;
   height: 5px;
   border-radius: 9999px;
-  background: #FFFFFF;
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  background: #000;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.35);
   animation: heroScrollWheel 2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
@@ -4554,8 +4554,8 @@ h6 {
   font-weight: 600;
   letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: var(--text-secondary);
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  color: #000;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
   transition: color var(--transition-fast), letter-spacing var(--transition-fast);
 }
 
@@ -4563,18 +4563,18 @@ h6 {
   font-size: 0.74rem;
   font-weight: 300;
   letter-spacing: 0.04em;
-  color: var(--text-secondary);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  color: #000;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
   text-transform: none;
 }
 
 .hero-scroll-hint:hover .hero-scroll-text {
-  color: var(--text-primary);
+  color: #000;
   letter-spacing: 0.28em;
 }
 
 .hero-scroll-hint:hover .hero-scroll-subtext {
-  color: var(--text-secondary);
+  color: #000;
 }
 
 @keyframes heroScrollFloat {
