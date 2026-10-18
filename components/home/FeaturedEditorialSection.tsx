@@ -69,9 +69,6 @@ export default function FeaturedEditorialSection({ products = [] }: FeaturedEdit
           <span className="title-lead">Featured</span>{' '}
           <span className="title-serif-accent">Products.</span>
         </h2>
-        <p className="homepage-section-desc">
-          Standout technology with the craftsmanship, capability, and longevity to earn a place in your day.
-        </p>
       </div>
 
       <div className="homepage-featured-grid" ref={gridRef} role="region" aria-label="Featured products">

@@ -15,6 +15,7 @@ interface ProductsPageProps {
     sort?: string;
     featured?: string;
     newArrivals?: string;
+    bestSellers?: string;
   }>;
 }
 
@@ -29,12 +30,14 @@ function buildProductsUrl({
   sort,
   featured,
   newArrivals,
+  bestSellers,
 }: {
   category?: string[];
   brand?: string[];
   sort?: string;
   featured?: string;
   newArrivals?: string;
+  bestSellers?: string;
 }) {
   const searchParams = new URLSearchParams();
 
@@ -43,18 +46,20 @@ function buildProductsUrl({
   if (sort) searchParams.set('sort', sort);
   if (featured) searchParams.set('featured', featured);
   if (newArrivals) searchParams.set('newArrivals', newArrivals);
+  if (bestSellers) searchParams.set('bestSellers', bestSellers);
 
   const queryString = searchParams.toString();
   return queryString ? `/products?${queryString}` : '/products';
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const { category, brand, sort, featured, newArrivals } = await searchParams;
+  const { category, brand, sort, featured, newArrivals, bestSellers } = await searchParams;
   const selectedCategories = normalizeValues(category);
   const selectedBrands = normalizeValues(brand);
   const isFeaturedView = featured === 'true';
   const isNewArrivalView = newArrivals === 'true';
-  const showSidebar = !isFeaturedView && !isNewArrivalView;
+  const isBestSellerView = bestSellers === 'true';
+  const showSidebar = !isFeaturedView && !isNewArrivalView && !isBestSellerView;
   const hasActiveFilters = selectedCategories.length > 0 || selectedBrands.length > 0;
 
   // Sort dropdown
@@ -63,6 +68,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     brand: selectedBrands,
     featured: isFeaturedView ? 'true' : undefined,
     newArrivals: isNewArrivalView ? 'true' : undefined,
+    bestSellers: isBestSellerView ? 'true' : undefined,
   };
   const sortOptions = [
     { value: 'newest', label: 'Newest' },
@@ -88,6 +94,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   if (selectedBrandIds.length) where.brandId = { in: selectedBrandIds };
   if (isFeaturedView) where.isFeatured = true;
   if (isNewArrivalView) where.isNewArrival = true;
+  if (isBestSellerView) where.isBestSeller = true;
 
   let orderBy: Prisma.ProductOrderByWithRelationInput = { createdAt: 'desc' };
   if (sort === 'price-asc') orderBy = { price: 'asc' };
@@ -112,7 +119,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       <div className="site-header-spacer" aria-hidden="true" />
       <Breadcrumbs items={[
         { label: 'Home', href: '/' },
-        { label: isFeaturedView ? 'Featured Products' : isNewArrivalView ? 'New Arrivals' : 'Product Catalog' },
+        { label: isFeaturedView ? 'Featured Products' : isNewArrivalView ? 'New Arrivals' : isBestSellerView ? 'Best Sellers' : 'Product Catalog' },
       ]} />
 
       <div className="shop-all-toolbar">

@@ -42,7 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable} style={{ backgroundColor: 'var(--bg-main)', colorScheme: 'dark' }}>
+    <html lang="en" className={inter.variable} style={{ backgroundColor: 'var(--bg-main)', colorScheme: 'light' }}>
       <body style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}>
         <AuthBootstrap />
         <Header />

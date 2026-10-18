@@ -25,27 +25,32 @@ export default async function HomePage() {
     image: banner.imageUrl,
   }));
 
-  // 2. Fetch Categories from DB
-  const dbCategories = await prisma.category.findMany({
-    where: { parentId: null },
-    orderBy: { name: "asc" },
+  // 2. Fetch Featured Categories for Bento Grid (Managed via Admin Dashboard)
+  const featuredDbCategories = await prisma.featuredCategory.findMany({
+    where: { isActive: true },
+    orderBy: { order: "asc" },
     include: {
-      products: {
-        where: { isActive: true },
-        orderBy: { createdAt: "desc" },
-        take: 1,
-        select: { images: true },
+      category: {
+        include: {
+          products: {
+            where: { isActive: true },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+            select: { images: true },
+          },
+        },
       },
     },
   });
 
-  const categories = dbCategories.map((cat) => {
+  const categories = featuredDbCategories.map((item) => {
+    const cat = item.category;
     return {
       id: cat.id,
-      name: cat.name,
+      name: item.title || cat.name,
       slug: cat.slug,
-      image: cat.imageUrl || parseProductImages(cat.products[0]?.images ?? "")[0],
-      description: cat.description,
+      image: item.imageUrl || cat.imageUrl || parseProductImages(cat.products[0]?.images ?? "")[0],
+      description: item.description || cat.description,
     };
   });
 
@@ -79,6 +84,21 @@ export default async function HomePage() {
     createdAt: p.createdAt.toISOString(),
   }));
 
+  // 5. Fetch Best Sellers (marked isBestSeller: true)
+  const rawBestSellers = await prisma.product.findMany({
+    where: { isBestSeller: true, isActive: true },
+    take: 10,
+    include: { category: true, brandRecord: true },
+  });
+
+  const bestSellers = rawBestSellers.map((p) => ({
+    ...p,
+    brand: p.brandRecord,
+    images: JSON.parse(p.images),
+    specs: p.specs,
+    createdAt: p.createdAt.toISOString(),
+  }));
+
   const trustedBrands = await prisma.brand.findMany({
     where: { isActive: true },
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
@@ -90,9 +110,7 @@ export default async function HomePage() {
       <HeroCarousel slides={carouselSlides} />
 
       <div className="container" style={{ position: "relative" }}>
-        {/* Ambient Glow */}
-        <div className="ambient-glow" aria-hidden="true" />
-
+        
         {/* 1. ections Bento Grid Section */}
         <CategoryBentoGrid categories={categories} />
 
@@ -112,7 +130,17 @@ export default async function HomePage() {
         {/* 4. Featured Products Editorial 2-Column Showcase */}
         <FeaturedEditorialSection products={featuredProducts} />
 
-        {/* 5. Assurances Section (100% Genuine, Islandwide Delivery, Trusted Support, Secure Payments) */}
+        {/* 5. Best Sellers Product Carousel Section */}
+        <ProductCarousel
+          title="Best Sellers"
+          eyebrow="Customer Favorites"
+          subtitle="The products customers come back for, chosen for quality, performance, and everyday value."
+          viewAllHref="/products?bestSellers=true"
+          products={bestSellers}
+          ctaLabel="More Best Sellers?"
+        />
+
+        {/* 6. Assurances Section (100% Genuine, Islandwide Delivery, Trusted Support, Secure Payments) */}
         <AssurancesSection />
       </div>
     </div>

@@ -31,6 +31,7 @@ export async function PATCH(request: Request) {
     stockQty?: number;
     isActive?: boolean;
     isFeatured?: boolean;
+    isBestSeller?: boolean;
     isNewArrival?: boolean;
     status?: string;
     images?: string;
@@ -92,6 +93,9 @@ export async function PATCH(request: Request) {
   }
   if (typeof body.isFeatured === 'boolean') {
     data.isFeatured = body.isFeatured;
+  }
+  if (typeof body.isBestSeller === 'boolean') {
+    data.isBestSeller = body.isBestSeller;
   }
   if (typeof body.isNewArrival === 'boolean') {
     data.isNewArrival = body.isNewArrival;
@@ -226,7 +230,7 @@ export async function POST(request: Request) {
   if (!status) return NextResponse.json({ error: 'Invalid product status.' }, { status: 400 });
   let product;
   try {
-    product = await prisma.product.create({ data: { name, slug, description, price, discountPrice, stockQty, categoryId, brandId, images: JSON.stringify(normalizeProductImages(body.images)), specs: typeof body.specs === 'string' ? body.specs : '', isFeatured: body.isFeatured === true, isNewArrival: body.isNewArrival === true, status, isActive: status === 'ACTIVE' }, include: { brandRecord: true } });
+    product = await prisma.product.create({ data: { name, slug, description, price, discountPrice, stockQty, categoryId, brandId, images: JSON.stringify(normalizeProductImages(body.images)), specs: typeof body.specs === 'string' ? body.specs : '', isFeatured: body.isFeatured === true, isBestSeller: body.isBestSeller === true, isNewArrival: body.isNewArrival === true, status, isActive: status === 'ACTIVE' }, include: { brandRecord: true } });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       return NextResponse.json({ error: 'Product slug already exists.' }, { status: 409 });

@@ -76,7 +76,7 @@ export default function Footer() {
                 height={42}
                 priority
                 unoptimized
-                style={{ objectFit: 'contain' }}
+                style={{ objectFit: 'contain', filter: 'invert(1)', mixBlendMode: 'multiply' }}
               />
             </Link>
             <p>

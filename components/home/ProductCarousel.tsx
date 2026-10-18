@@ -78,7 +78,6 @@ export default function ProductCarousel({ title, subtitle, eyebrow, viewAllHref,
         <h2 id={`${title.toLowerCase().replace(/\s+/g, '-')}-heading`} className="homepage-carousel-title">
           {renderDualTitle(title)}
         </h2>
-        {subtitle && <p className="homepage-carousel-subheading">{subtitle}</p>}
       </div>
       <div
         className="homepage-product-carousel-viewport"

@@ -23,6 +23,7 @@ async function main() {
   await prisma.contactMessage.deleteMany();
   await prisma.product.deleteMany();
   await prisma.brand.deleteMany();
+  await prisma.featuredCategory.deleteMany();
   await prisma.category.deleteMany();
   await prisma.profile.deleteMany();
   await prisma.user.deleteMany();
@@ -146,6 +147,18 @@ async function main() {
       seoDescription: 'Premium mobile and desktop accessories in Sri Lanka.',
     },
   });
+
+  // Seed Featured Categories for Bento Grid
+  const seedFeaturedCats = [earbudsCat, chargersCat, powerBanksCat, smartwatchesCat, accessoriesCat];
+  for (let i = 0; i < seedFeaturedCats.length; i++) {
+    await prisma.featuredCategory.create({
+      data: {
+        categoryId: seedFeaturedCats[i].id,
+        order: i + 1,
+        isActive: true,
+      },
+    });
+  }
 
   // Sample Products
   const products = [

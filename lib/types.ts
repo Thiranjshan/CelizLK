@@ -38,6 +38,8 @@ export interface Product {
   seoDescription?: string | null;
   isActive: boolean;
   isFeatured: boolean;
+  isBestSeller: boolean;
+  isNewArrival: boolean;
   createdAt: string;
 }
 

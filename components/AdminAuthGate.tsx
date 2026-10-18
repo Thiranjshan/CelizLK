@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { FormEvent, ReactNode, useEffect, useState } from 'react';
-import { BarChart3, Boxes, ClipboardList, LayoutGrid, LogOut, Package, Settings2, ShieldCheck, Tag, Users } from 'lucide-react';
+import { BarChart3, Boxes, ClipboardList, LayoutGrid, LogOut, Menu, Package, Settings2, ShieldCheck, Sparkles, Star, Tag, Users, X } from 'lucide-react';
 
 export interface AdminSession { id: string; email: string; name: string; role: string; }
 
@@ -10,6 +10,7 @@ export default function AdminAuthGate({ children, active }: { children: (session
   const [session, setSession] = useState<{ admin: AdminSession; token: string } | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetch('/api/admin/auth/refresh', { method: 'POST' })
@@ -17,6 +18,15 @@ export default function AdminAuthGate({ children, active }: { children: (session
       .then((result) => result && setSession({ admin: result.admin, token: result.accessToken }))
       .catch(() => undefined);
   }, []);
+
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') setSidebarOpen(false);
+    }
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [sidebarOpen]);
 
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setLoading(true); setError('');
@@ -37,12 +47,51 @@ export default function AdminAuthGate({ children, active }: { children: (session
     { href: '/admin', label: 'Dashboard', icon: BarChart3 },
     { href: '/admin/orders', label: 'Orders', icon: ClipboardList },
     { href: '/admin/products', label: 'Products', icon: Package },
+    { href: '/admin/merchandising', label: 'Merchandising', icon: Star },
     { href: '/admin/categories', label: 'Categories', icon: LayoutGrid },
+    { href: '/admin/featured-categories', label: 'Bento Collections', icon: Sparkles },
     { href: '/admin/brands', label: 'Brands', icon: Tag },
     { href: '/admin/hero-banners', label: 'Hero Banners', icon: LayoutGrid },
     { href: '/admin/inventory', label: 'Inventory', icon: Boxes },
     { href: '/admin/customers', label: 'Customers', icon: Users },
     { href: '/admin/settings', label: 'Store Settings', icon: Settings2 },
   ];
-  return <main className="admin-shell"><div className="admin-layout"><aside className="admin-sidebar"><Link href="/admin" className="admin-brand"><ShieldCheck size={21} /> CELIZ LK <span>ADMIN</span></Link><nav>{links.map(({ href, label, icon: Icon }) => <Link key={href} className={active === label.toLowerCase() ? 'active' : ''} href={href}><Icon size={18} /> {label}</Link>)}</nav><button className="admin-logout" onClick={logout}><LogOut size={17} /> Sign out</button></aside><section className="admin-content">{children(session.admin, session.token)}</section></div></main>;
+  return (
+    <main className="admin-shell">
+      <div className="admin-layout">
+        <aside id="admin-navigation" className={`admin-sidebar${sidebarOpen ? ' admin-sidebar-open' : ''}`} aria-label="Admin navigation">
+          <Link href="/admin" className="admin-brand" onClick={() => setSidebarOpen(false)}><ShieldCheck size={21} /> CELIZ LK <span>ADMIN</span></Link>
+          <nav>
+            {links.map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                className={active === label.toLowerCase() ? 'active' : ''}
+                href={href}
+                onClick={() => setSidebarOpen(false)}
+              >
+                <Icon size={18} /> {label}
+              </Link>
+            ))}
+          </nav>
+          <button className="admin-logout" onClick={logout}><LogOut size={17} /> Sign out</button>
+        </aside>
+        {sidebarOpen && <button className="admin-sidebar-backdrop" type="button" aria-label="Close admin navigation" onClick={() => setSidebarOpen(false)} />}
+        <section className="admin-content">
+          <div className="admin-mobile-nav">
+            <button
+              className="admin-mobile-nav-button"
+              type="button"
+              aria-controls="admin-navigation"
+              aria-expanded={sidebarOpen}
+              onClick={() => setSidebarOpen((open) => !open)}
+            >
+              {sidebarOpen ? <X size={19} /> : <Menu size={19} />}
+              <span>{sidebarOpen ? 'Close menu' : 'Admin menu'}</span>
+            </button>
+          </div>
+          {children(session.admin, session.token)}
+        </section>
+      </div>
+    </main>
+  );
 }

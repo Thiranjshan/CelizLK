@@ -10,6 +10,7 @@ export async function GET(request: Request) {
     const search = searchParams.get('search');
     const featured = searchParams.get('featured');
     const newArrivals = searchParams.get('newArrivals');
+    const bestSellers = searchParams.get('bestSellers');
     const sort = searchParams.get('sort'); // price-asc, price-desc, newest
 
     const where: Prisma.ProductWhereInput = { isActive: true };
@@ -34,6 +35,10 @@ export async function GET(request: Request) {
 
     if (newArrivals === 'true') {
       where.isNewArrival = true;
+    }
+
+    if (bestSellers === 'true') {
+      where.isBestSeller = true;
     }
 
     if (search) {
@@ -71,7 +76,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, slug, description, price, discountPrice, stockQty, categoryId, brandId, images, specs, isFeatured } = body;
+    const { name, slug, description, price, discountPrice, stockQty, categoryId, brandId, images, specs, isFeatured, isBestSeller, isNewArrival } = body;
 
     const newProduct = await prisma.product.create({
       data: {
@@ -86,6 +91,8 @@ export async function POST(request: Request) {
         images: typeof images === 'string' ? images : JSON.stringify(images),
         specs: typeof specs === 'string' ? specs.slice(0, 10000) : '',
         isFeatured: Boolean(isFeatured),
+        isBestSeller: Boolean(isBestSeller),
+        isNewArrival: Boolean(isNewArrival),
       },
     });
 

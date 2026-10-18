@@ -64,9 +64,7 @@ export default function CategoryBentoGrid({ categories }: CategoryBentoGridProps
           <span className="title-lead">Explore</span>{' '}
           <span className="title-serif-accent">Collections.</span>
         </h2>
-        <p className="homepage-section-desc">
-          Considered essentials where refined design meets everyday performance. Explore technology selected to look as good as it works.
-        </p>
+      
       </div>
 
       {/* Asymmetric Editorial Bento Grid */}

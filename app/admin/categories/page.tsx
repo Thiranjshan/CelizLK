@@ -1,8 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import Image from 'next/image';
-import { ImagePlus, LayoutGrid, Pencil, Trash2, X } from 'lucide-react';
+import { ImagePlus, LayoutGrid, Pencil, Sparkles, Trash2, X } from 'lucide-react';
 import AdminAuthGate from '@/components/AdminAuthGate';
 import { normalizeCategoryImageUrl } from '@/lib/category-validation';
 
@@ -133,13 +134,22 @@ function CategoriesManager({ token }: { token: string }) {
 
   return (
     <>
-      <header className="admin-header">
+      <header className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div className="admin-kicker">Catalog structure</div>
           <h1>Categories</h1>
           <p>Manage your product categories.</p>
         </div>
-        <LayoutGrid size={30} color="var(--accent-purple)" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <Link
+            href="/admin/featured-categories"
+            className="btn-secondary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.9rem' }}
+          >
+            <Sparkles size={16} /> Manage Bento Collections
+          </Link>
+          <LayoutGrid size={30} color="var(--accent-purple)" />
+        </div>
       </header>
 
       {error && <div className="admin-error" role="alert">{error}</div>}
