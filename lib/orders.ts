@@ -92,7 +92,7 @@ async function createOrderInTransaction(transaction: OrderTransaction, input: Cr
       total,
       status: orderStatus,
       items: { create: pricedItems.map((item) => ({ productId: item.product.id, productName: item.product.name, quantity: item.quantity, unitPrice: item.product.discountPrice ?? item.product.price, lineSubtotal: (item.product.discountPrice ?? item.product.price) * item.quantity })) },
-      payment: { create: { amount: total, method: selectedPaymentMethod, gateway: selectedPaymentMethod === 'PAYHERE' ? 'PayHere' : selectedPaymentMethod === 'BANK_TRANSFER' ? 'BankTransfer' : 'COD', status: paymentStatus } },
+      payment: { create: { amount: total, method: selectedPaymentMethod, gateway: selectedPaymentMethod === 'BANK_TRANSFER' ? 'BankTransfer' : 'COD', status: paymentStatus } },
       events: {
         create: selectedPaymentMethod === 'COD' ? [
           { eventType: 'ORDER_CREATED', newOrderStatus: orderStatus, actorType: 'CUSTOMER', actorId: input.userId, description: 'Order created' },
