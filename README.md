@@ -45,6 +45,31 @@ The infrastructure workflow uses Docker for packaging, GitHub Actions for automa
 - Product information such as slug, price, discounted price, stock quantity, category, brand, images, specifications, and SEO metadata.
 - Order and inventory-related administration supported by the current application.
 
+## Screenshots
+
+### Celiz LK Storefront
+
+<img width="1920" height="1080" alt="Screenshot 2026-10-24 113429" src="https://github.com/user-attachments/assets/0318871d-0c16-4995-8b69-188c47806703" />
+
+### Product Listing
+
+<img width="1920" height="1080" alt="Screenshot 2026-10-24 113535" src="https://github.com/user-attachments/assets/c12a6e4f-0938-4f21-a05d-d5b17b63fef6" />
+<img width="1920" height="1080" alt="Screenshot 2026-10-24 113511" src="https://github.com/user-attachments/assets/8ab878fb-5dd8-41b5-a7a3-8c6feff05ffa" />
+
+### Admin Dashboard
+
+<img width="1920" height="1080" alt="Screenshot 2026-10-24 113641" src="https://github.com/user-attachments/assets/04ae045d-b83b-4e5f-bbb1-7704d42b9e80" />
+
+### CI/CD Pipeline
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2d49c8f7-4ec5-4ec9-b116-ec7533a0d29f" />
+
+
+### Monitoring
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c0668c9d-1857-41ec-adf8-fe361b0c9416" />
+
+
 ### DevOps and Operations
 
 - Docker-based application packaging.
