@@ -70,6 +70,9 @@ The app already sets basic headers in next.config.ts:
 - Run with runtime env variables only.
 - Keep container data volumes separate from app source.
 - Apply Prisma migrations before starting the updated app image. The CI/CD deployment runs the `migrator` image with `docker compose --profile tools run --rm migrate`; do not deploy an app image without its matching migration image.
+- The app image defines a Docker health check that calls `/api/health` every 30 seconds. It allows 60 seconds for startup, times out each probe after 5 seconds, and marks the container unhealthy after 3 failed probes. The endpoint checks both the app and database.
+- After deploying the rebuilt image, check container health on the VM with `docker compose ps`. For detailed probe results, use `docker inspect --format '{{json .State.Health}}' <container-name-or-id>`.
+- Compose inherits the image health check unless a service-level `healthcheck` overrides or disables it. A `healthy` status is monitoring information; Docker Compose does not automatically restart an unhealthy container.
 
 ### Railway
 
