@@ -2,9 +2,7 @@
 
 Celiz LK is an e-commerce web application for a mobile-accessories business. The project combines product and order workflows with containerized deployment, CI/CD automation, cloud infrastructure, and basic operational monitoring.
 
-> **Portfolio focus:** This repository demonstrates both application development and the practices used to build, deploy, monitor, and troubleshoot a web application. It is a personal/business project, not a claim of enterprise-scale production readiness.
-
-**Live site:** [https://celiz.lk](https://celiz.lk)  <!-- Update or remove if the production URL changes or is not publicly accessible. -->
+**Live site:** [https://celizlk.duckdns.org/]
 
 ## Table of Contents
 
@@ -62,19 +60,19 @@ The infrastructure workflow uses Docker for packaging, GitHub Actions for automa
 
 ## Technology Stack
 
-| Area | Technologies |
-|---|---|
-| Web application | Next.js, React, TypeScript/JavaScript |
-| Data access | Prisma ORM |
-| Database | PostgreSQL in the deployed environment |
-| Containers | Docker, Docker Compose |
-| CI/CD | GitHub Actions |
-| Container registry | GitHub Container Registry (GHCR) |
-| Cloud hosting | Microsoft Azure Virtual Machine |
-| Reverse proxy and HTTPS | Caddy |
-| Infrastructure as Code | Terraform, where configured |
-| Monitoring | Application health endpoint, Docker health checks, external uptime monitoring, Azure VM metrics, and logs |
-| Version control | Git and GitHub |
+| Area                    | Technologies                                                                                              |
+| ----------------------- | --------------------------------------------------------------------------------------------------------- |
+| Web application         | Next.js, React, TypeScript/JavaScript                                                                     |
+| Data access             | Prisma ORM                                                                                                |
+| Database                | PostgreSQL in the deployed environment                                                                    |
+| Containers              | Docker, Docker Compose                                                                                    |
+| CI/CD                   | GitHub Actions                                                                                            |
+| Container registry      | GitHub Container Registry (GHCR)                                                                          |
+| Cloud hosting           | Microsoft Azure Virtual Machine                                                                           |
+| Reverse proxy and HTTPS | Caddy                                                                                                     |
+| Infrastructure as Code  | Terraform, where configured                                                                               |
+| Monitoring              | Application health endpoint, Docker health checks, external uptime monitoring, Azure VM metrics, and logs |
+| Version control         | Git and GitHub                                                                                            |
 
 The exact versions and commands are maintained in the project files (for example, `package.json`, the lockfile, `Dockerfile`, and Compose configuration).
 
@@ -187,12 +185,12 @@ Keep environment-specific configuration outside source control. The `.env.exampl
 
 Depending on the implementation, configuration may include:
 
-| Variable | Purpose | Example guidance |
-|---|---|---|
-| `DATABASE_URL` | Database connection string | Use a local development database for local work; never commit a real connection string. |
-| Authentication variables | Session, OAuth, or authentication provider configuration, if enabled | Use local/test credentials and follow the relevant provider's setup instructions. |
-| Application URL variables | Public or internal application origin, if used | Set the correct local or deployment URL. |
-| Storage/API variables | External service configuration, if used | Use placeholders in `.env.example` and keep secrets in the deployment secret store. |
+| Variable                  | Purpose                                                              | Example guidance                                                                        |
+| ------------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `DATABASE_URL`            | Database connection string                                           | Use a local development database for local work; never commit a real connection string. |
+| Authentication variables  | Session, OAuth, or authentication provider configuration, if enabled | Use local/test credentials and follow the relevant provider's setup instructions.       |
+| Application URL variables | Public or internal application origin, if used                       | Set the correct local or deployment URL.                                                |
+| Storage/API variables     | External service configuration, if used                              | Use placeholders in `.env.example` and keep secrets in the deployment secret store.     |
 
 Use the variable names actually read by the application. Do not copy production values into `.env.example`, screenshots, issue descriptions, or logs.
 
@@ -237,7 +235,15 @@ docker compose -f docker-compose.yml logs --tail=100 <service>
 docker compose -f docker-compose.yml down
 ```
 
-If the project pulls a pre-built GHCR image instead of building locally, use the workflow documented by the actual Compose configuration. Do not delete persistent database volumes as part of routine troubleshooting.
+GitHub Actions builds the Docker image and publishes it to GitHub Container Registry (GHCR). The Azure VM does not build the image locally; it pulls the pre-built image from GHCR and deploys it using Docker Compose.
+
+Deployment commands:
+
+````bash
+docker compose pull
+docker compose --profile tools run --rm migrate
+docker compose up -d
+docker compose ps
 
 ## CI/CD and Deployment
 
@@ -286,7 +292,7 @@ The health endpoint is available at:
 
 ```text
 /api/health
-```
+````
 
 When healthy, it should return HTTP `200`. When a required dependency such as the database is unavailable, it should return a failure status (for example, HTTP `503`) without exposing connection strings or internal error details.
 
@@ -339,16 +345,16 @@ A practical investigation sequence for an unavailable website is:
 
 ## Troubleshooting
 
-| Symptom | Checks to perform |
-|---|---|
-| Application fails to start | Review application logs, environment variables, build output, and container status. |
-| `/api/health` returns an error | Check route-handler logs, database availability, credentials/configuration, and network access. |
-| Container is `unhealthy` | Confirm the health-check URL and internal port, then inspect container logs. |
-| Website cannot be reached | Check DNS, HTTPS/TLS, VM status, network rules, Caddy status, and application status. |
-| Database connection fails | Verify the connection variable, database status, firewall/network access, TLS requirements, and database permissions. |
-| CI/CD workflow fails | Review the failed GitHub Actions step, build output, registry permissions, image tags, and deployment logs. |
-| Server disk usage is high | Check `df -h`, identify large logs/images safely, and confirm backups before removing anything. |
-| A deployment introduces a fault | Use the documented prior working image/release and rollback procedure; verify the health check after recovery. |
+| Symptom                         | Checks to perform                                                                                                     |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Application fails to start      | Review application logs, environment variables, build output, and container status.                                   |
+| `/api/health` returns an error  | Check route-handler logs, database availability, credentials/configuration, and network access.                       |
+| Container is `unhealthy`        | Confirm the health-check URL and internal port, then inspect container logs.                                          |
+| Website cannot be reached       | Check DNS, HTTPS/TLS, VM status, network rules, Caddy status, and application status.                                 |
+| Database connection fails       | Verify the connection variable, database status, firewall/network access, TLS requirements, and database permissions. |
+| CI/CD workflow fails            | Review the failed GitHub Actions step, build output, registry permissions, image tags, and deployment logs.           |
+| Server disk usage is high       | Check `df -h`, identify large logs/images safely, and confirm backups before removing anything.                       |
+| A deployment introduces a fault | Use the documented prior working image/release and rollback procedure; verify the health check after recovery.        |
 
 Never paste unredacted production logs or secrets into public issues or commit them to the repository.
 
@@ -378,7 +384,3 @@ These are potential improvements, not claims that the functionality is already i
 ## Project Status
 
 This is an actively developed e-commerce and DevOps portfolio project. For the most accurate state of the implementation, refer to the source code, workflow files, deployment configuration, and recent repository commits.
-
-## Contact
-
-For questions about the project, use the contact information available on the linked GitHub profile or Celiz LK's official channels.
