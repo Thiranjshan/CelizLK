@@ -10,7 +10,6 @@ import {
   ArrowRight,
   ArrowLeft,
   Truck,
-  CreditCard,
   Banknote,
   Building2,
   ShieldCheck,
@@ -99,7 +98,7 @@ function CheckoutContent() {
     postalCode: '',
     saveAddress: true,
     specialNotes: '',
-    paymentMethod: 'COD', // COD | BANK_TRANSFER | PAYHERE
+    paymentMethod: 'COD', // COD | BANK_TRANSFER
   });
 
   // Prefill user name/phone when loaded
@@ -708,25 +707,6 @@ function CheckoutContent() {
                       </div>
                     </label>
 
-                    {/* PayHere */}
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: formData.paymentMethod === 'PAYHERE' ? '2px solid var(--accent-purple)' : '1px solid var(--border-color)', background: formData.paymentMethod === 'PAYHERE' ? 'var(--accent-glow)' : 'var(--bg-white)', cursor: 'pointer' }}>
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="PAYHERE"
-                        checked={formData.paymentMethod === 'PAYHERE'}
-                        onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-                        style={{ accentColor: 'var(--accent-purple)' }}
-                      />
-                      <CreditCard size={24} color="var(--accent-purple)" />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 800, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span>Credit / Debit Card (PayHere)</span>
-                          <span className="badge badge-pending" style={{ fontSize: '0.7rem' }}>Sandbox Ready</span>
-                        </div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Visa, Mastercard & eZ Cash via PayHere payment gateway</div>
-                      </div>
-                    </label>
                   </div>
                 </div>
 

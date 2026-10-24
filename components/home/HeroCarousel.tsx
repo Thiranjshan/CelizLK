@@ -15,7 +15,9 @@ interface HeroCarouselProps {
 export default function HeroCarousel({ slides }: HeroCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [blackFadeActive, setBlackFadeActive] = useState(false);
   const touchStartRef = React.useRef<{ x: number; y: number } | null>(null);
+  const hasMountedRef = React.useRef(false);
 
   const handleNext = useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex + 1 < slides.length ? prevIndex + 1 : 0));
@@ -25,6 +27,17 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
     const interval = setInterval(handleNext, 7000);
     return () => clearInterval(interval);
   }, [handleNext]);
+
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    setBlackFadeActive(true);
+    const timeoutId = window.setTimeout(() => setBlackFadeActive(false), 350);
+    return () => window.clearTimeout(timeoutId);
+  }, [currentIndex]);
 
   useEffect(() => {
     const updateScrollProgress = () => {
@@ -113,8 +126,10 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
         ))}
       </div>
 
-      {/* Seamless cinematic black fade between hero image and next section */}
-      <div className="hero-carousel-bottom-fade" aria-hidden="true" />
+      <div
+        className={`hero-carousel-transition${blackFadeActive ? ' active' : ''}`}
+        aria-hidden="true"
+      />
 
       {/* Cinematic Typography Layer (Independent Layer) */}
       <HeroTypography />

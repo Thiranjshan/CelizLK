@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { getStoreSettings } from '@/lib/store-settings';
 
-export const paymentMethods = ['COD', 'BANK_TRANSFER', 'PAYHERE'] as const;
+export const paymentMethods = ['COD', 'BANK_TRANSFER'] as const;
 export type PaymentMethod = typeof paymentMethods[number];
 
 export const paymentStatuses = ['UNPAID', 'PENDING', 'PAID', 'FAILED', 'CANCELLED', 'REFUND_PENDING', 'REFUNDED', 'CHARGEBACK'] as const;

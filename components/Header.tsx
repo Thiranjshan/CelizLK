@@ -270,11 +270,17 @@ export default function Header() {
                   <input
                     ref={searchInputRef}
                     type="text"
-                    placeholder="Search products, brands, or categories..."
+                    placeholder="Quick search..."
                     value={searchQuery}
                     onChange={(event) => {
-                      setSearchQuery(event.target.value);
-                      if (event.target.value.trim().length < 2) clearSuggestions();
+                      const nextQuery = event.target.value;
+                      setSearchQuery(nextQuery);
+                      if (nextQuery.trim().length < 2) {
+                        setSuggestions([]);
+                        setSuggestionsOpen(false);
+                        setSuggestionsLoading(false);
+                        setSuggestionsError(false);
+                      }
                     }}
                     className="search-input"
                     role="combobox"
