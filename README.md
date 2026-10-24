@@ -1,12 +1,15 @@
 # Celiz LK — E-commerce Platform
 
-Celiz LK is an e-commerce web application for a mobile-accessories business. The project combines product and order workflows with containerized deployment, CI/CD automation, cloud infrastructure, and basic operational monitoring.
+Celiz LK is a live e-commerce web application for a mobile-accessories business. The production deployment is automated with GitHub Actions, Docker, GHCR, and SSH; it runs on Azure with Caddy in front of the application and a managed PostgreSQL database.
 
-**Live site:** [https://celizlk.duckdns.org/]
+- **Live site:** <https://celizlk.duckdns.org/>
+- **Application and CI/CD repository:** <https://github.com/Thiranjshan/CelizLK>
+- **Infrastructure as Code repository:** <https://github.com/Thiranjshan/celizlk-infra>
 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Repositories and Deployment Scope](#repositories-and-deployment-scope)
 - [Features](#features)
 - [Technology Stack](#technology-stack)
 - [Architecture](#architecture)
@@ -23,9 +26,18 @@ Celiz LK is an e-commerce web application for a mobile-accessories business. The
 
 ## Overview
 
-Celiz LK is being developed as an online storefront for genuine mobile accessories. The application supports product discovery and purchase-related workflows, while the deployment setup provides a practical environment for working with containers, automated delivery, cloud hosting, and operational monitoring.
+Celiz LK is a deployed e-commerce storefront for mobile accessories. This repository contains the Next.js application, its Docker image definitions, database schema and migrations, and the GitHub Actions CI/CD workflow. The companion infrastructure repository contains Terraform for the Azure resources. The production VM is configured to run the application and Caddy containers, and the deployed Caddy reverse proxy serves the public site over HTTPS.
 
-The infrastructure workflow uses Docker for packaging, GitHub Actions for automation, GitHub Container Registry (GHCR) for images, an Azure virtual machine for hosting, and Caddy as the HTTPS reverse proxy. Terraform is used to manage the infrastructure where configured. The deployed application connects to a managed PostgreSQL database.
+## Repositories and Deployment Scope
+
+| Repository | Contents |
+| --- | --- |
+| [CelizLK application](https://github.com/Thiranjshan/CelizLK) | Next.js storefront and admin application, Prisma schema/migrations, Docker `runner` and `migrator` targets, and the GitHub Actions CI/CD workflow. |
+| [celizlk-infra](https://github.com/Thiranjshan/celizlk-infra) | Terraform configuration for the existing Azure deployment: Ubuntu 22.04 Linux VM (`Standard_B2ats_v2`), virtual network/subnet, public IP and network security group, managed OS disk, PostgreSQL Flexible Server (`B_Standard_B1ms`, 7-day backup retention), and Azure Monitor agent/data collection resources. |
+
+The production deployment and Caddy reverse-proxy configuration are implemented and running. The VM's Docker Compose project and Caddy runtime configuration are configured on the deployment host; they are not files in either repository. Terraform state is currently local and is not committed. The infrastructure repository documents importing the existing Azure resources and checking for drift with `terraform plan`.
+
+The Terraform network security group currently defines public inbound rules for SSH (`22`), HTTP (`80`), and HTTPS (`443`). Restrict SSH to trusted source addresses when managing the Azure network configuration.
 
 ## Features
 
@@ -36,14 +48,14 @@ The infrastructure workflow uses Docker for packaging, GitHub Actions for automa
 - Product categories and brands.
 - Search and browsing features implemented by the application.
 - Cart and checkout workflows.
-- Order placement using the payment/confirmation methods supported by the current release, including cash on delivery and bank-transfer confirmation where enabled.
-- Delivery rules based on supported delivery zones where configured.
+- Order placement with cash on delivery or bank transfer. PayHere card payments are not available in the current checkout.
+- Delivery fees and payment instructions managed through store settings.
 
 ### Administration
 
 - Product and catalogue management.
 - Product information such as slug, price, discounted price, stock quantity, category, brand, images, specifications, and SEO metadata.
-- Order and inventory-related administration supported by the current application.
+- Order, inventory, customer, delivery-zone, merchandising, and store-settings administration.
 
 ## Screenshots
 
@@ -73,33 +85,31 @@ The infrastructure workflow uses Docker for packaging, GitHub Actions for automa
 ### DevOps and Operations
 
 - Docker-based application packaging.
-- Automated build and deployment workflow using GitHub Actions where configured.
+- Automated build and deployment workflow using GitHub Actions.
 - Container image publishing to GHCR.
-- Azure VM hosting with Caddy handling HTTPS and reverse-proxy traffic.
-- Infrastructure management with Terraform where configured.
+- Azure Linux VM hosting the application and Caddy containers; Caddy handles HTTPS and reverse-proxy traffic.
+- Azure resources managed with Terraform in the companion infrastructure repository.
 - Application health endpoint and Docker health checks.
-- External availability checks and alert notifications.
-- Azure VM metrics and application/container logs for basic troubleshooting.
-
-> Keep this feature list aligned with the code currently in the repository. Remove any item that is not implemented or enabled in the published version. Online card payments such as PayHere should not be described as supported unless they are implemented and tested.
+- Azure Monitor Linux agent and data collection configuration; application/container logs are available on the VM.
+- A post-deployment HTTPS health check in GitHub Actions.
 
 ## Technology Stack
 
 | Area                    | Technologies                                                                                              |
 | ----------------------- | --------------------------------------------------------------------------------------------------------- |
-| Web application         | Next.js, React, TypeScript/JavaScript                                                                     |
-| Data access             | Prisma ORM                                                                                                |
-| Database                | PostgreSQL in the deployed environment                                                                    |
-| Containers              | Docker, Docker Compose                                                                                    |
+| Web application         | Next.js 16 App Router, React 19, TypeScript 5                                                             |
+| Data access             | Prisma ORM 6                                                                                                |
+| Database                | PostgreSQL                                                                                                |
+| Containers              | Docker; Docker Compose is used by the deployment host                                                     |
 | CI/CD                   | GitHub Actions                                                                                            |
 | Container registry      | GitHub Container Registry (GHCR)                                                                          |
-| Cloud hosting           | Microsoft Azure Virtual Machine                                                                           |
+| Cloud hosting           | Azure Linux Virtual Machine and Azure Database for PostgreSQL Flexible Server                              |
 | Reverse proxy and HTTPS | Caddy                                                                                                     |
-| Infrastructure as Code  | Terraform, where configured                                                                               |
-| Monitoring              | Application health endpoint, Docker health checks, external uptime monitoring, Azure VM metrics, and logs |
+| Infrastructure as Code  | Terraform in [celizlk-infra](https://github.com/Thiranjshan/celizlk-infra)                                 |
+| Monitoring              | Application health endpoint, Docker health checks, Azure Monitor agent/data collection, and deployment health probe |
 | Version control         | Git and GitHub                                                                                            |
 
-The exact versions and commands are maintained in the project files (for example, `package.json`, the lockfile, `Dockerfile`, and Compose configuration).
+Dependency versions are recorded in `package.json` and `package-lock.json`. The application repository contains the `Dockerfile` and CI/CD workflow. Compose and Caddy runtime configuration are on the deployed VM rather than checked into these repositories.
 
 ## Architecture
 
@@ -117,58 +127,62 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    Developer[Developer] --> Repo[GitHub Repository]
-    Repo --> Actions[GitHub Actions]
-    Actions --> Checks[Build and Configured Checks]
-    Checks --> Image[Docker Image]
-    Image --> Registry[GHCR]
-    Registry --> VM[Azure VM]
-    VM --> Compose[Docker Compose]
-    Compose --> App[Application Container]
-    App --> Proxy[Caddy / HTTPS]
+    Developer[Developer] --> AppRepo[Application Repository]
+    AppRepo --> Actions[GitHub Actions]
+    Actions --> Checks[Lint, Type Check, Dependency Audit]
+    Checks --> Build[Build Runner and Migrator Images]
+    Build --> Registry[Publish Images to GHCR]
+    Registry --> Deploy[SSH Deployment]
+    Deploy --> Compose[VM Docker Compose]
+    Compose --> Migrate[Run Prisma Migrations]
+    Migrate --> Start[Start Application and Caddy]
+    Start --> Verify[Public Health Check]
+    InfraRepo[Infrastructure Repository] --> Terraform[Terraform]
+    Terraform --> Azure[Azure VM, Network, PostgreSQL, Monitor]
 ```
 
-The diagrams show the intended high-level workflow. Refer to the actual workflow files and infrastructure configuration for exact triggers, service names, networks, and deployment steps.
+The request path represents the running production topology. The delivery workflow is implemented in `.github/workflows/ci-cd.yml`; Terraform for Azure is maintained in [celizlk-infra](https://github.com/Thiranjshan/celizlk-infra). The VM's Compose and Caddy runtime configuration is deployed on the host and is not tracked in either repository.
 
 ## Repository Layout
 
-The layout below is illustrative; folders may differ in this project. Check the repository before relying on a path in a command or instruction.
-
 ```text
 .
-├── .github/workflows/   # CI/CD workflow definitions
-├── prisma/              # Prisma schema and migration files, if used here
-├── public/              # Static assets
-├── src/ or app/         # Next.js application source
-├── Dockerfile            # Application image build
-├── docker-compose.yml    # Container runtime configuration (name may differ)
-├── .dockerignore         # Files excluded from Docker build context
-├── .gitignore            # Files excluded from version control
-├── .env.example          # Example environment variables; no real secrets
-├── package.json          # Scripts and dependencies
-├── package-lock.json     # Locked npm dependency tree
-└── README.md
+├── app/                    # App Router pages and API routes
+│   ├── admin/              # Admin screens
+│   ├── api/                # API handlers, including /api/health
+│   ├── checkout/           # Checkout flow
+│   └── ...                 # Storefront, account, and information pages
+├── components/             # Shared UI
+├── lib/                    # Auth, order, database, and store logic
+├── prisma/
+│   ├── migrations/         # PostgreSQL migrations
+│   ├── schema.prisma       # Data model
+│   └── seed.ts             # Local demo-data seed
+├── public/                 # Static assets and upload directory
+├── tests/                  # Automated tests
+├── .github/workflows/      # CI/CD workflow
+├── Dockerfile              # runner and migrator image targets
+├── .dockerignore
+├── .env.example
+├── package.json
+├── package-lock.json
+└── next.config.ts
 ```
-
-Infrastructure managed in a separate repository should be linked here rather than copied into this repository without a reason.
 
 ## Local Development
 
 ### Prerequisites
 
 - Git.
-- A Node.js version compatible with the version declared by the project.
-- npm.
-- Access to a development database supported by the current Prisma schema.
-- Docker and Docker Compose if you use the containerized local workflow.
+- Node.js 22 and npm (the Docker image and CI workflow use Node.js 22).
+- A PostgreSQL development database.
+- Docker only if building or running the container image. The production Compose project is on the deployment VM and is not included here.
 
 ### 1. Clone the repository
 
-Replace the URL below with the actual public repository URL:
-
 ```bash
-git clone https://github.com/<GITHUB_USERNAME>/<REPOSITORY_NAME>.git
-cd <REPOSITORY_NAME>
+git clone https://github.com/Thiranjshan/CelizLK.git
+cd CelizLK
 ```
 
 ### 2. Install dependencies
@@ -179,11 +193,20 @@ npm ci
 
 ### 3. Configure environment variables
 
-Create a local `.env` file based on `.env.example` and supply development-only values. See [Environment Configuration](#environment-configuration).
+Create `.env` from `.env.example`, replace `DATABASE_URL` with a PostgreSQL development connection string, and configure development-only secrets. Prisma CLI commands use `.env`; Next.js also loads it. The SQLite-looking value in the current example file is a legacy placeholder and is not compatible with the PostgreSQL Prisma schema. See [Environment Configuration](#environment-configuration).
 
 ### 4. Prepare the database
 
-Use the project's documented Prisma/database scripts. If this repository uses Prisma migrations, apply the appropriate migration command for the development environment. Do not run development migration commands against the production database.
+Apply the Prisma migrations and generate the client:
+
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
+
+One migration enables PostgreSQL's `pg_trgm` extension for product-name search. The database role must be able to create it, or the database administrator must provision it first. Never run `migrate dev` against production.
+
+The optional `npx prisma db seed` command runs `prisma/seed.ts`, which deletes and recreates demo data. Use it only with a disposable local database; `ALLOW_DESTRUCTIVE_SEED=true` bypasses its safeguard.
 
 ### 5. Start the development server
 
@@ -195,121 +218,77 @@ Open [http://localhost:3000](http://localhost:3000), unless the port is overridd
 
 ### 6. Run checks
 
-Review the scripts in `package.json` and run the checks configured by this project. Common examples are:
+Run the available checks:
 
 ```bash
 npm run lint
+npx tsc --noEmit
+npm test
 npm run build
 ```
 
-Only run scripts that exist in `package.json`. If automated tests are configured, run the relevant test command as well.
+`npm test` runs `tests/*.test.ts` using Node's test runner and `tsx`. Tests requiring Prisma need a dedicated test database with the migrations applied.
 
 ## Environment Configuration
 
-Keep environment-specific configuration outside source control. The `.env.example` file should document the variable names needed to start the application without containing production credentials.
+Keep environment-specific configuration outside source control. `.env.example` currently lists these values:
 
-Depending on the implementation, configuration may include:
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection used by Prisma. |
+| `JWT_ACCESS_SECRET` | Customer access-token signing key. |
+| `ADMIN_JWT_SECRET` | Separate admin-token signing key; production requires at least 32 characters. |
+| `DELIVERY_FEE_LKR`, `NEXT_PUBLIC_DELIVERY_FEE_LKR` | Legacy example entries; the application currently does not read these values. |
+| `ALLOW_DESTRUCTIVE_SEED` | Optional seed-script override. Set to `true` only when intentionally resetting a disposable local database. |
 
-| Variable                  | Purpose                                                              | Example guidance                                                                        |
-| ------------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `DATABASE_URL`            | Database connection string                                           | Use a local development database for local work; never commit a real connection string. |
-| Authentication variables  | Session, OAuth, or authentication provider configuration, if enabled | Use local/test credentials and follow the relevant provider's setup instructions.       |
-| Application URL variables | Public or internal application origin, if used                       | Set the correct local or deployment URL.                                                |
-| Storage/API variables     | External service configuration, if used                              | Use placeholders in `.env.example` and keep secrets in the deployment secret store.     |
+Google OAuth is optional and reads `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`, and optionally `APP_URL`. `CORS_ALLOWED_ORIGINS` optionally configures the allowed origins. `NEXT_PUBLIC_SITE_URL` or `SITE_URL` sets the canonical URL used by sitemap and robots metadata; without either, production defaults to `https://celiz.lk`, so set one if the deployed public domain differs. `SEARCH_MODE=legacy` selects the legacy search implementation.
 
-Use the variable names actually read by the application. Do not copy production values into `.env.example`, screenshots, issue descriptions, or logs.
+Use development-only secrets locally and keep production values in the deployment secret store. Do not commit real credentials or connection strings.
 
 ## Database Setup
 
-The deployed application uses a managed PostgreSQL database. Local development should use an isolated development database with credentials that are not reused in production.
-
-If Prisma is used by the current branch:
-
-1. Review the Prisma schema and migration directory.
-2. Confirm the database provider and connection variable expected by the project.
-3. Use the repository's intended migration/generation scripts.
-4. Verify that the application can connect to the development database.
-5. Test backups and restores only in a separate development or staging database.
-
-Use the existing scripts and configuration in the repository as the source of truth. The exact Prisma commands can differ depending on the Prisma version and project configuration.
+The Prisma schema at `prisma/schema.prisma` uses PostgreSQL and `DATABASE_URL`. Migration SQL is versioned in `prisma/migrations/`. Use `npx prisma migrate dev` locally and `npx prisma migrate deploy` for deployment. Back up production before schema changes; do not run development migrations or the demo seed against production.
 
 ## Docker
 
-Docker packages the application and helps keep deployment behaviour consistent between environments.
+The repository includes a multi-stage `Dockerfile` with two final targets:
 
-Before running Compose commands, confirm the filename and service names in the repository. If the Compose file is `docker-compose.yml`, common commands include:
+- `runner` serves the Next.js standalone build on port `3000` as a non-root user.
+- `migrator` runs `prisma migrate deploy` for deployment migrations.
+
+Build the application image from the repository root:
 
 ```bash
-# Validate the Compose configuration
-docker compose -f docker-compose.yml config
-
-# Build the configured images (if a build section is present)
-docker compose -f docker-compose.yml build
-
-# Start services in the background
-docker compose -f docker-compose.yml up -d
-
-# Inspect service/container status
-docker compose -f docker-compose.yml ps
-
-# Review application logs (replace <service> with the real service name)
-docker compose -f docker-compose.yml logs --tail=100 <service>
-
-# Stop services
-
-docker compose -f docker-compose.yml down
+docker build --target runner -t celiz-lk:local .
 ```
 
-GitHub Actions builds the Docker image and publishes it to GitHub Container Registry (GHCR). The Azure VM does not build the image locally; it pulls the pre-built image from GHCR and deploys it using Docker Compose.
+The runner image has a Docker `HEALTHCHECK` that calls `/api/health` every 30 seconds, with a 5-second timeout, a 60-second startup grace period, and 3 retries. This endpoint checks the app and its database connection.
 
-Deployment commands:
+```bash
+docker ps
+docker inspect --format '{{json .State.Health}}' <container-name-or-id>
+docker logs --tail=100 <container-name-or-id>
+```
 
-````bash
-docker compose pull
-docker compose --profile tools run --rm migrate
-docker compose up -d
-docker compose ps
+The Compose file used by deployment is not included in this repository. The GitHub Actions deployment expects a Compose project on the VM under `~/app`; its services must use the published image and provide runtime environment variables. Compose inherits the image health check unless the service configuration overrides or disables it. Docker reports `unhealthy` but does not restart a container solely because of that state.
 
 ## CI/CD and Deployment
 
-The deployment workflow is designed to make application delivery repeatable.
+The implemented workflow in `.github/workflows/ci-cd.yml` runs on pushes and pull requests to `main` and manual dispatch. Its test job installs dependencies, generates Prisma Client, runs ESLint and TypeScript checks, and runs `npm audit --audit-level=critical` (the audit step is configured to continue if it fails). It does not currently run `npm test`.
 
-At a high level:
+On pushes to `main`, the workflow builds and publishes the `runner` image with `latest` and commit-SHA tags, and the `migrator` image with `migrator` and `migrator-<sha>` tags, to GHCR. It connects to the VM over SSH using the `VM_HOST`, `VM_USER`, and `VM_SSH_KEY` GitHub Actions secrets; in `~/app`, it pulls the Compose `tools` profile, runs the migration service, starts the services, and prunes unused images. The workflow then probes `https://celizlk.duckdns.org/api/health`, retrying before it fails the deployment job.
 
-1. Code changes are pushed to the configured GitHub branch.
-2. GitHub Actions runs the checks configured in the workflow.
-3. The workflow builds a Docker image.
-4. The image is published to GitHub Container Registry (GHCR), using repository secrets or permissions configured for the workflow.
-5. The Azure VM pulls the intended image and starts or updates the application using Docker Compose.
-6. Caddy routes HTTPS traffic to the application container.
-7. The deployed health endpoint and external availability monitor are used to verify service availability.
-
-The precise trigger, image tag, authentication method, and deployment commands are defined by the workflow and deployment files. Review `.github/workflows/` and the Compose configuration for the exact implementation.
-
-### Infrastructure as Code
-
-Terraform is used for infrastructure resources managed through the project's Terraform configuration. Review the Terraform repository and its README for the resource list, state configuration, variables, and apply procedure. Never commit Terraform state files or secret variable values to a public repository.
-
-### Deployment safety
-
-- Keep production credentials in GitHub/Azure secrets or the appropriate secret store.
-- Avoid using mutable image tags as the sole means of identifying a release; record the actual tag or digest used for deployment.
-- Verify the health check after deployment.
-- Keep a documented recovery/rollback procedure.
-- Avoid experimenting directly on production when a staging or local environment is sufficient.
+The deployment pipeline and production Caddy configuration are implemented. The Compose project and runtime environment are configured on the VM rather than tracked in the application repository; Azure resource definitions are tracked in [celizlk-infra](https://github.com/Thiranjshan/celizlk-infra). The `runner` image includes a Docker health check, and deployment is verified with the public application health endpoint.
 
 ## Monitoring and Operations
 
-Monitoring is intended to distinguish public availability issues from application, container, and infrastructure issues.
+The deployment combines an application/database health endpoint, the Docker image health check, an HTTPS health probe after each deployment, and Azure Monitor data collection for VM metrics. These checks cover different layers; none alone validates all storefront workflows.
 
-### 1. External availability
+### 1. Post-deployment availability probe
 
-An external uptime monitor checks the public homepage and the application's health endpoint over HTTPS. Notifications are configured for outages and recovery.
+The CI/CD workflow performs a post-deployment HTTPS request to the health endpoint. This is a deployment-time probe, not a continuous external uptime monitor.
 
-- Homepage check: verifies that the public site responds.
-- Health check: queries `/api/health` and expects a successful HTTP response when the application and its database check are healthy.
-
-An HTTP check does not prove that every product, cart, checkout, or order workflow is functioning. Important user journeys should also be tested separately.
+An HTTP health check does not prove that every product, cart, checkout, or order workflow is functioning. Important user journeys need separate tests.
 
 ### 2. Application health endpoint
 
@@ -317,26 +296,29 @@ The health endpoint is available at:
 
 ```text
 /api/health
-````
+```
 
-When healthy, it should return HTTP `200`. When a required dependency such as the database is unavailable, it should return a failure status (for example, HTTP `503`) without exposing connection strings or internal error details.
+The route checks the Node process and runs `SELECT 1` against PostgreSQL with a 3-second database timeout. It returns HTTP `200` when healthy and `503` when the database check fails. The public response avoids internal database errors; details are logged by the server.
 
-The endpoint's exact checks and response body are defined by the route handler in the repository. If its behaviour changes, update this documentation to match.
+The route returns JSON with an overall status and individual app/database checks. Its exact response shape is defined in `app/api/health/route.ts`.
 
 ### 3. Docker health check
 
-Docker Compose checks the application health endpoint from inside the container and reports the container's health state. A health check reporting `unhealthy` is a diagnostic signal; it does not automatically guarantee that Docker restarts the container.
+The runner image's Docker `HEALTHCHECK` probes `/api/health` inside the container. Compose displays this image-level health state unless its service configuration overrides or disables the check. An `unhealthy` state is diagnostic; Docker does not restart a container solely because of it.
 
-Inspect status and logs with commands such as:
+Inspect health and logs with:
 
 ```bash
 docker compose ps
 docker compose logs --since=30m <application-service>
+docker inspect --format '{{json .State.Health}}' <container-name-or-id>
 ```
 
-### 4. Azure VM metrics
+The Compose commands require the deployment-host Compose project; no Compose file is checked in here.
 
-Azure Monitor metrics provide host-level visibility into resources such as CPU, network traffic, and disk activity. Use the Azure portal's VM **Monitoring → Metrics** view to inspect trends and investigate possible resource pressure.
+### 4. Azure Monitor and VM metrics
+
+The infrastructure Terraform configures the Azure Monitor Linux agent and a data collection rule for VM performance metrics. Use the Azure portal's VM **Monitoring → Metrics** view to inspect available metrics and investigate resource pressure. The Terraform also defines an action group; an action group alone is not an alert rule or continuous website monitor.
 
 Host-level metrics are different from guest filesystem capacity and application-level metrics. For filesystem usage and memory, inspect the Linux VM directly when appropriate:
 
@@ -355,11 +337,11 @@ Useful diagnostic sources include:
 - Caddy reverse-proxy logs.
 - Docker container status and health state.
 - Azure VM metrics.
-- External monitor incident and recovery notifications.
+- GitHub Actions deployment and health-check results.
 
 A practical investigation sequence for an unavailable website is:
 
-1. Confirm the external alert and check whether the homepage and health endpoint both fail.
+1. Open the homepage and health endpoint to establish whether the issue affects the public site, the health probe, or both.
 2. Verify DNS and HTTPS reachability.
 3. Check the Azure VM status and resource usage.
 4. Inspect Docker Compose service status.
@@ -379,7 +361,7 @@ A practical investigation sequence for an unavailable website is:
 | Database connection fails       | Verify the connection variable, database status, firewall/network access, TLS requirements, and database permissions. |
 | CI/CD workflow fails            | Review the failed GitHub Actions step, build output, registry permissions, image tags, and deployment logs.           |
 | Server disk usage is high       | Check `df -h`, identify large logs/images safely, and confirm backups before removing anything.                       |
-| A deployment introduces a fault | Use the documented prior working image/release and rollback procedure; verify the health check after recovery.        |
+| A deployment introduces a fault | Review the failed deployment and health-check logs. No automatic rollback is configured; recover using the deployment host's Compose configuration and a known-good image tag, then verify health. |
 
 Never paste unredacted production logs or secrets into public issues or commit them to the repository.
 
@@ -397,15 +379,15 @@ Never paste unredacted production logs or secrets into public issues or commit t
 
 Possible next steps, depending on project needs, include:
 
-- Automated tests for important customer journeys and APIs.
+- Automated tests for important customer journeys and APIs (the current CI test job does not run `npm test`).
 - Structured application logs and centralized log retention.
-- More detailed dashboards and alert thresholds for infrastructure metrics.
-- Automated post-deployment smoke tests and a documented rollback workflow.
+- Explicit Azure metric alert rules and continuous external uptime monitoring.
+- Automated storefront smoke tests and a documented rollback workflow (the current pipeline probes `/api/health` after deployment).
 - Dependency and container image vulnerability scanning.
 - Accessibility, performance, and security testing.
 
-These are potential improvements, not claims that the functionality is already implemented.
+These are potential improvements, not claims that the functionality is already implemented. Azure infrastructure is tracked in [celizlk-infra](https://github.com/Thiranjshan/celizlk-infra); the production VM's Compose and Caddy runtime configuration is deployed on the host and is not checked into either repository.
 
 ## Project Status
 
-This is an actively developed e-commerce and DevOps portfolio project. For the most accurate state of the implementation, refer to the source code, workflow files, deployment configuration, and recent repository commits.
+The application is deployed at the live site above, and its CI/CD pipeline and production deployment are implemented. For application and deployment automation, see this repository; for Azure resource definitions, see [celizlk-infra](https://github.com/Thiranjshan/celizlk-infra).
