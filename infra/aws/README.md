@@ -29,7 +29,7 @@ EBS and S3 incur AWS charges. No paid snapshot or off-server backup service is e
 
 ## Inputs and credentials
 
-Review the defaults before applying. The default region is `ap-south-1`, instance type `t3.medium`, root disk `30 GiB`, persistent disk `100 GiB`, existing documented domain `celizlk.duckdns.org`, and local server backup retention `14` days. Confirm AWS region, monthly instance/disk/IPv4 budget, production domain, and whether SSH is needed. The instance type and disk sizes are cost/capacity decisions, not a quoted price.
+Review the defaults before applying. The default region is `ap-south-1`, instance type `t3.medium`, root disk `30 GiB`, persistent disk `100 GiB`, production domain `celizlk.store`, and local server backup retention `14` days. Confirm AWS region, monthly instance/disk/IPv4 budget, production domain, and whether SSH is needed. The instance type and disk sizes are cost/capacity decisions, not a quoted price.
 
 AWS CLI credentials should be supplied locally through an AWS profile/SSO with permission to create the listed EC2, VPC, EBS, IAM, EIP, S3, and OIDC resources. Do not put access keys in Terraform variables. Terraform state has no application secrets.
 

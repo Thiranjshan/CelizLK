@@ -1,8 +1,8 @@
 # Celiz LK — E-commerce Platform
 
-Celiz LK is a live e-commerce web application for a mobile-accessories business. The current production deployment remains on Azure until the documented cutover is approved and completed. This repository now also contains a prepared AWS EC2, Docker Compose, PostgreSQL, and Caddy deployment; no AWS infrastructure has been provisioned by this change.
+Celiz LK is a live e-commerce web application for a mobile-accessories business.
 
-- **Live site:** <https://celizlk.duckdns.org/>
+- **Live site:** <https://celizlk.store/>
 - **Application and CI/CD repository:** <https://github.com/Thiranjshan/CelizLK>
 - **AWS infrastructure configuration:** [`infra/aws/`](infra/aws/)
 
@@ -24,19 +24,20 @@ Celiz LK is a live e-commerce web application for a mobile-accessories business.
 - [Troubleshooting](#troubleshooting)
 - [Security Notes](#security-notes)
 - [Known Limitations and Future Improvements](#known-limitations-and-future-improvements)
+- [Project Status](#project-status)
 
 ## Overview
 
-Celiz LK is a deployed e-commerce storefront for mobile accessories. This repository contains the Next.js application, Docker image definitions, database schema and migrations, GitHub Actions workflow, and the new AWS Terraform and runtime/backup configuration. Existing Azure services remain the live production environment pending a staged migration. The AWS files are prepared configuration only.
+Celiz LK is a deployed e-commerce storefront for mobile accessories at [celizlk.store](https://celizlk.store/). This repository contains the Next.js application, Docker image definitions, database schema and migrations, GitHub Actions workflow, and the AWS Terraform and runtime/backup configuration. AWS files are prepared configuration only; provisioning, data restore, and cutover are pending.
 
 ## Repositories and Deployment Scope
 
 | Repository | Contents |
 | --- | --- |
 | [CelizLK application](https://github.com/Thiranjshan/CelizLK) | Next.js storefront and admin application, Prisma schema/migrations, Docker `runner` and `migrator` targets, CI/CD, and prepared AWS configuration under `infra/aws/`. |
-| Existing Azure deployment | Current live environment pending cutover: application and Caddy containers on an Azure VM, Azure Database for PostgreSQL, and the production domain. Do not modify or retire it during preparation. |
+| AWS deployment target | Prepared configuration: one EC2 instance for the application, PostgreSQL 18, and Caddy, with persistent encrypted storage, automated backups, and SSM-based deployment. It is not provisioned yet. |
 
-AWS Terraform, Compose, Caddy, role initialization, and backup scripts are maintained in this repository; they do not depend on a separate infrastructure repository. AWS provisioning, DNS changes, data restore, and cutover have not been performed. The prior Azure infrastructure repository is not part of this migration.
+AWS Terraform, Compose, Caddy, role initialization, and backup scripts are maintained in this repository; they do not depend on a separate infrastructure repository. AWS provisioning, DNS changes, data restore, and cutover have not been performed.
 
 ## Features
 
@@ -47,14 +48,15 @@ AWS Terraform, Compose, Caddy, role initialization, and backup scripts are maint
 - Product categories and brands.
 - Search and browsing features implemented by the application.
 - Cart and checkout workflows.
-- Order placement with cash on delivery or bank transfer. PayHere card payments are not available in the current checkout.
+- Customer accounts, saved addresses, and order history.
+- Order placement with cash on delivery or bank transfer. Bank-transfer proof and payment verification are supported; PayHere/card checkout is not currently implemented.
 - Delivery fees and payment instructions managed through store settings.
 
 ### Administration
 
 - Product and catalogue management.
 - Product information such as slug, price, discounted price, stock quantity, category, brand, images, specifications, and SEO metadata.
-- Order, inventory, customer, delivery-zone, merchandising, and store-settings administration.
+- Order and payment management, inventory, customers, delivery zones, coupons, reviews, staff, featured categories, hero banners, and store settings.
 
 ## Screenshots
 
@@ -86,11 +88,9 @@ AWS Terraform, Compose, Caddy, role initialization, and backup scripts are maint
 - Docker-based application packaging.
 - Automated build and deployment workflow using GitHub Actions.
 - Container image publishing to GHCR.
-- Current hosting: Azure VM, Caddy, and Azure Database for PostgreSQL.
-- Prepared target: one AWS EC2 instance running the application, PostgreSQL 18, and Caddy through Docker Compose.
-- AWS Terraform state: separate versioned/encrypted S3 bucket with S3-native state locking; no Azure state reuse.
+- Prepared deployment target (not provisioned): one AWS EC2 instance running the application, PostgreSQL 18, and Caddy through Docker Compose.
+- AWS Terraform state: separate versioned/encrypted S3 bucket with S3-native state locking.
 - Application health endpoint and Docker health checks.
-- Existing Azure Monitor configuration applies to the current Azure host only.
 - AWS target backup timers and deployment health checks are documented in the runbook.
 
 ## Technology Stack
@@ -103,10 +103,10 @@ AWS Terraform, Compose, Caddy, role initialization, and backup scripts are maint
 | Containers              | Docker; Docker Compose is used by the deployment host                                                     |
 | CI/CD                   | GitHub Actions                                                                                            |
 | Container registry      | GitHub Container Registry (GHCR)                                                                          |
-| Cloud hosting           | Current Azure deployment; prepared AWS EC2 target                                                         |
+| Cloud hosting           | AWS EC2 target (prepared; not yet provisioned)                                                            |
 | Reverse proxy and HTTPS | Caddy                                                                                                     |
 | Infrastructure as Code  | Terraform under `infra/aws/` for the prepared AWS target                                                  |
-| Monitoring              | Application health endpoint, Docker health checks, AWS Systems Manager command results, and backup timers |
+| Monitoring              | Application health endpoint, Docker health checks, AWS Systems Manager command results, and scheduled backup timers |
 | Version control         | Git and GitHub                                                                                            |
 
 Dependency versions are recorded in `package.json` and `package-lock.json`. AWS Compose and Caddy runtime configuration are tracked in `infra/aws/runtime/`; production secrets remain on the host and are not committed.
@@ -129,7 +129,7 @@ flowchart TD
 flowchart LR
     Developer[Developer] --> AppRepo[Application Repository]
     AppRepo --> Actions[GitHub Actions]
-    Actions --> Checks[Lint, Type Check, Dependency Audit]
+    Actions --> Checks[Lint, Type Check, Tests, Dependency Audit]
     Checks --> Build[Build Runner and Migrator Images]
     Build --> Registry[Publish SHA-tagged Images to GHCR]
     Registry --> Deploy[GitHub OIDC and SSM]
@@ -140,7 +140,7 @@ flowchart LR
     Terraform[AWS Terraform Apply] -. separate manual workflow .-> AWS[EC2, EBS, EIP, Network]
 ```
 
-The AWS diagram is the prepared target, not a claim that AWS is live. Before cutover, the live request path remains the Azure VM and Azure PostgreSQL. App image deployment and Terraform provisioning are separate: pushes do not run Terraform.
+The AWS diagram is the prepared target, not a claim that AWS is live. The current production service at celizlk.store remains authoritative until the AWS target is provisioned, restored, verified, and cut over. App image deployment and Terraform provisioning are separate: pushes do not run Terraform.
 
 ## Repository Layout
 
@@ -178,7 +178,7 @@ The AWS diagram is the prepared target, not a claim that AWS is live. Before cut
 - Git.
 - Node.js 22 and npm (the Docker image and CI workflow use Node.js 22).
 - A PostgreSQL development database.
-- Docker only if building or running the container image. The production Compose project is on the deployment VM and is not included here.
+- Docker only if building or running the container image. The AWS Compose project is tracked under `infra/aws/runtime/`; the existing production Compose configuration is managed separately from this repository.
 
 ### 1. Clone the repository
 
@@ -233,7 +233,7 @@ npm run build
 
 ## Environment Configuration
 
-Keep environment-specific configuration outside source control. `.env.example` lists local-development values. AWS deployment templates are in `infra/aws/runtime/*.env.example`; copy and populate them on the host without committing the completed files.
+Keep environment-specific configuration outside source control. `.env.example` lists local-development values. AWS deployment templates are in `infra/aws/runtime/*.env.example`; copy and populate them on the host without committing the completed files. The AWS examples use `celizlk.store`.
 
 | Variable | Purpose |
 | --- | --- |
@@ -246,7 +246,7 @@ Keep environment-specific configuration outside source control. `.env.example` l
 | `DELIVERY_FEE_LKR`, `NEXT_PUBLIC_DELIVERY_FEE_LKR` | Legacy example entries; the application currently does not read these values. |
 | `ALLOW_DESTRUCTIVE_SEED` | Optional seed-script override. Set to `true` only when intentionally resetting a disposable local database. |
 
-Google OAuth is optional. `NEXT_PUBLIC_SITE_URL` or `SITE_URL` sets the canonical URL used by sitemap and robots metadata; without either, production defaults to `https://celiz.lk`, so set one if the deployed public domain differs. `SEARCH_MODE=legacy` selects the legacy search implementation. The AWS Compose app and migrator use different PostgreSQL roles and connection strings. Bank-transfer instructions are read from persisted store settings; this repository does not currently configure SMTP/email or PayHere credentials.
+Google OAuth is optional. `NEXT_PUBLIC_SITE_URL` or `SITE_URL` sets the canonical URL used by sitemap and robots metadata; the production fallback is `https://celizlk.store`. `SEARCH_MODE=legacy` selects the legacy search implementation. The AWS Compose app and migrator use different PostgreSQL roles and connection strings. Bank-transfer instructions are read from persisted store settings; this repository does not currently configure SMTP/email or PayHere credentials.
 
 Use development-only secrets locally and keep production values in the deployment secret store. Do not commit real credentials or connection strings.
 
@@ -281,15 +281,15 @@ The app and migration roles are separate. The migration service runs `prisma mig
 
 ## CI/CD and Deployment
 
-The workflow in `.github/workflows/ci-cd.yml` runs lint and TypeScript checks plus unit/integration tests against a disposable PostgreSQL 18 service. It applies the Prisma migrations and seeds test fixtures only in that ephemeral CI database; the destructive seed override is scoped to the fixture step and is never used for production deployment. The existing critical dependency audit remains non-blocking.
+The workflow in `.github/workflows/ci-cd.yml` runs lint and TypeScript checks plus unit/integration tests against a disposable PostgreSQL 18 service. It applies the Prisma migrations and seeds test fixtures only in that ephemeral CI database; the destructive seed override is scoped to the fixture step and is never used for production deployment. The critical-severity dependency audit is non-blocking.
 
-Successful main builds publish the runner and migrator images to GHCR using the full commit SHA. A serialized deploy job (enabled only when `AWS_DEPLOY_ENABLED=true`) assumes an AWS role through GitHub OIDC and invokes the EC2 deployment script using Systems Manager. Until AWS is provisioned and accepted, tests/builds run while AWS deployment is skipped; Azure resources and DNS are not changed. The EC2 script runs the matching migration image, updates Compose services, waits for the database-backed app health check, and retains the previous healthy image for recovery. It does not roll back a database migration. It prunes only unused container images older than seven days after a healthy deployment; it never prunes volumes or database/upload data.
+Successful main builds publish the runner and migrator images to GHCR using the full commit SHA. A serialized deploy job (enabled only when `AWS_DEPLOY_ENABLED=true`) assumes an AWS role through GitHub OIDC and invokes the EC2 deployment script using Systems Manager. Until AWS is provisioned and accepted, tests/builds run while AWS deployment is skipped; existing production resources and DNS are not changed. The EC2 script runs the matching migration image, updates Compose services, waits for the database-backed app health check, and retains the previous healthy image for recovery. It does not roll back a database migration. It prunes only unused container images older than seven days after a healthy deployment; it never prunes volumes or database/upload data.
 
 The GitHub Actions repository variables are `AWS_DEPLOY_ENABLED`, `AWS_ROLE_ARN`, `AWS_REGION`, and `EC2_INSTANCE_ID`. The role ARN is a Terraform output; no long-lived AWS access key is needed in GitHub. EC2 has a separate root-only GHCR read token for pulling images. Application secrets are provisioned in protected files under `/srv/celiz/runtime/` and are not passed through Terraform or SSM. The AWS deployment is prepared, not live, until infrastructure, restore, verification, and owner-approved DNS cutover are complete. See the [AWS migration runbook](infra/aws/README.md).
 
 ## Monitoring and Operations
 
-The current Azure deployment and the prepared AWS target have different operational monitoring. The AWS deployment checks the app and PostgreSQL through `/api/health`, the Docker health state, and the status/output of the SSM deployment command. This is not a continuous external uptime monitor and does not prove all storefront flows.
+The prepared AWS target checks the app and PostgreSQL through `/api/health`, the Docker health state, and the status/output of the SSM deployment command. This is not a continuous external uptime monitor and does not prove all storefront flows.
 
 ### 1. Post-deployment availability probe
 
@@ -343,14 +343,14 @@ Useful diagnostic sources include:
 - Application/container logs.
 - Caddy reverse-proxy logs.
 - Docker container status and health state.
-- Azure VM metrics.
+- AWS EC2 metrics and Systems Manager command output.
 - GitHub Actions deployment and health-check results.
 
 A practical investigation sequence for an unavailable website is:
 
 1. Open the homepage and health endpoint to establish whether the issue affects the public site, the health probe, or both.
 2. Verify DNS and HTTPS reachability.
-3. Check the Azure VM status and resource usage.
+3. Check the AWS EC2 instance status and resource usage.
 4. Inspect Docker Compose service status.
 5. Review application and Caddy logs.
 6. Check database connectivity where relevant.
@@ -375,7 +375,7 @@ Never paste unredacted production logs or secrets into public issues or commit t
 ## Security Notes
 
 - Never commit `.env` files containing credentials, tokens, or connection strings.
-- Keep GitHub, Azure, database, and external-service credentials in the appropriate secret store.
+- Keep GitHub, AWS, database, and external-service credentials in the appropriate secret store.
 - Apply least-privilege access to cloud resources and deployment identities.
 - Expose only the network ports required by the application and administration workflow.
 - Do not return stack traces, SQL errors, hostnames, or secrets from public health endpoints.
@@ -386,15 +386,15 @@ Never paste unredacted production logs or secrets into public issues or commit t
 
 Possible next steps, depending on project needs, include:
 
-- Automated tests for important customer journeys and APIs beyond the existing unit suite.
+- Automated tests for important customer journeys and APIs beyond the existing automated test suite.
 - Structured application logs and centralized log retention.
-- Explicit Azure metric alert rules and continuous external uptime monitoring.
+- AWS metric alert rules and continuous external uptime monitoring.
 - Automated storefront smoke tests.
 - Dependency and container image vulnerability scanning.
 - Accessibility, performance, and security testing.
 
-These are potential improvements, not claims that the functionality is already implemented. The Azure VM's Compose and Caddy runtime configuration remains host-managed; the prepared AWS runtime is checked into this repository.
+These are potential improvements, not claims that the functionality is already implemented. The prepared AWS Compose and Caddy runtime configuration is checked into this repository.
 
 ## Project Status
 
-The application is live at the site above on Azure pending migration. The AWS deployment is prepared only; see [infra/aws/README.md](infra/aws/README.md) for the staging, restore, and cutover gates.
+The application is live at the site above. The AWS deployment is prepared only and is not yet provisioned; see [infra/aws/README.md](infra/aws/README.md) for the staging, restore, and cutover gates.

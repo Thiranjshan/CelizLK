@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 const siteUrl = (
   process.env.NEXT_PUBLIC_SITE_URL ||
   process.env.SITE_URL ||
-  (process.env.NODE_ENV === 'production' ? 'https://celiz.lk' : 'http://localhost:3000')
+  (process.env.NODE_ENV === 'production' ? 'https://celizlk.store' : 'http://localhost:3000')
 ).replace(/\/$/, '');
 
 export const dynamic = 'force-dynamic';
