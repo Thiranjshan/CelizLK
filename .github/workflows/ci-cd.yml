@@ -13,6 +13,22 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: celiz_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d celiz_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/celiz_test?schema=public
     steps:
       - uses: actions/checkout@v4
 
@@ -23,6 +39,14 @@ jobs:
 
       - run: npm ci
       - run: npx prisma generate
+      - name: Apply migrations to the isolated test database
+        run: npx prisma migrate deploy
+
+      - name: Seed disposable test fixtures
+        run: npx prisma db seed
+        env:
+          ALLOW_DESTRUCTIVE_SEED: 'true'
+
       - run: npm run lint
       - run: npx tsc --noEmit
       - run: npm test

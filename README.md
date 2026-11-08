@@ -281,7 +281,7 @@ The app and migration roles are separate. The migration service runs `prisma mig
 
 ## CI/CD and Deployment
 
-The workflow in `.github/workflows/ci-cd.yml` runs lint, TypeScript, unit tests, and the existing non-blocking critical audit on pushes/PRs to `main`.
+The workflow in `.github/workflows/ci-cd.yml` runs lint and TypeScript checks plus unit/integration tests against a disposable PostgreSQL 18 service. It applies the Prisma migrations and seeds test fixtures only in that ephemeral CI database; the destructive seed override is scoped to the fixture step and is never used for production deployment. The existing critical dependency audit remains non-blocking.
 
 Successful main builds publish the runner and migrator images to GHCR using the full commit SHA. A serialized deploy job (enabled only when `AWS_DEPLOY_ENABLED=true`) assumes an AWS role through GitHub OIDC and invokes the EC2 deployment script using Systems Manager. Until AWS is provisioned and accepted, tests/builds run while AWS deployment is skipped; Azure resources and DNS are not changed. The EC2 script runs the matching migration image, updates Compose services, waits for the database-backed app health check, and retains the previous healthy image for recovery. It does not roll back a database migration. It prunes only unused container images older than seven days after a healthy deployment; it never prunes volumes or database/upload data.
 
