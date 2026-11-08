@@ -34,6 +34,7 @@ yarn-error.log*
 .env*
 !.env.example
 !.env.local.example
+**/*.env
 
 # vercel
 .vercel
@@ -53,3 +54,12 @@ next-env.d.ts
 /prisma/*.db
 /prisma/*.db-journal
 /public/uploads/
+
+# Terraform state and local credentials/configuration
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/terraform.tfvars
+**/*.tfvars
+**/backend.hcl
+*.tfplan

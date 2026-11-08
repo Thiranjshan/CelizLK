@@ -1,0 +1,80 @@
+name: app
+
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    env_file:
+      - ./runtime/db.env
+    environment:
+      POSTGRES_DB: celizdb
+      POSTGRES_USER: celiz_admin
+    volumes:
+      - /srv/celiz/postgres:/var/lib/postgresql
+      - /srv/celiz/runtime/postgres-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U celiz_admin -d celizdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    stop_grace_period: 1m
+
+  app:
+    image: ghcr.io/thiranjshan/celizlk:${IMAGE_TAG:?Set IMAGE_TAG in /srv/celiz/.env}
+    restart: unless-stopped
+    env_file:
+      - ./runtime/app.env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+      - frontend
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health', { signal: AbortSignal.timeout(4000) }).then(r => { if (!r.ok) process.exitCode = 1; }).catch(() => { process.exitCode = 1; })"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    volumes:
+      - /srv/celiz/uploads:/app/public/uploads
+    stop_grace_period: 30s
+
+  migrate:
+    image: ghcr.io/thiranjshan/celizlk:migrator-${IMAGE_TAG:?Set IMAGE_TAG in /srv/celiz/.env}
+    profiles: ["tools"]
+    env_file:
+      - ./runtime/migrator.env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in /srv/celiz/.env}
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - /srv/celiz/runtime/Caddyfile:/etc/caddy/Caddyfile:ro
+      - /srv/celiz/caddy:/data
+      - /srv/celiz/caddy-config:/config
+    networks:
+      - frontend
+    stop_grace_period: 30s
+
+networks:
+  backend:
+    internal: true
+  frontend:

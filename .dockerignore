@@ -4,6 +4,17 @@ node_modules
 .github
 .env
 .env.*
+**/*.env
 Dockerfile
 npm-debug.log
 /public/uploads/
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/terraform.tfvars
+**/*.tfvars
+**/backend.hcl
+
+**/*.tfplan
+**/*.pem
+**/*.key

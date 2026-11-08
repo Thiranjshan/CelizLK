@@ -1,0 +1,11 @@
+aws_region             = "ap-south-1"
+instance_type          = "t3.medium"
+root_volume_size_gib   = 30
+data_volume_size_gib   = 100
+backup_retention_days  = 14
+github_repository      = "Thiranjshan/CelizLK"
+github_deploy_role_name = "celiz-github-deploy"
+
+# Optional. Set both to enable SSH, keeping the CIDR as narrow as possible.
+# ssh_ingress_cidr = "203.0.113.8/32"
+# ssh_public_key   = "ssh-ed25519 AAAA... administrator@device"

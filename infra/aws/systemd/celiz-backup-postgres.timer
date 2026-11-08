@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily Celiz PostgreSQL backup (UTC)
+
+[Timer]
+OnCalendar=*-*-* 02:15:00 UTC
+Persistent=true
+RandomizedDelaySec=10m
+Unit=celiz-backup-postgres.service
+
+[Install]
+WantedBy=timers.target

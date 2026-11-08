@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily Celiz uploads backup (UTC)
+
+[Timer]
+OnCalendar=*-*-* 02:45:00 UTC
+Persistent=true
+RandomizedDelaySec=10m
+Unit=celiz-backup-uploads.service
+
+[Install]
+WantedBy=timers.target

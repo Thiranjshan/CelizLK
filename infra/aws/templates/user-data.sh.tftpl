@@ -1,0 +1,84 @@
+#!/bin/bash
+set -euo pipefail
+
+exec > >(tee -a /var/log/celiz-bootstrap.log | logger -t celiz-bootstrap -s 2>/dev/console) 2>&1
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get update
+apt-get install -y ca-certificates curl docker.io docker-compose-v2 e2fsprogs snapd
+systemctl enable --now docker
+if ! snap list amazon-ssm-agent >/dev/null 2>&1; then
+  snap install amazon-ssm-agent --classic
+fi
+systemctl enable --now snap.amazon-ssm-agent.amazon-ssm-agent.service
+
+device="/dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_${data_device_id}"
+for attempt in $(seq 1 120); do
+  if [ -b "$device" ]; then
+    break
+  fi
+  sleep 5
+done
+if [ ! -b "$device" ]; then
+  echo "Persistent EBS device did not appear: $device" >&2
+  exit 1
+fi
+
+if ! blkid "$device" >/dev/null 2>&1; then
+  if [ -n "$(lsblk -no FSTYPE "$device")" ]; then
+    echo "Persistent EBS device has an unrecognized filesystem; refusing to format." >&2
+    exit 1
+  fi
+  mkfs.ext4 -L celiz-data "$device"
+fi
+
+install -d -m 0750 /srv/celiz
+if ! grep -q 'LABEL=celiz-data /srv/celiz ' /etc/fstab; then
+  printf '%s\n' 'LABEL=celiz-data /srv/celiz ext4 defaults 0 2' >> /etc/fstab
+fi
+mount /srv/celiz
+
+install -d -m 0750 /srv/celiz/runtime/postgres-init /srv/celiz/state
+install -d -m 0750 \
+  /srv/celiz/postgres \
+  /srv/celiz/uploads \
+  /srv/celiz/caddy \
+  /srv/celiz/caddy-config \
+  /srv/celiz/backups/database \
+  /srv/celiz/backups/uploads
+chown 999:999 /srv/celiz/postgres
+chown 1001:1001 /srv/celiz/uploads
+chown 1000:1000 /srv/celiz/caddy /srv/celiz/caddy-config
+groupadd --system celiz-backup
+usermod -aG celiz-backup ubuntu
+chown ubuntu:ubuntu /srv/celiz /srv/celiz/runtime /srv/celiz/state
+chown -R root:celiz-backup /srv/celiz/backups
+chmod 0750 /srv/celiz/backups /srv/celiz/backups/database /srv/celiz/backups/uploads
+chmod 0700 /srv/celiz/runtime
+
+cat > /etc/celiz-backup.conf <<'BACKUP_CONFIG'
+BACKUP_DIR=/srv/celiz/backups
+RETENTION_DAYS=${backup_retention_days}
+COMPOSE_FILE=/srv/celiz/compose.yaml
+BACKUP_TIMEZONE=UTC
+BACKUP_CONFIG
+chmod 0600 /etc/celiz-backup.conf
+
+install -d -m 0755 /usr/local/sbin
+printf '%s' '${postgres_backup_script}' | base64 -d | gzip -d > /usr/local/sbin/celiz-backup-postgres
+printf '%s' '${uploads_backup_script}' | base64 -d | gzip -d > /usr/local/sbin/celiz-backup-uploads
+printf '%s' '${deploy_script}' | base64 -d | gzip -d > /usr/local/sbin/celiz-deploy
+chmod 0750 /usr/local/sbin/celiz-backup-postgres /usr/local/sbin/celiz-backup-uploads /usr/local/sbin/celiz-deploy
+
+for unit in postgres_service postgres_timer uploads_service uploads_timer; do
+  case "$unit" in
+    postgres_service) content='${postgres_service}'; name=celiz-backup-postgres.service ;;
+    postgres_timer) content='${postgres_timer}'; name=celiz-backup-postgres.timer ;;
+    uploads_service) content='${uploads_service}'; name=celiz-backup-uploads.service ;;
+    uploads_timer) content='${uploads_timer}'; name=celiz-backup-uploads.timer ;;
+  esac
+  printf '%s' "$content" | base64 -d | gzip -d > "/etc/systemd/system/$name"
+done
+
+systemctl daemon-reload
+systemctl enable --now celiz-backup-postgres.timer celiz-backup-uploads.timer

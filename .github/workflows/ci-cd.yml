@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
   test:
@@ -23,28 +22,30 @@ jobs:
           cache: npm
 
       - run: npm ci
-
       - run: npx prisma generate
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Type check
-        run: npx tsc --noEmit
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm test
 
       - name: Audit dependencies
         run: npm audit --audit-level=critical
-        continue-on-error: true   # remove this line once you've cleaned up existing vulnerabilities
+        continue-on-error: true
 
   build:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.image.outputs.image }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Lowercase image name
-        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+      - name: Set image name
+        id: image
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-buildx-action@v3
 
@@ -54,58 +55,81 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push app image
+      - name: Build and push application image
         uses: docker/build-push-action@v6
         with:
           context: .
           target: runner
           push: true
           tags: |
-            ${{ env.IMAGE }}:latest
-            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ steps.image.outputs.image }}:${{ github.sha }}
+            ${{ steps.image.outputs.image }}:latest
           cache-from: type=gha,scope=app
           cache-to: type=gha,mode=max,scope=app
 
-      - name: Build and push migrator image
+      - name: Build and push migration image
         uses: docker/build-push-action@v6
         with:
           context: .
           target: migrator
           push: true
           tags: |
-            ${{ env.IMAGE }}:migrator
-            ${{ env.IMAGE }}:migrator-${{ github.sha }}
+            ${{ steps.image.outputs.image }}:migrator-${{ github.sha }}
           cache-from: type=gha,scope=app
           cache-to: type=gha,mode=max,scope=app
-          
+
   deploy:
     needs: build
+    if: github.ref == 'refs/heads/main' && vars.AWS_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
+    concurrency:
+      group: celiz-production-deploy
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
     steps:
-      - name: Deploy over SSH
-        uses: appleboy/ssh-action@v1
+      - name: Configure AWS credentials with GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          script: |
-            set -e
-            cd ~/app
-            docker compose --profile tools pull
-            docker compose --profile tools run --rm migrate
-            docker compose up -d
-            docker image prune -f
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Health check
+      - name: Deploy commit through Systems Manager
+        env:
+          EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          sleep 10
-          for i in 1 2 3 4 5; do
-            if curl -sf https://celizlk.duckdns.org/api/health; then
-              echo "Healthy"
-              exit 0
+          set -euo pipefail
+          parameters="$(jq -nc \
+            --arg instance "$EC2_INSTANCE_ID" \
+            --arg command "sudo /usr/local/sbin/celiz-deploy $IMAGE_TAG" \
+            '{InstanceIds:[$instance],DocumentName:"AWS-RunShellScript",Parameters:{commands:[$command]},TimeoutSeconds:600,Comment:("Celiz deploy " + $command)}')"
+          command_id="$(aws ssm send-command --cli-input-json "$parameters" --query 'Command.CommandId' --output text)"
+          echo "SSM command: $command_id"
+
+          for attempt in $(seq 1 120); do
+            if status="$(aws ssm get-command-invocation \
+              --command-id "$command_id" \
+              --instance-id "$EC2_INSTANCE_ID" \
+              --query Status --output text 2>/dev/null)"; then
+              case "$status" in
+                Success)
+                  aws ssm get-command-invocation \
+                    --command-id "$command_id" --instance-id "$EC2_INSTANCE_ID" \
+                    --query StandardOutputContent --output text
+                  exit 0
+                  ;;
+                Failed|Cancelled|TimedOut|DeliveryTimedOut|ExecutionTimedOut|Undeliverable|Terminated|Cancelling)
+                  aws ssm get-command-invocation \
+                    --command-id "$command_id" --instance-id "$EC2_INSTANCE_ID" \
+                    --query '[StandardOutputContent,StandardErrorContent]' --output text
+                  exit 1
+                  ;;
+              esac
             fi
-            echo "Not ready yet, retrying..."
             sleep 5
           done
-          echo "Health check failed"
+
+          echo "Timed out waiting for the EC2 deployment command." >&2
           exit 1

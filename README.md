@@ -1,10 +1,10 @@
 # Celiz LK — E-commerce Platform
 
-Celiz LK is a live e-commerce web application for a mobile-accessories business. The production deployment is automated with GitHub Actions, Docker, GHCR, and SSH; it runs on Azure with Caddy in front of the application and a managed PostgreSQL database.
+Celiz LK is a live e-commerce web application for a mobile-accessories business. The current production deployment remains on Azure until the documented cutover is approved and completed. This repository now also contains a prepared AWS EC2, Docker Compose, PostgreSQL, and Caddy deployment; no AWS infrastructure has been provisioned by this change.
 
 - **Live site:** <https://celizlk.duckdns.org/>
 - **Application and CI/CD repository:** <https://github.com/Thiranjshan/CelizLK>
-- **Infrastructure as Code repository:** <https://github.com/Thiranjshan/celizlk-infra>
+- **AWS infrastructure configuration:** [`infra/aws/`](infra/aws/)
 
 ## Table of Contents
 
@@ -19,6 +19,7 @@ Celiz LK is a live e-commerce web application for a mobile-accessories business.
 - [Database Setup](#database-setup)
 - [Docker](#docker)
 - [CI/CD and Deployment](#cicd-and-deployment)
+- [AWS Migration Runbook](infra/aws/README.md)
 - [Monitoring and Operations](#monitoring-and-operations)
 - [Troubleshooting](#troubleshooting)
 - [Security Notes](#security-notes)
@@ -26,18 +27,16 @@ Celiz LK is a live e-commerce web application for a mobile-accessories business.
 
 ## Overview
 
-Celiz LK is a deployed e-commerce storefront for mobile accessories. This repository contains the Next.js application, its Docker image definitions, database schema and migrations, and the GitHub Actions CI/CD workflow. The companion infrastructure repository contains Terraform for the Azure resources. The production VM is configured to run the application and Caddy containers, and the deployed Caddy reverse proxy serves the public site over HTTPS.
+Celiz LK is a deployed e-commerce storefront for mobile accessories. This repository contains the Next.js application, Docker image definitions, database schema and migrations, GitHub Actions workflow, and the new AWS Terraform and runtime/backup configuration. Existing Azure services remain the live production environment pending a staged migration. The AWS files are prepared configuration only.
 
 ## Repositories and Deployment Scope
 
 | Repository | Contents |
 | --- | --- |
-| [CelizLK application](https://github.com/Thiranjshan/CelizLK) | Next.js storefront and admin application, Prisma schema/migrations, Docker `runner` and `migrator` targets, and the GitHub Actions CI/CD workflow. |
-| [celizlk-infra](https://github.com/Thiranjshan/celizlk-infra) | Terraform configuration for the existing Azure deployment: Ubuntu 22.04 Linux VM (`Standard_B2ats_v2`), virtual network/subnet, public IP and network security group, managed OS disk, PostgreSQL Flexible Server (`B_Standard_B1ms`, 7-day backup retention), and Azure Monitor agent/data collection resources. |
+| [CelizLK application](https://github.com/Thiranjshan/CelizLK) | Next.js storefront and admin application, Prisma schema/migrations, Docker `runner` and `migrator` targets, CI/CD, and prepared AWS configuration under `infra/aws/`. |
+| Existing Azure deployment | Current live environment pending cutover: application and Caddy containers on an Azure VM, Azure Database for PostgreSQL, and the production domain. Do not modify or retire it during preparation. |
 
-The production deployment and Caddy reverse-proxy configuration are implemented and running. The VM's Docker Compose project and Caddy runtime configuration are configured on the deployment host; they are not files in either repository. Terraform state is currently local and is not committed. The infrastructure repository documents importing the existing Azure resources and checking for drift with `terraform plan`.
-
-The Terraform network security group currently defines public inbound rules for SSH (`22`), HTTP (`80`), and HTTPS (`443`). Restrict SSH to trusted source addresses when managing the Azure network configuration.
+AWS Terraform, Compose, Caddy, role initialization, and backup scripts are maintained in this repository; they do not depend on a separate infrastructure repository. AWS provisioning, DNS changes, data restore, and cutover have not been performed. The prior Azure infrastructure repository is not part of this migration.
 
 ## Features
 
@@ -87,11 +86,12 @@ The Terraform network security group currently defines public inbound rules for 
 - Docker-based application packaging.
 - Automated build and deployment workflow using GitHub Actions.
 - Container image publishing to GHCR.
-- Azure Linux VM hosting the application and Caddy containers; Caddy handles HTTPS and reverse-proxy traffic.
-- Azure resources managed with Terraform in the companion infrastructure repository.
+- Current hosting: Azure VM, Caddy, and Azure Database for PostgreSQL.
+- Prepared target: one AWS EC2 instance running the application, PostgreSQL 18, and Caddy through Docker Compose.
+- AWS Terraform state: separate versioned/encrypted S3 bucket with S3-native state locking; no Azure state reuse.
 - Application health endpoint and Docker health checks.
-- Azure Monitor Linux agent and data collection configuration; application/container logs are available on the VM.
-- A post-deployment HTTPS health check in GitHub Actions.
+- Existing Azure Monitor configuration applies to the current Azure host only.
+- AWS target backup timers and deployment health checks are documented in the runbook.
 
 ## Technology Stack
 
@@ -103,24 +103,24 @@ The Terraform network security group currently defines public inbound rules for 
 | Containers              | Docker; Docker Compose is used by the deployment host                                                     |
 | CI/CD                   | GitHub Actions                                                                                            |
 | Container registry      | GitHub Container Registry (GHCR)                                                                          |
-| Cloud hosting           | Azure Linux Virtual Machine and Azure Database for PostgreSQL Flexible Server                              |
+| Cloud hosting           | Current Azure deployment; prepared AWS EC2 target                                                         |
 | Reverse proxy and HTTPS | Caddy                                                                                                     |
-| Infrastructure as Code  | Terraform in [celizlk-infra](https://github.com/Thiranjshan/celizlk-infra)                                 |
-| Monitoring              | Application health endpoint, Docker health checks, Azure Monitor agent/data collection, and deployment health probe |
+| Infrastructure as Code  | Terraform under `infra/aws/` for the prepared AWS target                                                  |
+| Monitoring              | Application health endpoint, Docker health checks, AWS Systems Manager command results, and backup timers |
 | Version control         | Git and GitHub                                                                                            |
 
-Dependency versions are recorded in `package.json` and `package-lock.json`. The application repository contains the `Dockerfile` and CI/CD workflow. Compose and Caddy runtime configuration are on the deployed VM rather than checked into these repositories.
+Dependency versions are recorded in `package.json` and `package-lock.json`. AWS Compose and Caddy runtime configuration are tracked in `infra/aws/runtime/`; production secrets remain on the host and are not committed.
 
 ## Architecture
 
-### Request path
+### Prepared AWS target request path (not live yet)
 
 ```mermaid
 flowchart TD
     Customer[Customer Browser] --> DNS[Domain and DNS]
     DNS --> Caddy[Caddy HTTPS Reverse Proxy]
     Caddy --> Web[Next.js Application Container]
-    Web --> DB[(Managed PostgreSQL Database)]
+    Web --> DB[(PostgreSQL 18 on EC2)]
 ```
 
 ### Delivery workflow
@@ -131,17 +131,16 @@ flowchart LR
     AppRepo --> Actions[GitHub Actions]
     Actions --> Checks[Lint, Type Check, Dependency Audit]
     Checks --> Build[Build Runner and Migrator Images]
-    Build --> Registry[Publish Images to GHCR]
-    Registry --> Deploy[SSH Deployment]
-    Deploy --> Compose[VM Docker Compose]
+    Build --> Registry[Publish SHA-tagged Images to GHCR]
+    Registry --> Deploy[GitHub OIDC and SSM]
+    Deploy --> Compose[EC2 Docker Compose]
     Compose --> Migrate[Run Prisma Migrations]
     Migrate --> Start[Start Application and Caddy]
-    Start --> Verify[Public Health Check]
-    InfraRepo[Infrastructure Repository] --> Terraform[Terraform]
-    Terraform --> Azure[Azure VM, Network, PostgreSQL, Monitor]
+    Start --> Verify[Container and Database Health Check]
+    Terraform[AWS Terraform Apply] -. separate manual workflow .-> AWS[EC2, EBS, EIP, Network]
 ```
 
-The request path represents the running production topology. The delivery workflow is implemented in `.github/workflows/ci-cd.yml`; Terraform for Azure is maintained in [celizlk-infra](https://github.com/Thiranjshan/celizlk-infra). The VM's Compose and Caddy runtime configuration is deployed on the host and is not tracked in either repository.
+The AWS diagram is the prepared target, not a claim that AWS is live. Before cutover, the live request path remains the Azure VM and Azure PostgreSQL. App image deployment and Terraform provisioning are separate: pushes do not run Terraform.
 
 ## Repository Layout
 
@@ -162,6 +161,9 @@ The request path represents the running production topology. The delivery workfl
 ├── tests/                  # Automated tests
 ├── .github/workflows/      # CI/CD workflow
 ├── Dockerfile              # runner and migrator image targets
+├── infra/aws/              # AWS Terraform, Compose, Caddy, bootstrap, and runbook
+├── scripts/aws/            # EC2 deployment and server-side backup scripts
+├── scripts/windows/        # Checksum-verifying local backup downloader
 ├── .dockerignore
 ├── .env.example
 ├── package.json
@@ -193,7 +195,7 @@ npm ci
 
 ### 3. Configure environment variables
 
-Create `.env` from `.env.example`, replace `DATABASE_URL` with a PostgreSQL development connection string, and configure development-only secrets. Prisma CLI commands use `.env`; Next.js also loads it. The SQLite-looking value in the current example file is a legacy placeholder and is not compatible with the PostgreSQL Prisma schema. See [Environment Configuration](#environment-configuration).
+Create `.env` from `.env.example`, replace `DATABASE_URL` with a PostgreSQL development connection string, and configure development-only secrets. Prisma CLI commands use `.env`; Next.js also loads it. See [Environment Configuration](#environment-configuration).
 
 ### 4. Prepare the database
 
@@ -231,17 +233,20 @@ npm run build
 
 ## Environment Configuration
 
-Keep environment-specific configuration outside source control. `.env.example` currently lists these values:
+Keep environment-specific configuration outside source control. `.env.example` lists local-development values. AWS deployment templates are in `infra/aws/runtime/*.env.example`; copy and populate them on the host without committing the completed files.
 
 | Variable | Purpose |
 | --- | --- |
 | `DATABASE_URL` | PostgreSQL connection used by Prisma. |
 | `JWT_ACCESS_SECRET` | Customer access-token signing key. |
 | `ADMIN_JWT_SECRET` | Separate admin-token signing key; production requires at least 32 characters. |
+| `APP_URL`, `SITE_URL`, `NEXT_PUBLIC_SITE_URL` | Optional OAuth callback base and canonical public URLs; keep production values consistent with the chosen domain. |
+| `CORS_ALLOWED_ORIGINS` | Optional comma-separated allowed web origins. |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` | Optional Google OAuth configuration. |
 | `DELIVERY_FEE_LKR`, `NEXT_PUBLIC_DELIVERY_FEE_LKR` | Legacy example entries; the application currently does not read these values. |
 | `ALLOW_DESTRUCTIVE_SEED` | Optional seed-script override. Set to `true` only when intentionally resetting a disposable local database. |
 
-Google OAuth is optional and reads `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`, and optionally `APP_URL`. `CORS_ALLOWED_ORIGINS` optionally configures the allowed origins. `NEXT_PUBLIC_SITE_URL` or `SITE_URL` sets the canonical URL used by sitemap and robots metadata; without either, production defaults to `https://celiz.lk`, so set one if the deployed public domain differs. `SEARCH_MODE=legacy` selects the legacy search implementation.
+Google OAuth is optional. `NEXT_PUBLIC_SITE_URL` or `SITE_URL` sets the canonical URL used by sitemap and robots metadata; without either, production defaults to `https://celiz.lk`, so set one if the deployed public domain differs. `SEARCH_MODE=legacy` selects the legacy search implementation. The AWS Compose app and migrator use different PostgreSQL roles and connection strings. Bank-transfer instructions are read from persisted store settings; this repository does not currently configure SMTP/email or PayHere credentials.
 
 Use development-only secrets locally and keep production values in the deployment secret store. Do not commit real credentials or connection strings.
 
@@ -270,23 +275,25 @@ docker inspect --format '{{json .State.Health}}' <container-name-or-id>
 docker logs --tail=100 <container-name-or-id>
 ```
 
-The Compose file used by deployment is not included in this repository. The GitHub Actions deployment expects a Compose project on the VM under `~/app`; its services must use the published image and provide runtime environment variables. Compose inherits the image health check unless the service configuration overrides or disables it. Docker reports `unhealthy` but does not restart a container solely because of that state.
+The prepared AWS Compose file is `infra/aws/runtime/compose.yaml`; it runs PostgreSQL 18, the runner/migrator images, and Caddy on one EC2 instance. PostgreSQL has no published host port and uses the persistent `/srv/celiz/postgres` directory. Uploaded files retain the existing host/container mapping `/srv/celiz/uploads:/app/public/uploads`; Caddy certificate state is also on the encrypted persistent disk. Production env files are host-only and must be created from the examples.
+
+The app and migration roles are separate. The migration service runs `prisma migrate deploy` only; it does not reset or seed the restored data. PostgreSQL 18 stores its data under the versioned directory within the mounted `/var/lib/postgresql` root. Compose health-checks the database and application. Docker reports `unhealthy` but does not restart a container solely because of that state.
 
 ## CI/CD and Deployment
 
-The implemented workflow in `.github/workflows/ci-cd.yml` runs on pushes and pull requests to `main` and manual dispatch. Its test job installs dependencies, generates Prisma Client, runs ESLint and TypeScript checks, and runs `npm audit --audit-level=critical` (the audit step is configured to continue if it fails). It does not currently run `npm test`.
+The workflow in `.github/workflows/ci-cd.yml` runs lint, TypeScript, unit tests, and the existing non-blocking critical audit on pushes/PRs to `main`.
 
-On pushes to `main`, the workflow builds and publishes the `runner` image with `latest` and commit-SHA tags, and the `migrator` image with `migrator` and `migrator-<sha>` tags, to GHCR. It connects to the VM over SSH using the `VM_HOST`, `VM_USER`, and `VM_SSH_KEY` GitHub Actions secrets; in `~/app`, it pulls the Compose `tools` profile, runs the migration service, starts the services, and prunes unused images. The workflow then probes `https://celizlk.duckdns.org/api/health`, retrying before it fails the deployment job.
+Successful main builds publish the runner and migrator images to GHCR using the full commit SHA. A serialized deploy job (enabled only when `AWS_DEPLOY_ENABLED=true`) assumes an AWS role through GitHub OIDC and invokes the EC2 deployment script using Systems Manager. Until AWS is provisioned and accepted, tests/builds run while AWS deployment is skipped; Azure resources and DNS are not changed. The EC2 script runs the matching migration image, updates Compose services, waits for the database-backed app health check, and retains the previous healthy image for recovery. It does not roll back a database migration. It prunes only unused container images older than seven days after a healthy deployment; it never prunes volumes or database/upload data.
 
-The deployment pipeline and production Caddy configuration are implemented. The Compose project and runtime environment are configured on the VM rather than tracked in the application repository; Azure resource definitions are tracked in [celizlk-infra](https://github.com/Thiranjshan/celizlk-infra). The `runner` image includes a Docker health check, and deployment is verified with the public application health endpoint.
+The GitHub Actions repository variables are `AWS_DEPLOY_ENABLED`, `AWS_ROLE_ARN`, `AWS_REGION`, and `EC2_INSTANCE_ID`. The role ARN is a Terraform output; no long-lived AWS access key is needed in GitHub. EC2 has a separate root-only GHCR read token for pulling images. Application secrets are provisioned in protected files under `/srv/celiz/runtime/` and are not passed through Terraform or SSM. The AWS deployment is prepared, not live, until infrastructure, restore, verification, and owner-approved DNS cutover are complete. See the [AWS migration runbook](infra/aws/README.md).
 
 ## Monitoring and Operations
 
-The deployment combines an application/database health endpoint, the Docker image health check, an HTTPS health probe after each deployment, and Azure Monitor data collection for VM metrics. These checks cover different layers; none alone validates all storefront workflows.
+The current Azure deployment and the prepared AWS target have different operational monitoring. The AWS deployment checks the app and PostgreSQL through `/api/health`, the Docker health state, and the status/output of the SSM deployment command. This is not a continuous external uptime monitor and does not prove all storefront flows.
 
 ### 1. Post-deployment availability probe
 
-The CI/CD workflow performs a post-deployment HTTPS request to the health endpoint. This is a deployment-time probe, not a continuous external uptime monitor.
+Before DNS cutover, the AWS deployment verifies the application from its container network; after cutover, verify HTTPS and the public health endpoint from an external client. This is a deployment-time check, not a continuous external uptime monitor.
 
 An HTTP health check does not prove that every product, cart, checkout, or order workflow is functioning. Important user journeys need separate tests.
 
@@ -314,11 +321,9 @@ docker compose logs --since=30m <application-service>
 docker inspect --format '{{json .State.Health}}' <container-name-or-id>
 ```
 
-The Compose commands require the deployment-host Compose project; no Compose file is checked in here.
+On the AWS host, the Compose project is `/srv/celiz/compose.yaml`.
 
-### 4. Azure Monitor and VM metrics
-
-The infrastructure Terraform configures the Azure Monitor Linux agent and a data collection rule for VM performance metrics. Use the Azure portal's VM **Monitoring → Metrics** view to inspect available metrics and investigate resource pressure. The Terraform also defines an action group; an action group alone is not an alert rule or continuous website monitor.
+### 4. Host and backup monitoring
 
 Host-level metrics are different from guest filesystem capacity and application-level metrics. For filesystem usage and memory, inspect the Linux VM directly when appropriate:
 
@@ -328,6 +333,8 @@ free -h
 uptime
 docker stats
 ```
+
+On AWS, use Systems Manager for host access and inspect the UTC backup timers/services with `systemctl list-timers 'celiz-backup-*'`, `systemctl status celiz-backup-postgres.service celiz-backup-uploads.service`, and `journalctl`. Server backups are stored on the same persistent disk; download and independently verify them regularly. See the [backup runbook](infra/aws/README.md#backup-download-restore-safety).
 
 ### 5. Logs and incident investigation
 
@@ -357,11 +364,11 @@ A practical investigation sequence for an unavailable website is:
 | Application fails to start      | Review application logs, environment variables, build output, and container status.                                   |
 | `/api/health` returns an error  | Check route-handler logs, database availability, credentials/configuration, and network access.                       |
 | Container is `unhealthy`        | Confirm the health-check URL and internal port, then inspect container logs.                                          |
-| Website cannot be reached       | Check DNS, HTTPS/TLS, VM status, network rules, Caddy status, and application status.                                 |
+| Website cannot be reached       | Check DNS, HTTPS/TLS, the currently authoritative VM, network rules, Caddy status, and application status. |
 | Database connection fails       | Verify the connection variable, database status, firewall/network access, TLS requirements, and database permissions. |
 | CI/CD workflow fails            | Review the failed GitHub Actions step, build output, registry permissions, image tags, and deployment logs.           |
 | Server disk usage is high       | Check `df -h`, identify large logs/images safely, and confirm backups before removing anything.                       |
-| A deployment introduces a fault | Review the failed deployment and health-check logs. No automatic rollback is configured; recover using the deployment host's Compose configuration and a known-good image tag, then verify health. |
+| AWS deployment introduces a fault | Review the SSM output and Docker health/logs. The deploy script attempts an application-image rollback, but does not reverse database migrations; verify schema compatibility before rollback. |
 
 Never paste unredacted production logs or secrets into public issues or commit them to the repository.
 
@@ -379,15 +386,15 @@ Never paste unredacted production logs or secrets into public issues or commit t
 
 Possible next steps, depending on project needs, include:
 
-- Automated tests for important customer journeys and APIs (the current CI test job does not run `npm test`).
+- Automated tests for important customer journeys and APIs beyond the existing unit suite.
 - Structured application logs and centralized log retention.
 - Explicit Azure metric alert rules and continuous external uptime monitoring.
-- Automated storefront smoke tests and a documented rollback workflow (the current pipeline probes `/api/health` after deployment).
+- Automated storefront smoke tests.
 - Dependency and container image vulnerability scanning.
 - Accessibility, performance, and security testing.
 
-These are potential improvements, not claims that the functionality is already implemented. Azure infrastructure is tracked in [celizlk-infra](https://github.com/Thiranjshan/celizlk-infra); the production VM's Compose and Caddy runtime configuration is deployed on the host and is not checked into either repository.
+These are potential improvements, not claims that the functionality is already implemented. The Azure VM's Compose and Caddy runtime configuration remains host-managed; the prepared AWS runtime is checked into this repository.
 
 ## Project Status
 
-The application is deployed at the live site above, and its CI/CD pipeline and production deployment are implemented. For application and deployment automation, see this repository; for Azure resource definitions, see [celizlk-infra](https://github.com/Thiranjshan/celizlk-infra).
+The application is live at the site above on Azure pending migration. The AWS deployment is prepared only; see [infra/aws/README.md](infra/aws/README.md) for the staging, restore, and cutover gates.

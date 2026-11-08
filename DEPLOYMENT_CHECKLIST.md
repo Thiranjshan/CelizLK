@@ -7,21 +7,19 @@ Set the following values in the deployment environment, never in Git:
 - DATABASE_URL
 - JWT_ACCESS_SECRET
 - ADMIN_JWT_SECRET
-- BANK_TRANSFER_BANK_NAME
-- BANK_TRANSFER_ACCOUNT_NAME
-- BANK_TRANSFER_ACCOUNT_NUMBER
-- BANK_TRANSFER_BRANCH
 - CORS_ALLOWED_ORIGINS (optional, comma-separated list)
 
 Production values must be unique, long, and strong. Do not reuse local development secrets.
 
 ## Database
 
-- Use a managed production database instead of SQLite.
-- Enable automated daily backups.
-- Test restore operations in staging.
-- Keep a retention policy for snapshots.
-- Store the database URL in the deployment environment only.
+- The prepared AWS target runs PostgreSQL 18 on the same EC2 instance, on encrypted persistent EBS, with no public database port.
+- Configure separate least-privilege app and migration database roles.
+- Enable the documented daily PostgreSQL and uploads backups; server copies are on the same EBS volume and are not an independent disaster-recovery copy.
+- Download and checksum-verify backups to a protected Windows location; test restores in an isolated PostgreSQL 18 instance.
+- Keep server and local retention policies explicit and monitor timer failures.
+- Store database URLs/passwords only in protected runtime environment files, not Terraform, source, or workflow command arguments.
+- Bank transfer instructions are stored in the application's persisted store settings, not separate environment variables. Verify them after the database restore. The current app does not use SMTP/email or PayHere credentials.
 
 ## Authentication
 
@@ -87,6 +85,11 @@ The app already sets basic headers in next.config.ts:
 - Set up service monitoring and log rotation.
 - Keep OS packages patched.
 - Persist uploaded media outside the container. For Docker, mount a host directory to `/app/public/uploads` (for example, `-v /srv/celiz/uploads:/app/public/uploads`) and ensure it is writable by UID 1001.
+
+### AWS EC2 target
+
+- Follow [`infra/aws/README.md`](infra/aws/README.md) for Terraform state bootstrap, IAM/OIDC, database restore ownership/grants, backup transfer, and staged cutover.
+- AWS is not considered live until the database and image restore, app/admin verification, HTTPS, backup download, and owner-approved DNS cutover pass.
 
 ## Final deployment gate
 
